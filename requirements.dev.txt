@@ -8,7 +8,7 @@ mongoengine==0.20.0
 pymongo==3.10.1
 requests==2.24.0
 Unidecode==1.1.1
-uWSGI==2.0.19.1
+# uWSGI==2.0.19.1
 # redis==3.5.3
 # python-redis-lock==3.5.0
 django-after-response==0.2.2
