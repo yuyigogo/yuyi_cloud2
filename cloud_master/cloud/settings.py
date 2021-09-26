@@ -37,7 +37,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "vendor.django_mongoengine.mongo_auth",
 ]
+
+INSTALLED_APPS += ["vendor.django_mongoengine"]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -73,14 +76,15 @@ WSGI_APPLICATION = 'cloud.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+MONGODB_DATABASES = {
+    "default": {
+        "name": "test",
+        "host": "208.64.228.73",
+        "password": "",
+        "username": "",
+        "tz_aware": True,  # if you using timezones in django (USE_TZ = True)
+    },
 }
-
-
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 
