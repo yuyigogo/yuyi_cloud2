@@ -80,6 +80,7 @@ MONGODB_DATABASES = {
     "default": {
         "name": "test",
         "host": "208.64.228.73",
+        "port": "7085",
         "password": "",
         "username": "",
         "tz_aware": True,  # if you using timezones in django (USE_TZ = True)
@@ -144,11 +145,6 @@ LOGGING = {
     "loggers": {
         "django": {"handlers": ["console"], "level": "INFO", "propagate": False},
         "cloud": {"handlers": ["console"], "level": "DEBUG", "propagate": False},
-        "remote_storage": {
-            "handlers": ["console"],
-            "level": "DEBUG",
-            "propagate": False,
-        },
         "auth": {"handlers": ["console"], "level": "DEBUG", "propagate": False},
         "app_auth": {"handlers": ["console"], "level": "DEBUG", "propagate": False},
         "mongoengine": {"handlers": ["console"], "level": "DEBUG", "propagate": False},
