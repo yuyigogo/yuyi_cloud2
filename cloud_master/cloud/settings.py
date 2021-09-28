@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "vendor.django_mongoengine.mongo_auth",
+    "after_response",
 ]
 
 INSTALLED_APPS += ["vendor.django_mongoengine"]
