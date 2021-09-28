@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "vendor.django_mongoengine.mongo_auth",
     "after_response",
+    "user_management",
 ]
 
 INSTALLED_APPS += ["vendor.django_mongoengine"]
@@ -153,6 +154,7 @@ LOGGING = {
         "requests": {"handlers": ["console"], "level": "DEBUG", "propagate": False},
         "common": {"handlers": ["console"], "level": "DEBUG", "propagate": False},
         "vendor": {"handlers": ["console"], "level": "DEBUG", "propagate": False},
+        "user_management": {"handlers": ["console"], "level": "DEBUG", "propagate": False},
     },
     "root": {"handlers": ["console"], "level": "INFO"},
 }
