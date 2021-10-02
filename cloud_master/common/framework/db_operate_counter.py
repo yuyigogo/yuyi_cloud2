@@ -9,8 +9,8 @@ U:  1. update(xx) -> filter(xx) -> QuerySet.__call__
 so, if we need to calculate CRUD times,
 just handle 'model.save' and 'QuerySet.__call__'.
 
-1. modify GinerativDocument.save
-2. modify GinerativDocument's metaclass in order to use DBOperateCounterQuerySetManager
+1. modify CloudDocument.save
+2. modify CloudDocument's metaclass in order to use DBOperateCounterQuerySetManager
    which will invoke DBOperateCounterQuerySet.__call__
 """
 

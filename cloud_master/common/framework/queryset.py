@@ -62,7 +62,7 @@ class CloudQuerySetManager(QuerySetManager):
         return super().__get__(instance, owner)
 
 
-class GinoDocumentMetaclass(TopLevelDocumentMetaclass):
+class CloudDocumentMetaclass(TopLevelDocumentMetaclass):
     def __new__(cls, name, bases, attrs):
         attrs["objects"] = CloudQuerySetManager()
         return super().__new__(cls, name, bases, attrs)
