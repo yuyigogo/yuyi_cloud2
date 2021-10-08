@@ -7,6 +7,9 @@ B = 1
 KB = B * (2 ** 10)
 MB = KB * (2 ** 10)
 
+# max token expire days
+MAX_EXPIRE_DAYS = 7
+
 # max file size
 MAX_FILE_SIZE = 10 * MB
 

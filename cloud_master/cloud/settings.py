@@ -45,6 +45,7 @@ INSTALLED_APPS = [
 INSTALLED_APPS += ["vendor.django_mongoengine"]
 
 MIDDLEWARE = [
+    "common.framework.middleware.request.GlobalRequestMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -52,6 +53,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "common.framework.middleware.token.TokenHandlerMiddleware",
 ]
 
 ROOT_URLCONF = 'cloud.urls'
@@ -158,3 +160,6 @@ LOGGING = {
     },
     "root": {"handlers": ["console"], "level": "INFO"},
 }
+
+
+TOKEN_EXPIRE = 28800
