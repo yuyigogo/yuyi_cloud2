@@ -6,6 +6,8 @@ from rest_framework.exceptions import NotAuthenticated, PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
+from common.framework.authentication import TokenAuthentication
+
 logger = logging.getLogger(__name__)
 
 
@@ -39,7 +41,7 @@ class BaseView(ValidateMixin, APIView):
     None of these methods can break the sequence except raise a Exception.
     """
 
-    # authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
     def __init__(self, **kwargs):

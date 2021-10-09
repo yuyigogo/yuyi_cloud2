@@ -1,6 +1,6 @@
 import logging
 
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from mongoengine import DoesNotExist
 from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
@@ -52,3 +52,18 @@ class LoginView(BaseView):
             return BaseResponse(
                 status_code=HTTP_400_BAD_REQUEST, msg="username or password error!",
             )
+
+    def get(self, request):
+        # redirect to login template.
+        return BaseResponse()
+
+
+class LogOutView(BaseView):
+    def post(self, request):
+        user = request.user
+        logger.info(f"{user.username} request logout!")
+        UserTokenService.get_token_by_user_id(user_id=user.pk).delete()
+        user.remove_sessions()
+        logout(request)
+        # redirect to login template.
+        return BaseResponse()
