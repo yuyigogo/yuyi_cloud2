@@ -162,4 +162,9 @@ LOGGING = {
 }
 
 
-TOKEN_EXPIRE = 28800
+SESSION_ENGINE = "vendor.django_mongoengine.sessions"
+SESSION_SERIALIZER = "vendor.django_mongoengine.sessions.BSONSerializer"
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_COOKIE_AGE = 604800  # 7days
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True

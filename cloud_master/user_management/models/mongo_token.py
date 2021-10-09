@@ -2,14 +2,11 @@ import binascii
 import datetime
 import os
 
-from django.conf import settings
 from mongoengine import Document, ReferenceField, StringField
 from mongoengine.fields import DateTimeField
 from user_management.models.user import CloudUser
 
-from common.const import MAX_EXPIRE_DAYS
-
-TOKEN_EXPIRE = getattr(settings, "TOKEN_EXPIRE")
+from common.const import MAX_EXPIRE_DAYS, TOKEN_EXPIRE
 
 
 class MongoToken(Document):
@@ -31,7 +28,8 @@ class MongoToken(Document):
     def set_expire_date(self):
         self.expire = datetime.datetime.now() + datetime.timedelta(seconds=TOKEN_EXPIRE)
 
-    def generate_key(self):
+    @staticmethod
+    def generate_key():
         """
         Returns 44 characters string by converting 22 random bytes
         into hex format

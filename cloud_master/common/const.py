@@ -9,10 +9,12 @@ MB = KB * (2 ** 10)
 
 # max token expire days
 MAX_EXPIRE_DAYS = 7
-
+TOKEN_EXPIRE = 28800
 # max file size
 MAX_FILE_SIZE = 10 * MB
 
+# model name's max length const
+MAX_LENGTH_NAME = 200
 
 DD_MM_YY = "%d/%m/%Y"
 MM_DD_YY = "%m/%d/%Y"
@@ -126,3 +128,9 @@ class BaseEnum(Enum):
     @classmethod
     def to_dict(cls):
         return {x.name: x.value for x in cls}
+
+
+class RoleLevel(str, BaseEnum):
+    SUPER_ADMIN = 0
+    ADMIN = 1
+    NORMAL = 2
