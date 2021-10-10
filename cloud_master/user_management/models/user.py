@@ -1,6 +1,6 @@
 from mongoengine import StringField, ObjectIdField, ReferenceField, EmailField, BinaryField, IntField
 
-from models import DocumentMixin
+from cloud.models import DocumentMixin
 from user_management.models.user_session import UserSession
 from vendor.django_mongoengine.mongo_auth.models import User
 from vendor.django_mongoengine.sessions import MongoSession
