@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class LoginView(BaseView):
+    authentication_classes = ()
     permission_classes = (AllowAny,)
 
     @staticmethod
