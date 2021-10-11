@@ -68,9 +68,3 @@ class LogOutView(BaseView):
         logout(request)
         # redirect to login template.
         return BaseResponse()
-
-
-class TestView(BaseView):
-    def get(self, request):
-        print('test!!!')
-        return BaseResponse()

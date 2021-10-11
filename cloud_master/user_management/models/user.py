@@ -1,6 +1,7 @@
-from mongoengine import StringField, ObjectIdField, ReferenceField, EmailField, BinaryField, IntField
+from mongoengine import StringField, ObjectIdField, EmailField, BinaryField, ListField
 
 from cloud.models import DocumentMixin
+from common.const import MAX_LENGTH_NAME
 from user_management.models.user_session import UserSession
 from vendor.django_mongoengine.mongo_auth.models import User
 from vendor.django_mongoengine.sessions import MongoSession
@@ -8,13 +9,13 @@ from vendor.django_mongoengine.sessions import MongoSession
 
 class CloudUser(User, DocumentMixin):
     password = StringField(required=True, max_length=128)
-    username = StringField(max_length=100, required=True, verbose_name="username")
+    username = StringField(max_length=MAX_LENGTH_NAME, required=True, verbose_name="username")
     customer = ObjectIdField(required=True)
+    sites = ListField(required=True)
     phone = StringField(max_length=50)
     email = EmailField(required=True, unique=True, max_length=100)
     avatar = BinaryField()
-    role_level = IntField(required=True)
-    # permissions_profile = ReferenceField(PermissionsProfile)
+    role_level = StringField(required=True)
 
     meta = {
         "indexes": [
@@ -32,3 +33,18 @@ class CloudUser(User, DocumentMixin):
             except:
                 pass
             user_session.delete()
+
+    def has_permissions(self, permissions: list) -> bool:
+        """
+        :param list permissions: list of permissions
+        :return: if this user has any permission in permissions list
+        :return: bool
+        """
+        has_perm = False
+        if not permissions:
+            # no permission needed
+            has_perm = True
+        elif self.role_level in permissions:
+            has_perm = True
+
+        return has_perm

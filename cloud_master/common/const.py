@@ -134,3 +134,10 @@ class RoleLevel(str, BaseEnum):
     SUPER_ADMIN = 0
     ADMIN = 1
     NORMAL = 2
+
+    @classmethod
+    def allowed_role_level(cls):
+        return [cls.ADMIN, cls.NORMAL]
+
+
+ALL = "all"
