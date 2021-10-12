@@ -1,27 +1,27 @@
-from mongoengine import StringField, ObjectIdField, EmailField, BinaryField, ListField
-
 from cloud.models import DocumentMixin
-from common.const import MAX_LENGTH_NAME
+from mongoengine import (BinaryField, EmailField, IntField, ListField,
+                         ObjectIdField, StringField)
 from user_management.models.user_session import UserSession
+
+from common.const import MAX_LENGTH_NAME, RoleLevel
 from vendor.django_mongoengine.mongo_auth.models import User
 from vendor.django_mongoengine.sessions import MongoSession
 
 
 class CloudUser(User, DocumentMixin):
     password = StringField(required=True, max_length=128)
-    username = StringField(max_length=MAX_LENGTH_NAME, required=True, verbose_name="username")
+    username = StringField(
+        max_length=MAX_LENGTH_NAME, required=True, verbose_name="username"
+    )
     customer = ObjectIdField(required=True)
     sites = ListField(required=True)
     phone = StringField(max_length=50)
     email = EmailField(required=True, unique=True, max_length=100)
     avatar = BinaryField()
-    role_level = StringField(required=True)
+    role_level = IntField(required=True)
 
     meta = {
-        "indexes": [
-            "customer",
-            "email",
-        ],
+        "indexes": ["customer", "email", "username", "sites"],
         "index_background": True,
     }
 
@@ -48,3 +48,15 @@ class CloudUser(User, DocumentMixin):
             has_perm = True
 
         return has_perm
+
+    def is_cloud_or_client_super_admin(self):
+        return self.is_cloud_super_admin() or self.is_client_super_admin()
+
+    def is_cloud_super_admin(self):
+        return self.role_level == RoleLevel.SUPER_ADMIN
+
+    def is_client_super_admin(self):
+        return self.role_level == RoleLevel.ADMIN and self.customer == "all"
+
+    def is_normal_admin(self):
+        return self.role_level == RoleLevel.ADMIN and self.customer != "all"

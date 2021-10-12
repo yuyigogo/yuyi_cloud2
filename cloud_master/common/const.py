@@ -2,7 +2,6 @@
 from enum import Enum
 from functools import lru_cache
 
-
 B = 1
 KB = B * (2 ** 10)
 MB = KB * (2 ** 10)
@@ -130,7 +129,7 @@ class BaseEnum(Enum):
         return {x.name: x.value for x in cls}
 
 
-class RoleLevel(str, BaseEnum):
+class RoleLevel(int, BaseEnum):
     SUPER_ADMIN = 0
     ADMIN = 1
     NORMAL = 2
