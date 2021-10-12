@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     "vendor.django_mongoengine.mongo_auth",
     "after_response",
     "user_management",
+    "customer",
+    "sites",
 ]
 
 INSTALLED_APPS += ["vendor.django_mongoengine"]
@@ -157,6 +159,8 @@ LOGGING = {
         "common": {"handlers": ["console"], "level": "DEBUG", "propagate": False},
         "vendor": {"handlers": ["console"], "level": "DEBUG", "propagate": False},
         "user_management": {"handlers": ["console"], "level": "DEBUG", "propagate": False},
+        "customer": {"handlers": ["console"], "level": "DEBUG", "propagate": False},
+        "sites": {"handlers": ["console"], "level": "DEBUG", "propagate": False},
     },
     "root": {"handlers": ["console"], "level": "INFO"},
 }

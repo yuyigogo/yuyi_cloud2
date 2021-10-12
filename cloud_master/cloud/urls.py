@@ -23,4 +23,6 @@ urlpatterns = [
 # every app should has its own urls.py and insert it below
 urlpatterns += [
     path("rest/v1/", include("user_management.urls")),
+    path("rest/v1/", include("customer.urls")),
+    path("rest/v1/", include("sites.urls")),
 ]
