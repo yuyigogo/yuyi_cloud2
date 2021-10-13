@@ -1,4 +1,5 @@
 from customer.models.customer import Customer
+from mongoengine import DoesNotExist
 from rest_framework.fields import CharField
 
 from common.const import MAX_LENGTH_NAME, MAX_MESSAGE_LENGTH
@@ -19,3 +20,14 @@ class CustomerCreateSerializer(BaseSerializer):
                 code=StatusCode.CUSTOMER_NAME_DUPLICATE.value,
             )
         return name
+
+
+class CustomerSerializer(BaseSerializer):
+    def validate(self, data: dict) -> dict:
+        customer_id = self.context["pk"]
+        try:
+            customer = Customer.objects.get(pk=customer_id)
+        except DoesNotExist:
+            raise APIException(f"invalid {customer_id=}")
+        self.context["customer"] = customer
+        return data

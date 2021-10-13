@@ -2,7 +2,10 @@ import logging
 
 from customer.models.customer import Customer
 from customer.services.customer_service import CustomerService
-from customer.validators.customer_serializers import CustomerCreateSerializer
+from customer.validators.customer_serializers import (
+    CustomerCreateSerializer,
+    CustomerSerializer,
+)
 from rest_framework.status import HTTP_201_CREATED
 
 from common.const import RoleLevel
@@ -39,6 +42,11 @@ class CustomersView(BaseView):
         return BaseResponse(data={"total": total, "customers": data})
 
     def post(self, request):
+        """
+        create a new customer
+        :param request:
+        :return:
+        """
         user = request.user
         data, _ = self.get_validated_data(CustomerCreateSerializer)
         logger.info(f"{user.username} request create new customer with {data=}")
@@ -46,3 +54,23 @@ class CustomersView(BaseView):
             data["name"], data["administrative_division"], data.get("remarks")
         )
         return BaseResponse(data=customer.to_dict(), status_code=HTTP_201_CREATED)
+
+
+class CustomerView(BaseView):
+    permission_classes = PermissionFactory(
+        RoleLevel.CLIENT_SUPER_ADMIN,
+        RoleLevel.CLOUD_SUPER_ADMIN,
+        method_list=("DELETE",),
+    )
+
+    def get(self, request, pk):
+        _, context = self.get_validated_data(CustomerSerializer, pk=pk)
+        customer = context["customer"]
+        return BaseResponse(data=customer.to_dict())
+
+    def delete(self, request, pk):
+        _, context = self.get_validated_data(CustomerSerializer, pk=pk)
+        customer = context["customer"]
+        logger.info(f"{request.user.username} request delete {customer=}")
+        customer.delete()
+        return BaseResponse()
