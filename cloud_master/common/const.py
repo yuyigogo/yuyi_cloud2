@@ -149,3 +149,4 @@ class RoleLevel(int, BaseEnum):
 
 
 ALL = "all"
+MAX_MESSAGE_LENGTH = 2000

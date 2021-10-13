@@ -8,5 +8,4 @@ from enum import Enum, unique
 @unique
 class StatusCode(Enum):
     """0----9999"""
-
-    pass
+    CUSTOMER_NAME_DUPLICATE = 1000
