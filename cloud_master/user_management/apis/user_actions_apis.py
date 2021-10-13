@@ -3,7 +3,9 @@ import logging
 from rest_framework.status import HTTP_201_CREATED
 from user_management.services.user_service import UserService
 from user_management.validators.user_actions_serializers import (
-    UserCreateSerializer, UserListSerializer)
+    UserCreateSerializer,
+    UserListSerializer,
+)
 
 from common.const import RoleLevel
 from common.framework.permissions import PermissionFactory
@@ -15,7 +17,10 @@ logger = logging.getLogger(__name__)
 
 class UsersView(BaseView):
     permission_classes = PermissionFactory(
-        RoleLevel.SUPER_ADMIN, RoleLevel.ADMIN, method_list=("POST",)
+        RoleLevel.CLOUD_SUPER_ADMIN,
+        RoleLevel.CLIENT_SUPER_ADMIN,
+        RoleLevel.ADMIN,
+        method_list=("POST",),
     )
 
     def get(self, request):

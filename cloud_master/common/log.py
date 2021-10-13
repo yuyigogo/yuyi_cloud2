@@ -11,4 +11,3 @@ class DefaultServerFormatter(logging.Formatter):
         record.user = getattr(global_request.user, "id", "none")
         message = super(DefaultServerFormatter, self).format(record)
         return message
-

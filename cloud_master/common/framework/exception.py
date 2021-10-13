@@ -5,12 +5,16 @@ import rest_framework
 from django.contrib.auth.models import AnonymousUser
 from redis.exceptions import TimeoutError
 from rest_framework.exceptions import ErrorDetail
-from rest_framework.status import (HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED,
-                                   HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND,
-                                   HTTP_405_METHOD_NOT_ALLOWED,
-                                   HTTP_406_NOT_ACCEPTABLE,
-                                   HTTP_500_INTERNAL_SERVER_ERROR,
-                                   HTTP_503_SERVICE_UNAVAILABLE)
+from rest_framework.status import (
+    HTTP_400_BAD_REQUEST,
+    HTTP_401_UNAUTHORIZED,
+    HTTP_403_FORBIDDEN,
+    HTTP_404_NOT_FOUND,
+    HTTP_405_METHOD_NOT_ALLOWED,
+    HTTP_406_NOT_ACCEPTABLE,
+    HTTP_500_INTERNAL_SERVER_ERROR,
+    HTTP_503_SERVICE_UNAVAILABLE,
+)
 
 from common.framework.response import BaseResponse, ExceptionResponse
 

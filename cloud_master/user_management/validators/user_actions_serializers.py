@@ -1,6 +1,11 @@
 from bson import ObjectId
-from rest_framework.fields import (CharField, ChoiceField, EmailField,
-                                   IntegerField, ListField)
+from rest_framework.fields import (
+    CharField,
+    ChoiceField,
+    EmailField,
+    IntegerField,
+    ListField,
+)
 
 from common.const import ALL, MAX_LENGTH_NAME, RoleLevel
 from common.framework.exception import APIException

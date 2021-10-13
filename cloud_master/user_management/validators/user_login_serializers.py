@@ -7,4 +7,3 @@ from common.framework.serializer import BaseSerializer
 class LoginViewViewSerializer(BaseSerializer):
     username = CharField(max_length=MAX_LENGTH_NAME)
     password = CharField()
-

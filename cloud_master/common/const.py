@@ -130,13 +130,22 @@ class BaseEnum(Enum):
 
 
 class RoleLevel(int, BaseEnum):
-    SUPER_ADMIN = 0
-    ADMIN = 1
-    NORMAL = 2
+    """
+    there are four roles in this system:
+    cloud super admin: inner super administrator, manages all companies and all sites;
+    client super admin: external super administrator, manages all companies and all sites;
+    admin: an administrator who manages one company and some sites which belong to this company;
+    normal: normal user under a certain company site.
+    """
+
+    CLOUD_SUPER_ADMIN = 0
+    CLIENT_SUPER_ADMIN = 10
+    ADMIN = 20
+    NORMAL = 30
 
     @classmethod
     def allowed_role_level(cls):
-        return [cls.ADMIN, cls.NORMAL]
+        return [cls.CLIENT_SUPER_ADMIN, cls.ADMIN, cls.NORMAL]
 
 
 ALL = "all"

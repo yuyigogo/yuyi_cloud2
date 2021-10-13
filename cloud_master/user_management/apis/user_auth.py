@@ -8,8 +8,7 @@ from rest_framework.status import HTTP_400_BAD_REQUEST
 from user_management.models.mongo_token import MongoToken
 from user_management.models.user_session import UserSession
 from user_management.services.user_token_service import UserTokenService
-from user_management.validators.user_login_serializers import \
-    LoginViewViewSerializer
+from user_management.validators.user_login_serializers import LoginViewViewSerializer
 
 from common.framework.response import BaseResponse
 from common.framework.view import BaseView

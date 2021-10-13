@@ -6,8 +6,7 @@ from bson.objectid import ObjectId
 from django.conf import settings
 from mongoengine.base.fields import ObjectIdField
 from mongoengine.document import Document, EmbeddedDocument
-from mongoengine.fields import (BooleanField, DateTimeField, EmailField,
-                                StringField)
+from mongoengine.fields import BooleanField, DateTimeField, EmailField, StringField
 
 from common.framework.db_operate_counter import increase_db_operate_count
 from common.framework.queryset import CloudDocumentMetaclass

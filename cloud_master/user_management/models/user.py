@@ -1,6 +1,12 @@
 from cloud.models import DocumentMixin
-from mongoengine import (BinaryField, EmailField, IntField, ListField,
-                         ObjectIdField, StringField)
+from mongoengine import (
+    BinaryField,
+    EmailField,
+    IntField,
+    ListField,
+    ObjectIdField,
+    StringField,
+)
 from user_management.models.user_session import UserSession
 
 from common.const import MAX_LENGTH_NAME, RoleLevel
@@ -53,10 +59,10 @@ class CloudUser(User, DocumentMixin):
         return self.is_cloud_super_admin() or self.is_client_super_admin()
 
     def is_cloud_super_admin(self):
-        return self.role_level == RoleLevel.SUPER_ADMIN
+        return self.role_level == RoleLevel.CLOUD_SUPER_ADMIN
 
     def is_client_super_admin(self):
-        return self.role_level == RoleLevel.ADMIN and self.customer == "all"
+        return self.role_level == RoleLevel.CLIENT_SUPER_ADMIN
 
     def is_normal_admin(self):
-        return self.role_level == RoleLevel.ADMIN and self.customer != "all"
+        return self.role_level == RoleLevel.ADMIN

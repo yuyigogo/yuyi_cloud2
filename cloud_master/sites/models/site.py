@@ -1,5 +1,5 @@
 from cloud.models import CloudDocument
-from mongoengine import IntField, ListField, StringField
+from mongoengine import IntField, ListField, StringField, ObjectIdField
 
 
 class Site(CloudDocument):
@@ -8,8 +8,13 @@ class Site(CloudDocument):
     voltage_level = IntField(required=True)
     site_location = ListField()
     remarks = StringField(max_length=2000)
+    customer = ObjectIdField(required=True)
 
-    meta = {"indexes": ["name"], "index_background": True, "collection": "site"}
+    meta = {
+        "indexes": ["name", "customer"],
+        "index_background": True,
+        "collection": "site",
+    }
 
     def __str__(self):
         return "SiteModel: {}".format(self.name)
