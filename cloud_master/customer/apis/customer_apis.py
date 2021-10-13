@@ -5,6 +5,7 @@ from customer.services.customer_service import CustomerService
 from customer.validators.customer_serializers import (
     CustomerCreateSerializer,
     CustomerSerializer,
+    DeleteCustomerSerializer,
 )
 from rest_framework.status import HTTP_201_CREATED
 
@@ -57,10 +58,9 @@ class CustomersView(BaseView):
 
 
 class CustomerView(BaseView):
-    permission_classes = PermissionFactory(
-        RoleLevel.CLIENT_SUPER_ADMIN,
-        RoleLevel.CLOUD_SUPER_ADMIN,
-        method_list=("DELETE",),
+    permission_classes = (
+        PermissionFactory(RoleLevel.CLOUD_SUPER_ADMIN, method_list=("DELETE", "PUT")),
+        PermissionFactory(RoleLevel.CLIENT_SUPER_ADMIN, method_list=("DELETE", "PUT")),
     )
 
     def get(self, request, pk):
@@ -69,8 +69,15 @@ class CustomerView(BaseView):
         return BaseResponse(data=customer.to_dict())
 
     def delete(self, request, pk):
-        _, context = self.get_validated_data(CustomerSerializer, pk=pk)
+        _, context = self.get_validated_data(DeleteCustomerSerializer, pk=pk)
         customer = context["customer"]
         logger.info(f"{request.user.username} request delete {customer=}")
-        customer.delete()
+        CustomerService.delete_customer(customer)
+        return BaseResponse()
+
+    def put(self, request, pk):
+        # todo : need specify which field can modify? who can modify who?
+        user = request.user
+        _, context = self.get_validated_data(CustomerSerializer, pk=pk)
+        customer = context["customer"]
         return BaseResponse()

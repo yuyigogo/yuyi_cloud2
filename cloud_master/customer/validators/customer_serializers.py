@@ -4,7 +4,7 @@ from rest_framework.fields import CharField
 
 from common.const import MAX_LENGTH_NAME, MAX_MESSAGE_LENGTH
 from common.error_code import StatusCode
-from common.framework.exception import APIException
+from common.framework.exception import APIException, ForbiddenException
 from common.framework.serializer import BaseSerializer
 
 
@@ -30,4 +30,14 @@ class CustomerSerializer(BaseSerializer):
         except DoesNotExist:
             raise APIException(f"invalid {customer_id=}")
         self.context["customer"] = customer
+        return data
+
+
+class DeleteCustomerSerializer(CustomerSerializer):
+    def validate(self, data: dict) -> dict:
+        data = super(DeleteCustomerSerializer, self).validate(data)
+        user = self.context["request"].user
+        customer_id = self.context["pk"]
+        if str(user.customer) == customer_id:
+            raise ForbiddenException("user can't delete own customer")
         return data
