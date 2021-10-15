@@ -6,6 +6,7 @@ from customer.validators.customer_serializers import (
     CustomerCreateSerializer,
     CustomerSerializer,
     DeleteCustomerSerializer,
+    UpdateCustomerSerializer,
 )
 from rest_framework.status import HTTP_201_CREATED
 
@@ -76,8 +77,20 @@ class CustomerView(BaseView):
         return BaseResponse()
 
     def put(self, request, pk):
-        # todo : need specify which field can modify? who can modify who?
         user = request.user
-        _, context = self.get_validated_data(CustomerSerializer, pk=pk)
+        data, context = self.get_validated_data(UpdateCustomerSerializer, pk=pk)
+        logger.info(f"{user.username} request update customer: {pk} with {data=}")
         customer = context["customer"]
-        return BaseResponse()
+        name = data.get("name")
+        administrative_division = data.get("administrative_division")
+        remarks = data.get("remarks")
+        update_fields = {}
+        if name:
+            update_fields["name"] = name
+        if administrative_division:
+            update_fields["administrative_division"] = administrative_division
+        if remarks:
+            update_fields["remarks"] = remarks
+        if update_fields:
+            customer.update(**update_fields)
+        return BaseResponse(data=update_fields)

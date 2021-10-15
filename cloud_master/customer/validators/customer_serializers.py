@@ -41,3 +41,19 @@ class DeleteCustomerSerializer(CustomerSerializer):
         if str(user.customer) == customer_id:
             raise ForbiddenException("user can't delete own customer")
         return data
+
+
+class UpdateCustomerSerializer(DeleteCustomerSerializer):
+    name = CharField(max_length=MAX_LENGTH_NAME, required=False)
+    administrative_division = CharField(required=False)
+    remarks = CharField(required=False)
+
+    def validate(self, data: dict) -> dict:
+        data = super(UpdateCustomerSerializer, self).validate(data)
+        name = data.get("name")
+        if name and Customer.objects.fiter(name=name).count():
+            raise APIException(
+                "customer name duplicate!",
+                code=StatusCode.CUSTOMER_NAME_DUPLICATE.value,
+            )
+        return data
