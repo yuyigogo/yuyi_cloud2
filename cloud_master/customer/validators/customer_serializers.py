@@ -2,7 +2,7 @@ from customer.models.customer import Customer
 from mongoengine import DoesNotExist
 from rest_framework.fields import CharField
 
-from common.const import MAX_LENGTH_NAME, MAX_MESSAGE_LENGTH, ALL
+from common.const import MAX_LENGTH_NAME, MAX_MESSAGE_LENGTH
 from common.error_code import StatusCode
 from common.framework.exception import APIException, ForbiddenException
 from common.framework.serializer import BaseSerializer
@@ -14,7 +14,7 @@ class CustomerCreateSerializer(BaseSerializer):
     remarks = CharField(max_length=MAX_MESSAGE_LENGTH)
 
     def validate_name(self, name: str) -> str:
-        if name == ALL or Customer.objects(name=name).count() > 0:
+        if Customer.objects(name=name).count() > 0:
             raise APIException(
                 "customer name duplicate!",
                 code=StatusCode.CUSTOMER_NAME_DUPLICATE.value,
@@ -39,7 +39,7 @@ class DeleteCustomerSerializer(CustomerSerializer):
         user = self.context["request"].user
         customer_id = self.context["pk"]
         if str(user.customer) == customer_id:
-            raise ForbiddenException("user can't delete own customer")
+            raise ForbiddenException("user can't update/delete own customer")
         return data
 
 

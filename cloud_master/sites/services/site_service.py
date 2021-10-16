@@ -37,3 +37,16 @@ class SiteService(BaseService):
         )
         site.save()
         return site
+
+    @classmethod
+    def delete_site(cls, site: Site, customer_id: Union[ObjectId, str] = None):
+        # remove the deleted site_id from user.sites
+        # if this is ALL customer, should query without customer
+        site_id = site.pk
+        users = CloudUser.objects.filter(sites__in=[site_id])
+        if customer_id:
+            users = users.filter(customer=customer_id)
+        for user in users:
+            user.sites.remove(site_id)
+            user.update(sites=user.sites)
+        site.delete()
