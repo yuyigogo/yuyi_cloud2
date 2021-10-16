@@ -9,3 +9,4 @@ from enum import Enum, unique
 class StatusCode(Enum):
     """0----9999"""
     CUSTOMER_NAME_DUPLICATE = 1000
+    SITE_NAME_DUPLICATE = 1001

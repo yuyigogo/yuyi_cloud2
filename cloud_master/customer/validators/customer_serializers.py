@@ -2,7 +2,7 @@ from customer.models.customer import Customer
 from mongoengine import DoesNotExist
 from rest_framework.fields import CharField
 
-from common.const import MAX_LENGTH_NAME, MAX_MESSAGE_LENGTH
+from common.const import MAX_LENGTH_NAME, MAX_MESSAGE_LENGTH, ALL
 from common.error_code import StatusCode
 from common.framework.exception import APIException, ForbiddenException
 from common.framework.serializer import BaseSerializer
@@ -14,7 +14,7 @@ class CustomerCreateSerializer(BaseSerializer):
     remarks = CharField(max_length=MAX_MESSAGE_LENGTH)
 
     def validate_name(self, name: str) -> str:
-        if Customer.objects(name=name).count() > 0:
+        if name == ALL or Customer.objects(name=name).count() > 0:
             raise APIException(
                 "customer name duplicate!",
                 code=StatusCode.CUSTOMER_NAME_DUPLICATE.value,
