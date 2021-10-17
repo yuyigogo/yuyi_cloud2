@@ -14,7 +14,15 @@ class UserService(BaseService):
 
     @classmethod
     def create_user(cls, user_data: dict) -> CloudUser:
-        user = CloudUser(**user_data)
+        user = CloudUser(
+            username=user_data["username"],
+            password=user_data["password"],
+            customer=user_data["customer"],
+            sites=user_data["sites"],
+            phone=user_data.get("phone", ""),
+            email=user_data["email"],
+            role_level=user_data["role_level"],
+        )
         user.save()
         return user
 
@@ -63,6 +71,7 @@ class UserService(BaseService):
                 "status": user.is_active,
                 "email": user.email,
                 "phone": user.phone,
+                "is_active": user.is_active,
             }
             for user in users_by_page
         ]

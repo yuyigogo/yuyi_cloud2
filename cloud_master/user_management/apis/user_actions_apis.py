@@ -1,9 +1,11 @@
 import logging
 
 from rest_framework.status import HTTP_201_CREATED
+from user_management.models.user import CloudUser
 from user_management.services.user_service import UserService
 from user_management.validators.user_actions_serializers import (
     UserCreateSerializer,
+    UsersDeleteSerializer,
     UserListSerializer,
 )
 
@@ -57,4 +59,19 @@ class UsersView(BaseView):
         return BaseResponse(data=user.to_dict(), status_code=HTTP_201_CREATED)
 
     def put(self, request):
-        pass
+        user = request.user
+        data, _ = self.get_validated_data(UsersDeleteSerializer)
+        update_user_ids = data["user_ids"]
+        logger.info(f"{user.username} request enable/suspend users: {update_user_ids}")
+        CloudUser.objects.filter(id__in=update_user_ids).update(
+            is_active=data["is_suspend"]
+        )
+        return BaseResponse()
+
+    def delete(self, request):
+        user = request.user
+        data, _ = self.get_validated_data(UsersDeleteSerializer)
+        delete_user_ids = data["user_ids"]
+        logger.info(f"{user.username} request delete users: {delete_user_ids}")
+        CloudUser.objects.filter(id__in=delete_user_ids).delete()
+        return BaseResponse()
