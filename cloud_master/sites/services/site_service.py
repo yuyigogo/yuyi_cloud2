@@ -1,6 +1,8 @@
 from typing import Optional, Union
 
 from bson import ObjectId
+
+from common.const import ALL
 from sites.models.site import Site
 from user_management.models.user import CloudUser
 
@@ -50,3 +52,7 @@ class SiteService(BaseService):
             user.sites.remove(site_id)
             user.update(sites=user.sites)
         site.delete()
+
+    @classmethod
+    def named_all_site(cls):
+        return Site.objects.get(name=ALL)

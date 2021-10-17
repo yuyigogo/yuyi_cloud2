@@ -3,7 +3,7 @@ from typing import Union
 
 import rest_framework
 from django.contrib.auth.models import AnonymousUser
-from redis.exceptions import TimeoutError
+# from redis.exceptions import TimeoutError
 from rest_framework.exceptions import ErrorDetail
 from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
@@ -135,12 +135,12 @@ def global_exception_handler(e, context):
             code=HTTP_403_FORBIDDEN,
             status_code=HTTP_403_FORBIDDEN,
         )
-    elif isinstance(e, TimeoutError):
-        return BaseResponse(
-            msg="Redis timeout",
-            code=HTTP_503_SERVICE_UNAVAILABLE,
-            status_code=HTTP_503_SERVICE_UNAVAILABLE,
-        )
+    # elif isinstance(e, TimeoutError):
+    #     return BaseResponse(
+    #         msg="Redis timeout",
+    #         code=HTTP_503_SERVICE_UNAVAILABLE,
+    #         status_code=HTTP_503_SERVICE_UNAVAILABLE,
+    #     )
     elif isinstance(e, rest_framework.exceptions.MethodNotAllowed):
         return BaseResponse(
             msg="Method not allowed",

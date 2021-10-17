@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 
 from common.const import ALL
 from customer.models.customer import Customer
@@ -29,3 +29,9 @@ class CustomerService(BaseService):
     @classmethod
     def named_all_customer(cls):
         return Customer.objects.get(name=ALL)
+
+    @classmethod
+    def get_customer_id_name_dict(cls, customer_ids: Union[set, list]) -> dict:
+        return dict(
+            Customer.objects.filter(id__in=customer_ids).values_list("id", "name")
+        )

@@ -26,13 +26,20 @@ class UserService(BaseService):
         customer: Optional[str] = None,
         sites: Optional[list] = None,
     ) -> Tuple[int, list]:
+        from customer.services.customer_service import CustomerService
+        from sites.services.site_service import SiteService
+
         query = Q()
         if username:
             query &= Q(username__icontains=username)
         if customer:
-            if customer == ALL and sites == [ALL]:
+            named_all_customer_id = str(CustomerService.named_all_customer().id)
+            named_all_site_id = str(SiteService.named_all_site().id)
+            if customer == named_all_customer_id and sites == [named_all_site_id]:
+                # customer and site both are ALL
                 query &= Q(role_level__gte=self.user.role_level)
-            elif customer == ALL and sites != [ALL]:
+            elif customer == named_all_customer_id and sites != [named_all_site_id]:
+                # only customer is ALL
                 query &= Q(sites__in=sites)
             else:
                 query &= Q(customer=customer, sites__in=sites)
@@ -46,8 +53,8 @@ class UserService(BaseService):
         users = CloudUser.objects.filter(query)
         total = users.count()
         users_by_page = get_objects_pagination(page, limit, users)
-        customers = set(users_by_page.values_list("customer"))
-        customer_dict = {}
+        customer_ids = set(users_by_page.values_list("customer"))
+        customer_dict = CustomerService.get_customer_id_name_dict(customer_ids)
         user_info = [
             {
                 "username": user.username,
