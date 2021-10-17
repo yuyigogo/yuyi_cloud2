@@ -1,11 +1,10 @@
 from typing import Optional, Union
 
 from bson import ObjectId
-
-from common.const import ALL
 from sites.models.site import Site
 from user_management.models.user import CloudUser
 
+from common.const import ALL
 from common.framework.service import BaseService
 
 
@@ -56,3 +55,18 @@ class SiteService(BaseService):
     @classmethod
     def named_all_site(cls):
         return Site.objects.get(name=ALL)
+
+    @classmethod
+    def get_user_sites_info(cls, site_ids: list) -> list:
+        sites = Site.objects.filter(id__in=site_ids)
+        return [
+            {
+                "name": site.name,
+                "customer": str(site.customer),
+                "administrative_division": site.administrative_division,
+                "remarks": site.remarks,
+                "voltage_level": site.voltage_level,
+                "site_location": site.site_location,
+            }
+            for site in sites
+        ]

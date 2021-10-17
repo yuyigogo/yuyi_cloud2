@@ -1,10 +1,11 @@
 from typing import Optional, Union
 
-from common.const import ALL
+from bson import ObjectId
 from customer.models.customer import Customer
 from sites.models.site import Site
 from user_management.models.user import CloudUser
 
+from common.const import ALL
 from common.framework.service import BaseService
 
 
@@ -35,3 +36,12 @@ class CustomerService(BaseService):
         return dict(
             Customer.objects.filter(id__in=customer_ids).values_list("id", "name")
         )
+
+    @classmethod
+    def get_customer_info(cls, customer_id: Union[str, ObjectId]) -> dict:
+        customer = Customer.objects.get(id=customer_id)
+        return {
+            "name": customer.name,
+            "administrative_division": customer.administrative_division,
+            "remarks": customer.remarks,
+        }

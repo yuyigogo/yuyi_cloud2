@@ -1,8 +1,13 @@
 import logging
 
+from mongoengine import DoesNotExist
 from rest_framework.status import HTTP_201_CREATED
+
+from customer.services.customer_service import CustomerService
+from sites.services.site_service import SiteService
 from user_management.models.user import CloudUser
 from user_management.services.user_service import UserService
+from user_management.services.user_token_service import UserTokenService
 from user_management.validators.user_actions_serializers import (
     UserCreateSerializer,
     UsersDeleteSerializer,
@@ -18,11 +23,16 @@ logger = logging.getLogger(__name__)
 
 
 class UsersView(BaseView):
-    permission_classes = PermissionFactory(
-        RoleLevel.CLOUD_SUPER_ADMIN,
-        RoleLevel.CLIENT_SUPER_ADMIN,
-        RoleLevel.ADMIN,
-        method_list=("POST",),
+    permission_classes = (
+        PermissionFactory(
+            RoleLevel.ADMIN, method_list=("GET", "POST", "PUT", "DELETE")
+        ),
+        PermissionFactory(
+            RoleLevel.CLOUD_SUPER_ADMIN, method_list=("GET", "POST", "PUT", "DELETE")
+        ),
+        PermissionFactory(
+            RoleLevel.CLIENT_SUPER_ADMIN, method_list=("GET", "POST", "PUT", "DELETE")
+        ),
     )
 
     def get(self, request):
@@ -75,3 +85,27 @@ class UsersView(BaseView):
         logger.info(f"{user.username} request delete users: {delete_user_ids}")
         CloudUser.objects.filter(id__in=delete_user_ids).delete()
         return BaseResponse()
+
+
+class CurrentUserView(BaseView):
+
+    def get(self, request):
+        user = request.user
+        try:
+            token = UserTokenService.get_token_by_user_id(user_id=user.id)
+            token_key = token.key
+        except DoesNotExist:
+            token_key = ""
+        current_user = {
+            "id": str(user.id),
+            "username": user.username,
+            "email": user.email,
+            "is_cloud_super_admin": user.is_cloud_super_admin(),
+            "is_client_super_admin": user.is_client_admin(),
+            "customer": str(user.customer),
+            "token": token_key,
+            "role_level": user.role_level,
+            "customer_info": CustomerService.get_customer_info(user.customer),
+            "site_info": SiteService.get_user_sites_info(user.sites)
+        }
+        return BaseResponse(data=current_user)
