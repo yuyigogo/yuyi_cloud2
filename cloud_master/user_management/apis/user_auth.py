@@ -37,9 +37,6 @@ class LoginView(BaseView):
         data, _ = self.get_validated_data(LoginViewViewSerializer)
         logger.info(f"{request.user.username} request login with {data=}")
         user = CloudUser.objects.get(username=data["username"], password=data["password"])
-        # user = authenticate(
-        #     request, username=data["username"], password=data["password"]
-        # )
         if user is not None and user.is_active:
             user.remove_sessions()
             login(request, user)

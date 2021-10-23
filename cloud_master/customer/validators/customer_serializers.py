@@ -1,3 +1,5 @@
+from rest_framework.status import HTTP_400_BAD_REQUEST
+
 from customer.models.customer import Customer
 from mongoengine import DoesNotExist
 from rest_framework.fields import CharField
@@ -51,7 +53,7 @@ class UpdateCustomerSerializer(DeleteCustomerSerializer):
     def validate(self, data: dict) -> dict:
         data = super(UpdateCustomerSerializer, self).validate(data)
         name = data.get("name")
-        if name and Customer.objects.fiter(name=name).count():
+        if name and Customer.objects.filter(name=name).count():
             raise APIException(
                 "customer name duplicate!",
                 code=StatusCode.CUSTOMER_NAME_DUPLICATE.value,

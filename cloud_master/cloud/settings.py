@@ -29,6 +29,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
+REST_FRAMEWORK = {
+    "EXCEPTION_HANDLER": "common.framework.exception.global_exception_handler"
+}
 
 # Application definition
 
@@ -44,7 +47,7 @@ INSTALLED_APPS = [
     "after_response",
     "user_management",
     "customer",
-    "sites"
+    "sites",
 ]
 
 INSTALLED_APPS += ["vendor.django_mongoengine"]
@@ -175,5 +178,5 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
 MONGOENGINE_USER_DOCUMENT = "user_management.models.user.CloudUser"
-AUTHENTICATION_BACKENDS = ("common.framework.authentication.CloudLoginBackend", )
-mongoengine.connect("test", host='208.64.228.73:7085')
+AUTHENTICATION_BACKENDS = ("common.framework.authentication.CloudLoginBackend",)
+mongoengine.connect("test", host="208.64.228.73:7085")
