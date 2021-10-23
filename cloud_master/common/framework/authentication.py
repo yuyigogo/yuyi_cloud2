@@ -1,11 +1,21 @@
 from typing import Optional
 
+from django.contrib.auth.backends import ModelBackend
 from mongoengine import DoesNotExist
 from rest_framework import status
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import NotAuthenticated
 from user_management.models.mongo_token import MongoToken
 from user_management.services.user_token_service import UserTokenService
+
+
+class CloudLoginBackend(ModelBackend):
+    def user_can_authenticate(self, user):
+        """
+        According to django default implement(django/contrib/auth/backends.py: ModelBackend.authenticate),
+        it treat inactive user error like invalid password error, set user_can_authenticate to True make it different.
+        """
+        return True
 
 
 class TokenAuthentication(BaseAuthentication):

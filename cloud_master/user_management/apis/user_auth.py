@@ -6,6 +6,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.status import HTTP_400_BAD_REQUEST
 from user_management.models.mongo_token import MongoToken
+from user_management.models.user import CloudUser
 from user_management.models.user_session import UserSession
 from user_management.services.user_token_service import UserTokenService
 from user_management.validators.user_login_serializers import LoginViewViewSerializer
@@ -35,9 +36,10 @@ class LoginView(BaseView):
     def post(self, request):
         data, _ = self.get_validated_data(LoginViewViewSerializer)
         logger.info(f"{request.user.username} request login with {data=}")
-        user = authenticate(
-            request, username=data["username"], password=data["password"]
-        )
+        user = CloudUser.objects.get(username=data["username"], password=data["password"])
+        # user = authenticate(
+        #     request, username=data["username"], password=data["password"]
+        # )
         if user is not None and user.is_active:
             user.remove_sessions()
             login(request, user)
