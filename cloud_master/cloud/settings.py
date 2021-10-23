@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+import mongoengine
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -38,6 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "vendor.django_mongoengine.mongo_auth",
+    "cloud",
     "after_response",
     "user_management",
     "customer",
@@ -170,3 +173,5 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_COOKIE_AGE = 604800  # 7days
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
+
+mongoengine.connect("test", host='208.64.228.73:7085')

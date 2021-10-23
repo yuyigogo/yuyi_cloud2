@@ -39,7 +39,7 @@ class CreateSiteSerializer(BaseSerializer):
     name = CharField(required=True, max_length=MAX_LENGTH_NAME)
     administrative_division = CharField(required=True)
     remarks = CharField(max_length=MAX_MESSAGE_LENGTH)
-    voltage_level = IntegerField(required=True)
+    voltage_level = CharField(required=True)
     site_location = ListField()
 
     def validate(self, data: dict) -> dict:
@@ -76,7 +76,7 @@ class UpdateSiteSerializer(BaseSerializer):
     name = CharField(max_length=MAX_LENGTH_NAME)
     administrative_division = CharField()
     remarks = CharField(max_length=MAX_MESSAGE_LENGTH)
-    voltage_level = IntegerField()
+    voltage_level = CharField()
     site_location = ListField()
 
     def validate(self, data: dict) -> dict:
