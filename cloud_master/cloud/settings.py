@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     "user_management",
     "customer",
     "sites",
+    "equipment_management",
+    "file_management",
 ]
 
 INSTALLED_APPS += ["vendor.django_mongoengine"]
@@ -165,6 +167,16 @@ LOGGING = {
         },
         "customer": {"handlers": ["console"], "level": "DEBUG", "propagate": False},
         "sites": {"handlers": ["console"], "level": "DEBUG", "propagate": False},
+        "equipment_management": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+        "file_management": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
     },
     "root": {"handlers": ["console"], "level": "INFO"},
 }
