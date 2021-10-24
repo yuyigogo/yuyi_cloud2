@@ -1,17 +1,17 @@
 import logging
 
+from customer.services.customer_service import CustomerService
 from mongoengine import DoesNotExist
 from rest_framework.status import HTTP_201_CREATED
-
-from customer.services.customer_service import CustomerService
 from sites.services.site_service import SiteService
 from user_management.models.user import CloudUser
 from user_management.services.user_service import UserService
 from user_management.services.user_token_service import UserTokenService
 from user_management.validators.user_actions_serializers import (
+    PutUsersSerializer,
     UserCreateSerializer,
-    UsersDeleteSerializer,
     UserListSerializer,
+    UsersDeleteSerializer,
 )
 
 from common.const import RoleLevel
@@ -25,13 +25,9 @@ logger = logging.getLogger(__name__)
 class UsersView(BaseView):
     permission_classes = (
         PermissionFactory(
-            RoleLevel.ADMIN, method_list=("GET", "POST", "PUT", "DELETE")
-        ),
-        PermissionFactory(
-            RoleLevel.CLOUD_SUPER_ADMIN, method_list=("GET", "POST", "PUT", "DELETE")
-        ),
-        PermissionFactory(
-            RoleLevel.CLIENT_SUPER_ADMIN, method_list=("GET", "POST", "PUT", "DELETE")
+            RoleLevel.CLIENT_SUPER_ADMIN.value,
+            RoleLevel.CLOUD_SUPER_ADMIN.value,
+            RoleLevel.ADMIN.value,
         ),
     )
 
@@ -70,7 +66,7 @@ class UsersView(BaseView):
 
     def put(self, request):
         user = request.user
-        data, _ = self.get_validated_data(UsersDeleteSerializer)
+        data, _ = self.get_validated_data(PutUsersSerializer)
         update_user_ids = data["user_ids"]
         logger.info(f"{user.username} request enable/suspend users: {update_user_ids}")
         CloudUser.objects.filter(id__in=update_user_ids).update(
@@ -88,7 +84,6 @@ class UsersView(BaseView):
 
 
 class CurrentUserView(BaseView):
-
     def get(self, request):
         user = request.user
         try:
@@ -101,11 +96,11 @@ class CurrentUserView(BaseView):
             "username": user.username,
             "email": user.email,
             "is_cloud_super_admin": user.is_cloud_super_admin(),
-            "is_client_super_admin": user.is_client_admin(),
+            "is_client_super_admin": user.is_client_super_admin(),
             "customer": str(user.customer),
             "token": token_key,
             "role_level": user.role_level,
             "customer_info": CustomerService.get_customer_info(user.customer),
-            "site_info": SiteService.get_user_sites_info(user.sites)
+            "site_info": SiteService.get_user_sites_info(user.sites),
         }
         return BaseResponse(data=current_user)

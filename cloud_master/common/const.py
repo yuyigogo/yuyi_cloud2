@@ -145,7 +145,7 @@ class RoleLevel(int, BaseEnum):
 
     @classmethod
     def allowed_role_level(cls):
-        return [cls.CLIENT_SUPER_ADMIN, cls.ADMIN, cls.NORMAL]
+        return [cls.CLIENT_SUPER_ADMIN.value, cls.ADMIN.value, cls.NORMAL.value]
 
 
 ALL = "all"
