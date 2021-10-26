@@ -37,6 +37,7 @@ class EquipmentService(BaseService):
                 "device_model": e.device_model,
                 "factory_number": e.factory_number,
                 "remarks": e.remarks,
+                "site_id": str(self.site_id),
             }
             for e in equipments
         ]
