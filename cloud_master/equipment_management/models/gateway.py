@@ -1,5 +1,9 @@
+from datetime import datetime
+
+import pytz
+
 from cloud.models import CloudDocument
-from mongoengine import ListField, ObjectIdField, StringField
+from mongoengine import ListField, ObjectIdField, StringField, DateTimeField
 
 from common.const import MAX_LENGTH_NAME, MAX_MESSAGE_LENGTH
 
@@ -9,7 +13,7 @@ class GateWay(CloudDocument):
     client_number = StringField(required=True)
     site_id = ObjectIdField(required=True)
     customer = ObjectIdField(required=True)
-    time_calibration = StringField(required=True)
+    time_adjusting = DateTimeField(default=lambda: datetime.now(tz=pytz.utc))
     remarks = StringField(max_length=MAX_MESSAGE_LENGTH)
     sensor_ids = ListField()
 
