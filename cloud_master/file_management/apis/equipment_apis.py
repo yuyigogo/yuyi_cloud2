@@ -6,8 +6,8 @@ from common.const import RoleLevel
 from common.framework.permissions import PermissionFactory
 from common.framework.response import BaseResponse
 from common.framework.view import BaseView
-from equipment_management.services.equipment_service import EquipmentService
-from equipment_management.validators.equipment_serializers import (
+from file_management.services.equipment_service import EquipmentService
+from file_management.validators.equipment_serializers import (
     CreateEquipmentSerializer,
 )
 

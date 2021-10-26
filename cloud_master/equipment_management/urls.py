@@ -1,6 +1,6 @@
 from django.urls import re_path
 
-from equipment_management.equipment_apis import EquipmentListView
+from file_management.apis.equipment_apis import EquipmentListView
 
 urlpatterns = [
     re_path(
