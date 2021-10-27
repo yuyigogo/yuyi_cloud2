@@ -1,7 +1,10 @@
 from django.urls import re_path
 
 from file_management.apis.equipment_apis import EquipmentListView
-from file_management.apis.measure_point_apis import MeasurePointListView
+from file_management.apis.measure_point_apis import (
+    MeasurePointListView,
+    MeasurePointView,
+)
 
 urlpatterns = [
     re_path(
@@ -12,6 +15,11 @@ urlpatterns = [
     re_path(
         r"^equipment/(?P<equipment_id>[a-zA-Z0-9]+)/point/$",
         MeasurePointListView.as_view(),
+        name="measure_points_actions",
+    ),
+    re_path(
+        r"^equipment/(?P<equipment_id>[a-zA-Z0-9]+)/point/(?P<point_id>[a-zA-Z0-9]+)/$",
+        MeasurePointView.as_view(),
         name="measure_point_actions",
     ),
 ]

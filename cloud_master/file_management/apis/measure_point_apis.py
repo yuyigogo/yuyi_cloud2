@@ -1,8 +1,11 @@
 import logging
 
+from file_management.models.measure_point import MeasurePoint
 from file_management.services.meansure_point_service import MeasurePointService
-from file_management.validators.measure_point_serializers import \
-    CreatePointSerializer
+from file_management.validators.measure_point_serializers import (
+    CreatePointSerializer,
+    UpdatePointSerializer,
+)
 from rest_framework.status import HTTP_201_CREATED
 
 from common.const import RoleLevel
@@ -36,3 +39,41 @@ class MeasurePointListView(BaseView):
         """get list points in one equipment"""
         points = MeasurePointService(equipment_id).get_points_for_equipment()
         return BaseResponse(data=points)
+
+
+class MeasurePointView(BaseView):
+    permission_classes = (
+        PermissionFactory(
+            RoleLevel.CLIENT_SUPER_ADMIN.value,
+            RoleLevel.CLOUD_SUPER_ADMIN.value,
+            method_list=("PUT",),
+        ),
+    )
+
+    def get(self, request, equipment_id, point_id):
+        point = MeasurePoint.objects.get(equipment_id=equipment_id, id=point_id)
+        return BaseResponse(data=point.to_dict())
+
+    def put(self, request, equipment_id, point_id):
+        user = request.user
+        data, context = self.get_validated_data(
+            UpdatePointSerializer, equipment_id=equipment_id, point_id=point_id
+        )
+        logger.info(f"{user.username} request update point with {data=}")
+        measure_name = data.get("measure_name")
+        measure_type = data.get("measure_type")
+        sensor_number = data.get("sensor_number")
+        remarks = data.get("remarks")
+        point = context["point"]
+        update_fields = {}
+        if measure_name:
+            update_fields["measure_name"] = measure_name
+        if measure_type:
+            update_fields["measure_name"] = measure_name
+        if sensor_number:
+            update_fields["sensor_number"] = sensor_number
+        if remarks:
+            update_fields["remarks"] = remarks
+        if update_fields:
+            point.update(**update_fields)
+        return BaseResponse(data=update_fields)
