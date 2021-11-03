@@ -131,7 +131,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = "/static/"
-
 # Each env specific setting file should re-define formatters, loggers, handler it needs
 LOGGING = {
     "version": 1,
@@ -191,4 +190,4 @@ CSRF_COOKIE_SECURE = True
 
 MONGOENGINE_USER_DOCUMENT = "user_management.models.user.CloudUser"
 AUTHENTICATION_BACKENDS = ("common.framework.authentication.CloudLoginBackend",)
-mongoengine.connect("test", host="208.64.228.73:7085")
+mongoengine.connect("test", host="208.64.228.73:7085", connect=False)
