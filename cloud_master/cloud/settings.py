@@ -18,6 +18,7 @@ import mongoengine
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
@@ -28,6 +29,10 @@ SECRET_KEY = "cw#_mge+llq8k6)2h7yr9+yp!j=jv@!b9=@*_y3t(56fn(p@s2"
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
+
+REST_FRAMEWORK = {
+    "EXCEPTION_HANDLER": "common.framework.exception.global_exception_handler"
+}
 
 # Application definition
 
@@ -43,7 +48,9 @@ INSTALLED_APPS = [
     "after_response",
     "user_management",
     "customer",
-    "sites"
+    "sites",
+    "equipment_management",
+    "file_management",
 ]
 
 INSTALLED_APPS += ["vendor.django_mongoengine"]
@@ -80,6 +87,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "cloud.wsgi.application"
 
+
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
@@ -100,10 +108,11 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", },
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator", },
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator", },
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
 ]
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
@@ -118,11 +127,11 @@ USE_L10N = True
 
 USE_TZ = True
 
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = "/static/"
-
 # Each env specific setting file should re-define formatters, loggers, handler it needs
 LOGGING = {
     "version": 1,
@@ -158,9 +167,20 @@ LOGGING = {
         },
         "customer": {"handlers": ["console"], "level": "DEBUG", "propagate": False},
         "sites": {"handlers": ["console"], "level": "DEBUG", "propagate": False},
+        "equipment_management": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+        "file_management": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
     },
     "root": {"handlers": ["console"], "level": "INFO"},
 }
+
 
 SESSION_ENGINE = "vendor.django_mongoengine.sessions"
 SESSION_SERIALIZER = "vendor.django_mongoengine.sessions.BSONSerializer"
@@ -171,7 +191,7 @@ CSRF_COOKIE_SECURE = True
 
 MONGOENGINE_USER_DOCUMENT = "user_management.models.user.CloudUser"
 AUTHENTICATION_BACKENDS = ("common.framework.authentication.CloudLoginBackend",)
-mongoengine.connect("test", host='208.64.228.73:7085')
+mongoengine.connect("test", host="208.64.228.73:7085", connect=False)
 
 MQTT_CLIENT_CONFIG = {
     "host": "121.37.185.39",

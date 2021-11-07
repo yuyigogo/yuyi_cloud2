@@ -41,6 +41,7 @@ class CustomerService(BaseService):
     def get_customer_info(cls, customer_id: Union[str, ObjectId]) -> dict:
         customer = Customer.objects.get(id=customer_id)
         return {
+            "id": str(customer.id),
             "name": customer.name,
             "administrative_division": customer.administrative_division,
             "remarks": customer.remarks,

@@ -1,3 +1,6 @@
+from common.const import RoleLevel
+
+
 class PermissionFactory:
     """
     replacement of user.views.has_permission
@@ -6,8 +9,8 @@ class PermissionFactory:
     eg:
     class SomeView(BaseView):
         permission_classes = (
-            PermissionFactory(RoleLevel.SUPER_ADMIN),
-            PermissionFactory(RoleLevel.ADMIN),
+            PermissionFactory(RoleLevel.SUPER_ADMIN.value),
+            PermissionFactory(RoleLevel.ADMIN.value),
         )
     """
 
@@ -17,7 +20,10 @@ class PermissionFactory:
                 if method_list and request.method not in method_list:
                     return True
                 if request.user and request.user.is_authenticated:
-                    return request.user.has_permissions(init_perm_list)
+                    requested_permissions = (
+                        RoleLevel.CLOUD_SUPER_ADMIN.value,
+                    ) + init_perm_list
+                    return request.user.has_permissions(requested_permissions)
                 return False
 
         return _PermissionClass

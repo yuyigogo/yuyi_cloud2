@@ -27,7 +27,7 @@ class CloudUser(User, DocumentMixin):
     role_level = IntField(required=True)
 
     meta = {
-        "indexes": ["customer", "email", "username", "sites"],
+        "indexes": ["customer", "email", "username", "sites", "role_level"],
         "index_background": True,
     }
 

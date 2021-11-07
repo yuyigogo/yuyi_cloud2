@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate, login, logout
 from mongoengine import DoesNotExist
 from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
-from rest_framework.status import HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK
 from user_management.models.mongo_token import MongoToken
 from user_management.models.user import CloudUser
 from user_management.models.user_session import UserSession
@@ -37,9 +37,6 @@ class LoginView(BaseView):
         data, _ = self.get_validated_data(LoginViewViewSerializer)
         logger.info(f"{request.user.username} request login with {data=}")
         user = CloudUser.objects.get(username=data["username"], password=data["password"])
-        # user = authenticate(
-        #     request, username=data["username"], password=data["password"]
-        # )
         if user is not None and user.is_active:
             user.remove_sessions()
             login(request, user)
@@ -49,7 +46,7 @@ class LoginView(BaseView):
             self._add_cloud_token_in_request_header(request)
             # note the new session of user
             UserSession(user_id=user.id, session_key=request.session.session_key).save()
-            return BaseResponse()
+            return BaseResponse(status_code=HTTP_200_OK)
         else:
             return BaseResponse(
                 status_code=HTTP_400_BAD_REQUEST, msg="username or password error!",
@@ -57,7 +54,7 @@ class LoginView(BaseView):
 
     def get(self, request):
         # redirect to login template.
-        return BaseResponse()
+        return BaseResponse(status_code=HTTP_200_OK)
 
 
 class LogOutView(BaseView):
@@ -68,4 +65,4 @@ class LogOutView(BaseView):
         user.remove_sessions()
         logout(request)
         # redirect to login template.
-        return BaseResponse()
+        return BaseResponse(status_code=HTTP_200_OK)

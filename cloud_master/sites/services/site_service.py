@@ -61,6 +61,7 @@ class SiteService(BaseService):
         sites = Site.objects.filter(id__in=site_ids)
         return [
             {
+                "id": str(site.id),
                 "name": site.name,
                 "customer": str(site.customer),
                 "administrative_division": site.administrative_division,

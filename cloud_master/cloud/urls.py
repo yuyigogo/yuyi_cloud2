@@ -25,4 +25,6 @@ urlpatterns += [
     path("rest/v1/", include("user_management.urls")),
     path("rest/v1/", include("customer.urls")),
     path("rest/v1/", include("sites.urls")),
+    path("rest/v1/", include("equipment_management.urls")),
+    path("rest/v1/", include("file_management.urls")),
 ]

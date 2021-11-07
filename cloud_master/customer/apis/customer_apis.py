@@ -19,8 +19,10 @@ logger = logging.getLogger(__name__)
 
 
 class CustomersView(BaseView):
-    permission_classes = PermissionFactory(
-        RoleLevel.CLIENT_SUPER_ADMIN, RoleLevel.CLOUD_SUPER_ADMIN
+    permission_classes = (
+        PermissionFactory(
+            RoleLevel.CLIENT_SUPER_ADMIN.value, RoleLevel.CLOUD_SUPER_ADMIN.value
+        ),
     )
 
     def get(self, request):
@@ -60,8 +62,11 @@ class CustomersView(BaseView):
 
 class CustomerView(BaseView):
     permission_classes = (
-        PermissionFactory(RoleLevel.CLOUD_SUPER_ADMIN, method_list=("DELETE", "PUT")),
-        PermissionFactory(RoleLevel.CLIENT_SUPER_ADMIN, method_list=("DELETE", "PUT")),
+        PermissionFactory(
+            RoleLevel.CLIENT_SUPER_ADMIN.value,
+            RoleLevel.CLOUD_SUPER_ADMIN.value,
+            method_list=("DELETE", "PUT"),
+        ),
     )
 
     def get(self, request, pk):

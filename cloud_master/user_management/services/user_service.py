@@ -66,7 +66,7 @@ class UserService(BaseService):
         user_info = [
             {
                 "username": user.username,
-                "customer": customer_dict.get(str(user.customer), ""),
+                "customer_name": customer_dict.get(user.customer, ""),
                 "role_level": user.role_level,
                 "status": user.is_active,
                 "email": user.email,
