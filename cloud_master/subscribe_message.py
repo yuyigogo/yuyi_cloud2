@@ -1,16 +1,11 @@
 import datetime
 import json
-import os
 import re
-import sys
-import time
-import uuid
 import dateutil.parser
 import pymongo
 import redis
+
 from paho.mqtt import client as mqtt_client
-# this is a global variable to store parsed data
-from paho.mqtt.client import base62
 from cloud.settings import REDIS_HOST, REDIS_PORT, MG_HOST, MG_PORT, MG_DB_NAME, MQTT_CLIENT_CONFIG
 
 uhf_loading_data, ae_tev_loading_data = {}, {}
