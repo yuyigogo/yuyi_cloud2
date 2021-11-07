@@ -1,19 +1,28 @@
+asgiref==3.4.1
+Babel==2.8.0
+certifi==2021.5.30
+chardet==3.0.4
+defusedxml==0.7.1
+dicttoxml==1.7.4
 Django==3.0.8
+django-after-response==0.2.2
 django-cors-headers==3.4.0
 django-sslserver==0.22
 djangoajax==3.2
 djangorestframework==3.11.0
+djangorestframework-xml==2.0.0
+idna==2.10
+importlib-metadata==4.8.1
 jsonpickle==1.4.1
 mongoengine==0.20.0
+paho-mqtt==1.5.1
 pymongo==3.10.1
-requests==2.24.0
-Unidecode==1.1.1
-# uWSGI==2.0.19.1
-# redis==3.5.3
-# python-redis-lock==3.5.0
-django-after-response==0.2.2
-djangorestframework-xml==2.0.0
-six==1.15.0
-dicttoxml==1.7.4
-Babel==2.8.0
 python-dateutil==2.8.1
+pytz==2021.1
+redis==3.5.3
+requests==2.24.0
+six==1.15.0
+sqlparse==0.4.2
+Unidecode==1.1.1
+urllib3==1.25.11
+zipp==3.5.0
