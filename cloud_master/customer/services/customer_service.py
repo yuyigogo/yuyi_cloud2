@@ -2,6 +2,8 @@ from typing import Optional, Union
 
 from bson import ObjectId
 from customer.models.customer import Customer
+from file_management.models.electrical_equipment import ElectricalEquipment
+from file_management.models.measure_point import MeasurePoint
 from sites.models.site import Site
 from user_management.models.user import CloudUser
 
@@ -21,9 +23,16 @@ class CustomerService(BaseService):
         return customer
 
     @classmethod
-    def delete_customer(cls, customer: Customer):
+    def delete_customer(cls, customer: Customer, clear_resource: bool):
         # when delete customer, will delete the resources in this customer
-        Site.objects.filter(customer=customer.pk).delete()
+        if clear_resource:
+            sites = Site.objects.filter(customer=customer.pk)
+            site_ids = sites.values_list("id")
+            equipments = ElectricalEquipment.objects.filter(site_id__in=site_ids)
+            equipment_ids = equipments.values_list("id")
+            MeasurePoint.objects.filter(equipment_id__in=equipment_ids).delete()
+            sites.delete()
+            equipments.delete()
         CloudUser.filter(customer=customer.pk).delete()
         customer.delete()
 

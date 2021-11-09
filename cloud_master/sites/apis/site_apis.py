@@ -93,14 +93,13 @@ class CustomerSiteView(BaseView):
         return BaseResponse(data=update_fields)
 
     def delete(self, request, customer_id, site_id):
+        # todo delete site resource include what?
         user = request.user
-        _, context = self.get_validated_data(
-            DeleteSiteSerializer, customer_id=customer_id, site_id=site_id
+        data, context = self.get_validated_data(
+            DeleteSiteSerializer, site_id=site_id
         )
-        logger.info(f"{user.username} request delete {site_id=} in {customer_id=}")
+        logger.info(f"{user.username} request delete {site_id=} in {customer_id=} with {data}")
         site = context["site"]
-        # if this is ALL customer, should query without customer
-        query_customer = context["query_customer"]
-        q_customer_id = customer_id if query_customer else None
-        SiteService.delete_site(site, q_customer_id)
+        clear_resource = data["clear_resource"]
+        SiteService.delete_site(site, clear_resource)
         return BaseResponse()

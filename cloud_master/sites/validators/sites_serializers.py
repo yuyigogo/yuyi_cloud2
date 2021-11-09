@@ -1,6 +1,6 @@
 from bson import ObjectId
 from mongoengine import DoesNotExist
-from rest_framework.fields import CharField, IntegerField, ListField
+from rest_framework.fields import BooleanField, CharField, ListField
 from sites.models.site import Site
 
 from common.const import ALL, MAX_LENGTH_NAME, MAX_MESSAGE_LENGTH
@@ -98,14 +98,13 @@ class UpdateSiteSerializer(BaseSerializer):
 
 
 class DeleteSiteSerializer(BaseSerializer):
+    clear_resource = BooleanField(default=False)
+
     def validate(self, data: dict) -> dict:
         user = self.context["request"].user
         site_id = self.context["site_id"]
-        customer_id = self.context["customer_id"]
         site = get_site(site_id)
         self.context["site"] = site
-        self.context["query_customer"] = True
-        if str(user.customer) == customer_id:
-            # delete site in ALL customer
-            self.context["query_customer"] = False
+        if site.name == ALL:
+            raise ForbiddenException("named ALL site can not be deleted!")
         return data

@@ -1,6 +1,8 @@
 from typing import Optional, Union
 
 from bson import ObjectId
+from file_management.models.electrical_equipment import ElectricalEquipment
+from file_management.models.measure_point import MeasurePoint
 from sites.models.site import Site
 from user_management.models.user import CloudUser
 
@@ -40,16 +42,14 @@ class SiteService(BaseService):
         return site
 
     @classmethod
-    def delete_site(cls, site: Site, customer_id: Union[ObjectId, str] = None):
-        # remove the deleted site_id from user.sites
-        # if this is ALL customer, should query without customer
+    def delete_site(cls, site: Site, clear_resource: bool):
         site_id = site.pk
-        users = CloudUser.objects.filter(sites__in=[site_id])
-        if customer_id:
-            users = users.filter(customer=customer_id)
-        for user in users:
-            user.sites.remove(site_id)
-            user.update(sites=user.sites)
+        if clear_resource:
+            equipments = ElectricalEquipment.objects.filter(site_id=site_id)
+            equipment_ids = equipments.values_list("id")
+            MeasurePoint.objects.filter(equipment_id__in=equipment_ids).delete()
+            equipments.delete()
+        CloudUser.objects.filter(sites__in=[site_id]).delete()
         site.delete()
 
     @classmethod

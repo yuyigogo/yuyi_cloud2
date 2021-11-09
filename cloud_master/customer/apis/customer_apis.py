@@ -75,10 +75,11 @@ class CustomerView(BaseView):
         return BaseResponse(data=customer.to_dict())
 
     def delete(self, request, pk):
-        _, context = self.get_validated_data(DeleteCustomerSerializer, pk=pk)
+        data, context = self.get_validated_data(DeleteCustomerSerializer, pk=pk)
+        clear_resource = data["clear_resource"]
         customer = context["customer"]
         logger.info(f"{request.user.username} request delete {customer=}")
-        CustomerService.delete_customer(customer)
+        CustomerService.delete_customer(customer, clear_resource)
         return BaseResponse()
 
     def put(self, request, pk):

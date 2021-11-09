@@ -1,8 +1,6 @@
-from rest_framework.status import HTTP_400_BAD_REQUEST
-
 from customer.models.customer import Customer
 from mongoengine import DoesNotExist
-from rest_framework.fields import CharField
+from rest_framework.fields import CharField, BooleanField
 
 from common.const import MAX_LENGTH_NAME, MAX_MESSAGE_LENGTH
 from common.error_code import StatusCode
@@ -36,6 +34,8 @@ class CustomerSerializer(BaseSerializer):
 
 
 class DeleteCustomerSerializer(CustomerSerializer):
+    clear_resource = BooleanField(default=False)
+
     def validate(self, data: dict) -> dict:
         data = super(DeleteCustomerSerializer, self).validate(data)
         user = self.context["request"].user
