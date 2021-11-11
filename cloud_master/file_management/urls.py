@@ -30,8 +30,8 @@ urlpatterns = [
         FileNavigationTreeView.as_view(),
         name="customer_file_tree",
     ),
-    path(
-        "all_customers/file_tree/$",
+    re_path(
+        r"^all_customers/file_tree/$",
         AllFileNavigationTreeView.as_view(),
         name="all_customer_file_tree",
     ),
