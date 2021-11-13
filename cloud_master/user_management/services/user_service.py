@@ -46,11 +46,17 @@ class UserService(BaseService):
             if customer == named_all_customer_id and sites == [named_all_site_id]:
                 # customer and site both are ALL
                 query &= Q(role_level__gte=self.user.role_level)
-            elif customer == named_all_customer_id and sites != [named_all_site_id]:
+            elif (
+                customer == named_all_customer_id
+                and sites
+                and sites != [named_all_site_id]
+            ):
                 # only customer is ALL
                 query &= Q(sites__in=sites)
-            else:
+            elif sites:
                 query &= Q(customer=customer, sites__in=sites)
+            else:
+                query &= Q(customer=customer)
         else:
             # default query or no customer and sites query
             if self.user.is_cloud_or_client_super_admin():
