@@ -71,6 +71,7 @@ class UserService(BaseService):
                 "status": user.is_active,
                 "email": user.email,
                 "phone": user.phone,
+                "id": str(user.pk),
             }
             for user in users_by_page
         ]
