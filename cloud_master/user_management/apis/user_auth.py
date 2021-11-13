@@ -1,15 +1,18 @@
 import logging
 
-from django.contrib.auth import authenticate, login, logout
+from customer.services.customer_service import CustomerService
+from django.contrib.auth import login, logout
 from mongoengine import DoesNotExist
 from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
-from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
+from sites.services.site_service import SiteService
 from user_management.models.mongo_token import MongoToken
 from user_management.models.user import CloudUser
 from user_management.models.user_session import UserSession
 from user_management.services.user_token_service import UserTokenService
-from user_management.validators.user_login_serializers import LoginViewViewSerializer
+from user_management.validators.user_login_serializers import \
+    LoginViewViewSerializer
 
 from common.framework.response import BaseResponse
 from common.framework.view import BaseView
@@ -37,7 +40,9 @@ class LoginView(BaseView):
         data, _ = self.get_validated_data(LoginViewViewSerializer)
         logger.info(f"{request.user.username} request login with {data=}")
         try:
-            user = CloudUser.objects.get(username=data["username"], password=data["password"])
+            user = CloudUser.objects.get(
+                username=data["username"], password=data["password"]
+            )
         except DoesNotExist:
             logger.info(f"login failed with {data=}")
             return BaseResponse(
@@ -52,7 +57,18 @@ class LoginView(BaseView):
             self._add_cloud_token_in_request_header(request)
             # note the new session of user
             UserSession(user_id=user.id, session_key=request.session.session_key).save()
-            return BaseResponse(status_code=HTTP_200_OK)
+            current_user = {
+                "id": str(user.id),
+                "username": user.username,
+                "email": user.email,
+                "is_cloud_super_admin": user.is_cloud_super_admin(),
+                "is_client_super_admin": user.is_client_super_admin(),
+                "customer": str(user.customer),
+                "role_level": user.role_level,
+                "customer_info": CustomerService.get_customer_info(user.customer),
+                "site_info": SiteService.get_user_sites_info(user.sites),
+            }
+            return BaseResponse(data=current_user)
         else:
             logger.info(f"{user.username} is not active!")
             return BaseResponse(
