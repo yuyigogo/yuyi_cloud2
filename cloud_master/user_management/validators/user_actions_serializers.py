@@ -6,7 +6,8 @@ from rest_framework.fields import (
     ChoiceField,
     EmailField,
     IntegerField,
-    ListField, BooleanField,
+    ListField,
+    BooleanField,
 )
 from sites.models.site import Site
 from sites.services.site_service import SiteService
@@ -107,3 +108,7 @@ class UsersDeleteSerializer(BaseSerializer):
 
 class PutUsersSerializer(UsersDeleteSerializer):
     is_suspend = BooleanField(required=True)
+
+    def validate(self, data: dict) -> dict:
+        data = super(UsersDeleteSerializer, self).validate(data)
+        return data

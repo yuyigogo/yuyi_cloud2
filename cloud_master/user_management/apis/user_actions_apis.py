@@ -68,7 +68,7 @@ class UsersView(BaseView):
         user = request.user
         data, _ = self.get_validated_data(PutUsersSerializer)
         update_user_ids = data["user_ids"]
-        logger.info(f"{user.username} request enable/suspend users: {update_user_ids}")
+        logger.info(f"{user.username} request enable/suspend users: with {data=}")
         CloudUser.objects.filter(id__in=update_user_ids).update(
             is_active=data["is_suspend"]
         )
