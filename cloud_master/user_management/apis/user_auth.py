@@ -36,8 +36,14 @@ class LoginView(BaseView):
     def post(self, request):
         data, _ = self.get_validated_data(LoginViewViewSerializer)
         logger.info(f"{request.user.username} request login with {data=}")
-        user = CloudUser.objects.get(username=data["username"], password=data["password"])
-        if user is not None and user.is_active:
+        try:
+            user = CloudUser.objects.get(username=data["username"], password=data["password"])
+        except DoesNotExist:
+            logger.info(f"login failed with {data=}")
+            return BaseResponse(
+                status_code=HTTP_400_BAD_REQUEST, msg="username or password error!",
+            )
+        if user.is_active:
             user.remove_sessions()
             login(request, user)
             # session may be flushed after auth_login(), in this case, generate a new session key
@@ -48,8 +54,9 @@ class LoginView(BaseView):
             UserSession(user_id=user.id, session_key=request.session.session_key).save()
             return BaseResponse(status_code=HTTP_200_OK)
         else:
+            logger.info(f"{user.username} is not active!")
             return BaseResponse(
-                status_code=HTTP_400_BAD_REQUEST, msg="username or password error!",
+                status_code=HTTP_400_BAD_REQUEST, msg="user login failed!",
             )
 
     def get(self, request):
