@@ -1,6 +1,7 @@
 from cloud.models import DocumentMixin
 from mongoengine import (
     BinaryField,
+    BooleanField,
     EmailField,
     IntField,
     ListField,
@@ -25,6 +26,7 @@ class CloudUser(User, DocumentMixin):
     email = EmailField(required=True, max_length=100)
     avatar = BinaryField()
     role_level = IntField(required=True)
+    is_active = BooleanField(default=True)
 
     meta = {
         "indexes": ["customer", "email", "username", "sites", "role_level"],
