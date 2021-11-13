@@ -1,6 +1,8 @@
 from typing import Optional, Union
 
 from bson import ObjectId
+from mongoengine import queryset
+
 from file_management.models.electrical_equipment import ElectricalEquipment
 from file_management.models.measure_point import MeasurePoint
 from sites.models.site import Site
@@ -15,7 +17,7 @@ class SiteService(BaseService):
         self.user = user
         self.customer_id = customer_id
 
-    def get_sites_by_customer_id(self) -> list:
+    def get_sites_by_customer_id(self) -> queryset:
         sites = Site.objects.filter()
         if self.user.is_cloud_or_client_super_admin():
             return sites

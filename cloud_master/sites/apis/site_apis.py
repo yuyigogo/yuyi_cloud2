@@ -32,7 +32,7 @@ class CustomerSitesView(BaseView):
         self.get_validated_data(GetCustomerSitesSerializer, customer_id=customer_id)
         sites = SiteService(user, customer_id).get_sites_by_customer_id()
         data = [site.to_dict() for site in sites]
-        return BaseResponse(data=data)
+        return BaseResponse(data={"sites": data, "total": sites.count()})
 
     def post(self, request, customer_id):
         user = request.user
@@ -95,10 +95,10 @@ class CustomerSiteView(BaseView):
     def delete(self, request, customer_id, site_id):
         # todo delete site resource include what?
         user = request.user
-        data, context = self.get_validated_data(
-            DeleteSiteSerializer, site_id=site_id
+        data, context = self.get_validated_data(DeleteSiteSerializer, site_id=site_id)
+        logger.info(
+            f"{user.username} request delete {site_id=} in {customer_id=} with {data}"
         )
-        logger.info(f"{user.username} request delete {site_id=} in {customer_id=} with {data}")
         site = context["site"]
         clear_resource = data["clear_resource"]
         SiteService.delete_site(site, clear_resource)

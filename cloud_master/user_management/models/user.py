@@ -22,7 +22,7 @@ class CloudUser(User, DocumentMixin):
     customer = ObjectIdField(required=True)
     sites = ListField(required=True)
     phone = StringField(max_length=50)
-    email = EmailField(required=True, unique=True, max_length=100)
+    email = EmailField(required=True, max_length=100)
     avatar = BinaryField()
     role_level = IntField(required=True)
 
