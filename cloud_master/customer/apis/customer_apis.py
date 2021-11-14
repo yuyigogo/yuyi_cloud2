@@ -21,19 +21,19 @@ logger = logging.getLogger(__name__)
 class CustomersView(BaseView):
     permission_classes = (
         PermissionFactory(
-            RoleLevel.CLIENT_SUPER_ADMIN.value, RoleLevel.CLOUD_SUPER_ADMIN.value
+            RoleLevel.CLIENT_SUPER_ADMIN.value,
+            RoleLevel.CLOUD_SUPER_ADMIN.value,
+            method_list=("POST",),
         ),
     )
 
     def get(self, request):
-        """
-        get list customers, only cloud/client super admin have access to this view.
-        :param request:
-        :return:
-        """
         user = request.user
         logger.info(f"{user.username} request list customers")
-        customers = Customer.objects.all()
+        if user.is_cloud_or_client_super_admin():
+            customers = Customer.objects.all()
+        else:
+            customers = Customer.objects.filter(id=user.customer)
         total = customers.count()
         data = [
             {

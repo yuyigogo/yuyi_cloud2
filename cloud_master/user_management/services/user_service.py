@@ -41,23 +41,31 @@ class UserService(BaseService):
         if username:
             query &= Q(username__icontains=username)
         if customer:
-            named_all_customer_id = str(CustomerService.named_all_customer().id)
-            named_all_site_id = str(SiteService.named_all_site().id)
-            if customer == named_all_customer_id and sites == [named_all_site_id]:
-                # customer and site both are ALL
-                query &= Q(role_level__gte=self.user.role_level)
-            elif (
-                customer == named_all_customer_id
-                and sites
-                and sites != [named_all_site_id]
-            ):
-                # only customer is ALL
-                query &= Q(sites__in=sites)
-            elif sites:
-                query &= Q(customer=customer, sites__in=sites)
-            else:
-                query &= Q(customer=customer)
-        else:
+            query &= Q(customer=customer)
+        if sites:
+            query &= Q(sites__in=sites)
+            # named_all_customer_id = str(CustomerService.named_all_customer().id)
+            # named_all_site_id = str(SiteService.named_all_site().id)
+            # if customer == named_all_customer_id and sites == [named_all_site_id]:
+            #     # customer and site both are ALL
+            #     query &= Q(role_level__gte=self.user.role_level)
+            # elif (
+            #     customer == named_all_customer_id
+            #     and sites
+            #     and sites != [named_all_site_id]
+            # ):
+            #     # only customer is ALL
+            #     query &= Q(sites__in=sites)
+            # elif (
+            #         customer == named_all_customer_id
+            #         and sites is None
+            # ):
+            #     pass
+            # elif sites:
+            #     query &= Q(customer=customer, sites__in=sites)
+            # else:
+            #     query &= Q(customer=customer)
+        if not all([username, customer, sites]):
             # default query or no customer and sites query
             if self.user.is_cloud_or_client_super_admin():
                 query &= Q(role_level__gte=self.user.role_level)
