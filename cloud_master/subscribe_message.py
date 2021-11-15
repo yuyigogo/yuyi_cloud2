@@ -38,6 +38,7 @@ class DataLoader:
     def on_connect(client, userdata, flags, rc):
         print("Connected with result code " + str(rc))
         client.subscribe("#")  # 订阅消息
+        # client.subscribe("8E001302000001A5")  # 订阅消息
 
     @staticmethod
     def get_sensor_type(msg_dict):
@@ -46,6 +47,8 @@ class DataLoader:
             return 'ae_tev'
         elif 'Temp' in params:
             return 'temp'
+        elif 'UHF' in params:
+            return 'uhf'
         else:
             return ''
 
@@ -83,15 +86,19 @@ class DataLoader:
         ret = DataLoader.pattern.match(msg.topic)
         if ret is not None:
             client_id, sensor_id = ret.groups()[0], ret.groups()[1]
-            if sensor_redis_cli.sismember('client_ids', client_id):
-                msg_dict = json.loads(msg.payload.decode('utf-8'))
-                sensor_type = DataLoader.get_sensor_type(msg_dict)
-                if sensor_type:
-                    if sensor_type == 'ae_tev':
-                        for sensor_type in ['ae', 'tev']:
+            try:
+                if sensor_redis_cli.sismember('client_ids', client_id):
+
+                    msg_dict = json.loads(msg.payload.decode('utf-8'))
+                    sensor_type = DataLoader.get_sensor_type(msg_dict)
+                    if sensor_type:
+                        if sensor_type == 'ae_tev':
+                            for sensor_type in ['ae', 'tev']:
+                                DataLoader.insert(client_id, sensor_id, sensor_type, msg_dict)
+                        else:
                             DataLoader.insert(client_id, sensor_id, sensor_type, msg_dict)
-                    else:
-                        DataLoader.insert(client_id, sensor_id, sensor_type, msg_dict)
+            except Exception as e:
+                print(e)
 
     @staticmethod
     def on_subscribe(client, userdata, mid, granted_qos):
