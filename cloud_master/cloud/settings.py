@@ -199,6 +199,7 @@ MQTT_CLIENT_CONFIG = {
     "user": "guest",
     "pw": "guest",
     "subscribe_client_id": "8E001302000001A5"
+    # "subscribe_client_id": "123123123"
 }
 REDIS_HOST = '208.64.228.73'
 REDIS_PORT = 7086

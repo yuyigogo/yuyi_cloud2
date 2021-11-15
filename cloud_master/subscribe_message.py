@@ -40,33 +40,58 @@ class DataLoader:
         client.subscribe("#")  # 订阅消息
 
     @staticmethod
+    def get_sensor_type(msg_dict):
+        params = msg_dict.get('params', {})
+        if 'TEV' in params or 'AE' in params:
+            return 'ae_tev'
+        elif 'Temp' in params:
+            return 'temp'
+        else:
+            return ''
+
+    @staticmethod
+    def insert(client_id, sensor_id, sensor_type, msg_dict):
+        cur_time = dateutil.parser.parse(datetime.datetime.utcnow().isoformat())
+        my_col = mg_cli[sensor_type]
+        my_query = {'is_new': True}
+        new_values = {"$set": {"is_new": False, "update_time": cur_time}}
+        my_col.update_many(my_query, new_values)
+        params = msg_dict.get('params', {})
+        if sensor_type == 'ae':
+            params.pop('TEV')
+        if sensor_type == 'tev':
+            params.pop('AE')
+        data = {
+            'client_id': client_id,
+            'sensor_id': sensor_id,
+            'version': msg_dict.get('version', ''),
+            'sensor_type': sensor_type,
+            'params': params,
+            'create_time': cur_time,
+            'update_time': cur_time,
+            'is_new': True,
+        }
+        insert_res = my_col.insert_one(data)
+        if insert_res.acknowledged:
+            print('插入数据成功！！！')
+        else:
+            print(f'{msg_dict}插入数据失败！！！')
+
+    @staticmethod
     def on_message(client, userdata, msg):
         print(f"msg.topic:{msg.topic}")
         ret = DataLoader.pattern.match(msg.topic)
         if ret is not None:
             client_id, sensor_id = ret.groups()[0], ret.groups()[1]
-            if sensor_redis_cli.exists(sensor_id):
-                # sensor_id在redis中
-                sensor_type = sensor_redis_cli.get(sensor_id)
+            if sensor_redis_cli.sismember('client_ids', client_id):
                 msg_dict = json.loads(msg.payload.decode('utf-8'))
-                # 删除消息中原来的id
-                msg_dict.pop('id', '')
-                my_col = mg_cli[sensor_type]
-                my_query = {'is_new': True}
-                cur_time = dateutil.parser.parse(datetime.datetime.utcnow().isoformat())
-                new_values = {"$set": {"is_new": False, "update_time": cur_time}}
-                my_col.update_many(my_query, new_values)
-                msg_dict['is_new'] = True
-                msg_dict['client_id'] = client_id
-                msg_dict['sensor_id'] = sensor_id
-                msg_dict['sensor_type'] = sensor_type
-                msg_dict['create_time'] = cur_time
-                msg_dict['update_time'] = cur_time
-                insert_res = my_col.insert_one(msg_dict)
-                if insert_res.acknowledged:
-                    print('插入数据成功！！！')
-                else:
-                    print(f'{msg_dict}插入数据成功！！！')
+                sensor_type = DataLoader.get_sensor_type(msg_dict)
+                if sensor_type:
+                    if sensor_type == 'ae_tev':
+                        for sensor_type in ['ae', 'tev']:
+                            DataLoader.insert(client_id, sensor_id, sensor_type, msg_dict)
+                    else:
+                        DataLoader.insert(client_id, sensor_id, sensor_type, msg_dict)
 
     @staticmethod
     def on_subscribe(client, userdata, mid, granted_qos):
