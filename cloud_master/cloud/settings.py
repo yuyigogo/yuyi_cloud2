@@ -14,6 +14,7 @@ import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import mongoengine
+import pymongo
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -208,3 +209,5 @@ REDIS_PORT = 7086
 MG_HOST = "208.64.228.73"
 MG_PORT = 7085
 MG_DB_NAME = "test"
+
+MONGO_CLIENT = pymongo.MongoClient(f"mongodb://{MG_HOST}:{MG_PORT}/")[MG_DB_NAME]
