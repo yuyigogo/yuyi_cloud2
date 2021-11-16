@@ -15,7 +15,6 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import mongoengine
 
-
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -51,6 +50,7 @@ INSTALLED_APPS = [
     "sites",
     "equipment_management",
     "file_management",
+    "navigation",
 ]
 
 INSTALLED_APPS += ["vendor.django_mongoengine"]
@@ -177,6 +177,7 @@ LOGGING = {
             "level": "DEBUG",
             "propagate": False,
         },
+        "navigation": {"handlers": ["console"], "level": "DEBUG", "propagate": False,},
     },
     "root": {"handlers": ["console"], "level": "INFO"},
 }
@@ -199,12 +200,11 @@ MQTT_CLIENT_CONFIG = {
     "user": "guest",
     "pw": "guest",
     # "subscribe_client_id": "8E001302000001A5"
-    "subscribe_client_id": "123123123"
+    "subscribe_client_id": "123123123",
 }
-REDIS_HOST = '208.64.228.73'
+REDIS_HOST = "208.64.228.73"
 REDIS_PORT = 7086
 
-MG_HOST = '208.64.228.73'
+MG_HOST = "208.64.228.73"
 MG_PORT = 7085
-MG_DB_NAME = 'test'
-
+MG_DB_NAME = "test"

@@ -3,8 +3,8 @@ from file_management.models.measure_point import MeasurePoint
 from mongoengine import DoesNotExist
 from rest_framework.fields import CharField
 
-from common.const import MAX_LENGTH_NAME, MAX_MESSAGE_LENGTH
-from common.framework.exception import InvalidException
+from common.const import MAX_LENGTH_NAME, MAX_MESSAGE_LENGTH, SensorType
+from common.framework.exception import APIException, InvalidException
 from common.framework.serializer import BaseSerializer
 
 
@@ -13,6 +13,11 @@ class CreatePointSerializer(BaseSerializer):
     measure_type = CharField(required=True)
     sensor_number = CharField(required=True)
     remarks = CharField(max_length=MAX_MESSAGE_LENGTH)
+
+    def validate_measure_type(self, measure_type: str) -> str:
+        if measure_type not in SensorType.values():
+            raise APIException(f"invalid {measure_type=}")
+        return measure_type
 
     def validate(self, data: dict) -> dict:
         equipment_id = self.context["equipment_id"]

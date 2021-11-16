@@ -60,6 +60,7 @@ class DataLoader:
         new_values = {"$set": {"is_new": False, "update_time": cur_time}}
         my_col.update_many(my_query, new_values)
         params = msg_dict.get('params', {})
+        # todo use SensorType to match the constant
         if sensor_type == 'ae':
             params.pop('TEV')
         if sensor_type == 'tev':

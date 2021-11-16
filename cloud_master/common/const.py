@@ -150,3 +150,10 @@ class RoleLevel(int, BaseEnum):
 
 ALL = "all"
 MAX_MESSAGE_LENGTH = 2000
+
+
+class SensorType(str, BaseEnum):
+    ae = "ae"
+    tev = "tev"
+    temp = "temp"
+    uhf = "uhf"

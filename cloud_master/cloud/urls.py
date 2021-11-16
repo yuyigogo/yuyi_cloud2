@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path("rest/v1/admin/", admin.site.urls),
 ]
 
 # every app should has its own urls.py and insert it below
@@ -27,4 +27,5 @@ urlpatterns += [
     path("rest/v1/", include("sites.urls")),
     path("rest/v1/", include("equipment_management.urls")),
     path("rest/v1/", include("file_management.urls")),
+    path("rest/v1/", include("navigation.urls")),
 ]
