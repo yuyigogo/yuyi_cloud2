@@ -64,7 +64,7 @@ class DataLoader:
     def insert(client_id, sensor_id, sensor_type, msg_dict):
         cur_time = dateutil.parser.parse(datetime.datetime.utcnow().isoformat())
         my_col = mg_cli[sensor_type]
-        my_query = {"is_new": True}
+        my_query = {"is_new": True, "sensor_id": sensor_id}
         new_values = {"$set": {"is_new": False, "update_time": cur_time}}
         my_col.update_many(my_query, new_values)
         params = msg_dict.get("params", {})
