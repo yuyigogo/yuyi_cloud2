@@ -1,7 +1,9 @@
 from cloud.models import bson_to_dict
 from cloud.settings import MONGO_CLIENT
+from customer.models.customer import Customer
 from file_management.models.electrical_equipment import ElectricalEquipment
 from file_management.models.measure_point import MeasurePoint
+from sites.models.site import Site
 
 from common.framework.service import BaseService
 
@@ -14,16 +16,21 @@ class SiteNavigationService(BaseService):
         return bson_to_dict(sensor_data) if sensor_data else {}
 
     @classmethod
-    def get_all_points_in_equipment(cls, equipment: ElectricalEquipment) -> list:
-        points = MeasurePoint.objects.filter(equipment_id=equipment.pk)
-        point_info = []
+    def get_all_sensors_in_equipment(cls, equipment: ElectricalEquipment) -> dict:
+        equipment_sensors = {
+            "device_id": str(equipment.pk),
+            "device_name": equipment.device_name,
+            "device_type": equipment.device_type,
+            "sensor_infos": [],
+        }
+        points = MeasurePoint.objects.only(
+            "measure_name", "measure_type", "sensor_number"
+        ).filter(equipment_id=equipment.pk)
         for point in points:
             sensor_number = point.sensor_number
             sensor_type = point.measure_type
-            point_info.append(
+            equipment_sensors["sensor_infos"].append(
                 {
-                    "device_name": equipment.device_name,
-                    "device_id": str(equipment.pk),
                     "measure_name": point.measure_name,
                     "measure_id": str(point.pk),
                     "sensor_type": sensor_type,
@@ -33,8 +40,32 @@ class SiteNavigationService(BaseService):
                     ),
                 }
             )
-        return point_info
+        return equipment_sensors
 
     @classmethod
-    def get_all_points_in_site(cls, equipments: list):
-        return [cls.get_all_points_in_equipment(equipment) for equipment in equipments]
+    def get_all_sensors_in_site(cls, site: Site) -> dict:
+        site_sensors = {
+            "site_id": str(site.pk),
+            "site_name": site.name,
+            "sensor_infos": [],
+        }
+        equipments = ElectricalEquipment.objects.only(
+            "device_name", "device_type"
+        ).filter(site_id=site.pk)
+        site_sensors["sensor_infos"] = [
+            cls.get_all_sensors_in_equipment(equipment) for equipment in equipments
+        ]
+        return site_sensors
+
+    @classmethod
+    def get_all_sensors_in_customer(cls, customer: Customer) -> dict:
+        customer_sensors = {
+            "customer_id": str(customer.pk),
+            "customer_name": customer.name,
+            "sensor_infos": [],
+        }
+        sites = Site.objects.only("name").filter(customer=customer.pk)
+        customer_sensors["sensor_infos"] = [
+            cls.get_all_sensors_in_site(site) for site in sites
+        ]
+        return customer_sensors

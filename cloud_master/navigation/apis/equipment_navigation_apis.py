@@ -1,31 +1,37 @@
+import logging
+
+from customer.models.customer import Customer
 from file_management.models.electrical_equipment import ElectricalEquipment
 from mongoengine import DoesNotExist
 from navigation.services.equipment_navigation_service import SiteNavigationService
 from rest_framework.status import HTTP_404_NOT_FOUND
+from sites.models.site import Site
 
 from common.framework.response import BaseResponse
 from common.framework.view import BaseView
 
+logger = logging.getLogger(__name__)
 
-class EquipmentsNavigationView(BaseView):
+
+class SiteSensorsView(BaseView):
     def get(self, request, site_id):
         """
-        某个站点下所有设备对应的测点(传感器)数据列表
         all points(sensors) in the corresponding site
         :param site_id:
         :return:
         """
-        equipments = ElectricalEquipment.objects.only(
-            "device_name", "device_type"
-        ).filter(site_id=site_id)
-        data = SiteNavigationService.get_all_points_in_site(equipments)
-        return BaseResponse(data=data)
+        try:
+            site = Site.objects.get(id=site_id)
+        except DoesNotExist:
+            logger.info(f"invalid {site_id=}")
+            return BaseResponse(status_code=HTTP_404_NOT_FOUND)
+        site_sensors = SiteNavigationService.get_all_sensors_in_site(site)
+        return BaseResponse(data=site_sensors)
 
 
-class EquipmentNavigationView(BaseView):
+class EquipmentSensorsView(BaseView):
     def get(self, request, site_id, equipment_id):
         """
-        设备下所有测点(传感器)数据列表
         all points(sensors) in the corresponding equipment
         :param site_id:
         :param equipment_id:
@@ -34,6 +40,27 @@ class EquipmentNavigationView(BaseView):
         try:
             equipment = ElectricalEquipment.objects.get(id=equipment_id)
         except DoesNotExist:
+            logger.info(f"invalid {equipment_id=}")
             return BaseResponse(status_code=HTTP_404_NOT_FOUND)
-        points = SiteNavigationService.get_all_points_in_equipment(equipment)
-        return BaseResponse(data=points)
+        equipment_sensors = SiteNavigationService.get_all_sensors_in_equipment(
+            equipment
+        )
+        return BaseResponse(data=equipment_sensors)
+
+
+class CustomerSensorsView(BaseView):
+    def get(self, request, customer_id):
+        """
+        all points(sensors) in the corresponding customer
+        :param request:
+        :param customer_id:
+        :return:
+        """
+        # todo validate user has permissions or not.
+        try:
+            customer = Customer.objects.get(id=customer_id)
+        except DoesNotExist:
+            logger.info(f"invalid {customer_id=}")
+            return BaseResponse(status_code=HTTP_404_NOT_FOUND)
+        customer_sensors = SiteNavigationService.get_all_sensors_in_customer(customer)
+        return BaseResponse(data=customer_sensors)
