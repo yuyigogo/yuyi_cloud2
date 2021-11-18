@@ -10,11 +10,16 @@ from common.framework.view import BaseView
 class EquipmentsNavigationView(BaseView):
     def get(self, request, site_id):
         """
+        某个站点下所有设备对应的测点(传感器)数据列表
         all points(sensors) in the corresponding site
         :param site_id:
         :return:
         """
-        pass
+        equipments = ElectricalEquipment.objects.only(
+            "device_name", "device_type"
+        ).filter(site_id=site_id)
+        data = SiteNavigationService.get_all_points_in_site(equipments)
+        return BaseResponse(data=data)
 
 
 class EquipmentNavigationView(BaseView):

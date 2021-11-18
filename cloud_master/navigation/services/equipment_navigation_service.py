@@ -34,3 +34,7 @@ class SiteNavigationService(BaseService):
                 }
             )
         return point_info
+
+    @classmethod
+    def get_all_points_in_site(cls, equipments: list):
+        return [cls.get_all_points_in_equipment(equipment) for equipment in equipments]
