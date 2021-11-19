@@ -1,6 +1,7 @@
-from django.urls import re_path, path
+from django.urls import path, re_path
 from navigation.apis.equipment_navigation_apis import (
     CustomerSensorsView,
+    CustomerTreesView,
     EquipmentSensorsView,
     SiteSensorsView,
 )
@@ -21,5 +22,5 @@ urlpatterns = [
         CustomerSensorsView.as_view(),
         name="sensor_info_in_customer",
     ),
-    # path(r"^customers/")
+    path("customer-trees/", CustomerTreesView.as_view(), name="customer_trees_info",),
 ]
