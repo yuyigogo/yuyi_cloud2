@@ -19,9 +19,9 @@ class SiteNavigationService(BaseService):
     def get_all_sensors_in_equipment(cls, equipment: ElectricalEquipment) -> dict:
         equipment_sensors = {
             "id": str(equipment.pk),
-            "name": equipment.device_name,
+            "label": equipment.device_name,
             "type": equipment.device_type,
-            "sensor_infos": [],
+            "children": [],
         }
         points = MeasurePoint.objects.only(
             "measure_name", "measure_type", "sensor_number"
@@ -31,12 +31,10 @@ class SiteNavigationService(BaseService):
             sensor_type = point.measure_type
             equipment_sensors["sensor_infos"].append(
                 {
-                    "name": point.measure_name,
+                    "label": point.measure_name,
                     "id": str(point.pk),
                     "type": sensor_type,
-                    "sensor_infos": cls.get_latest_sensor_info(
-                        sensor_number, sensor_type
-                    ),
+                    "children": cls.get_latest_sensor_info(sensor_number, sensor_type),
                 }
             )
         return equipment_sensors
@@ -45,13 +43,13 @@ class SiteNavigationService(BaseService):
     def get_all_sensors_in_site(cls, site: Site) -> dict:
         site_sensors = {
             "id": str(site.pk),
-            "name": site.name,
-            "sensor_infos": [],
+            "label": site.name,
+            "children": [],
         }
         equipments = ElectricalEquipment.objects.only(
             "device_name", "device_type"
         ).filter(site_id=site.pk)
-        site_sensors["sensor_infos"] = [
+        site_sensors["children"] = [
             cls.get_all_sensors_in_equipment(equipment) for equipment in equipments
         ]
         return site_sensors
@@ -60,11 +58,11 @@ class SiteNavigationService(BaseService):
     def get_all_sensors_in_customer(cls, customer: Customer) -> dict:
         customer_sensors = {
             "id": str(customer.pk),
-            "name": customer.name,
-            "sensor_infos": [],
+            "label": customer.name,
+            "children": [],
         }
         sites = Site.objects.only("name").filter(customer=customer.pk)
-        customer_sensors["sensor_infos"] = [
+        customer_sensors["children"] = [
             cls.get_all_sensors_in_site(site) for site in sites
         ]
         return customer_sensors
