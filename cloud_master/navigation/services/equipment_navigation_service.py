@@ -18,9 +18,9 @@ class SiteNavigationService(BaseService):
     @classmethod
     def get_all_sensors_in_equipment(cls, equipment: ElectricalEquipment) -> dict:
         equipment_sensors = {
-            "device_id": str(equipment.pk),
-            "device_name": equipment.device_name,
-            "device_type": equipment.device_type,
+            "id": str(equipment.pk),
+            "name": equipment.device_name,
+            "type": equipment.device_type,
             "sensor_infos": [],
         }
         points = MeasurePoint.objects.only(
@@ -31,11 +31,10 @@ class SiteNavigationService(BaseService):
             sensor_type = point.measure_type
             equipment_sensors["sensor_infos"].append(
                 {
-                    "measure_name": point.measure_name,
-                    "measure_id": str(point.pk),
-                    "sensor_type": sensor_type,
-                    "sensor_number": sensor_number,
-                    "sensor_info": cls.get_latest_sensor_info(
+                    "name": point.measure_name,
+                    "id": str(point.pk),
+                    "type": sensor_type,
+                    "sensor_infos": cls.get_latest_sensor_info(
                         sensor_number, sensor_type
                     ),
                 }
@@ -45,8 +44,8 @@ class SiteNavigationService(BaseService):
     @classmethod
     def get_all_sensors_in_site(cls, site: Site) -> dict:
         site_sensors = {
-            "site_id": str(site.pk),
-            "site_name": site.name,
+            "id": str(site.pk),
+            "name": site.name,
             "sensor_infos": [],
         }
         equipments = ElectricalEquipment.objects.only(
@@ -60,8 +59,8 @@ class SiteNavigationService(BaseService):
     @classmethod
     def get_all_sensors_in_customer(cls, customer: Customer) -> dict:
         customer_sensors = {
-            "customer_id": str(customer.pk),
-            "customer_name": customer.name,
+            "id": str(customer.pk),
+            "name": customer.name,
             "sensor_infos": [],
         }
         sites = Site.objects.only("name").filter(customer=customer.pk)

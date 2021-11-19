@@ -1,4 +1,4 @@
-from django.urls import re_path
+from django.urls import re_path, path
 from navigation.apis.equipment_navigation_apis import (
     CustomerSensorsView,
     EquipmentSensorsView,
@@ -21,4 +21,5 @@ urlpatterns = [
         CustomerSensorsView.as_view(),
         name="sensor_info_in_customer",
     ),
+    # path(r"^customers/")
 ]

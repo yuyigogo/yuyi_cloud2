@@ -210,4 +210,4 @@ MG_HOST = "208.64.228.73"
 MG_PORT = 7085
 MG_DB_NAME = "test"
 
-MONGO_CLIENT = pymongo.MongoClient(f"mongodb://{MG_HOST}:{MG_PORT}/")[MG_DB_NAME]
+MONGO_CLIENT = pymongo.MongoClient(f"mongodb://{MG_HOST}:{MG_PORT}/", connect=False)[MG_DB_NAME]
