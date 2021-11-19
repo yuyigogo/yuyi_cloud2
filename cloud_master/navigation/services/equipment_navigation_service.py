@@ -29,7 +29,7 @@ class SiteNavigationService(BaseService):
         for point in points:
             sensor_number = point.sensor_number
             sensor_type = point.measure_type
-            equipment_sensors["sensor_infos"].append(
+            equipment_sensors["children"].append(
                 {
                     "label": point.measure_name,
                     "id": str(point.pk),
