@@ -72,6 +72,7 @@ class SiteNavigationService(BaseService):
         customer_tree_info = {
             "id": str(customer.pk),
             "label": customer.name,
+            "type": "customer",
             "children": [],
         }
         sites = Site.objects.filter(customer=customer.pk)
@@ -85,13 +86,18 @@ class SiteNavigationService(BaseService):
         site_tree_info = {
             "label": site.name,
             "id": str(site.pk),
+            "type": "site",
             "children": [],
         }
         equipments = ElectricalEquipment.objects.only("device_name").filter(
             site_id=site.pk
         )
         site_tree_info["children"] = [
-            {"label": equipment.device_name, "id": str(equipment.pk)}
+            {
+                "label": equipment.device_name,
+                "id": str(equipment.pk),
+                "type": "equipment",
+            }
             for equipment in equipments
         ]
         return site_tree_info
