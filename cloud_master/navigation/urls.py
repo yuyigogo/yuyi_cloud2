@@ -23,11 +23,6 @@ urlpatterns = [
         CustomerSensorsView.as_view(),
         name="sensor_info_in_customer",
     ),
-    path("customer-trees/", CustomerTreesView.as_view(), name="customer_trees_info",),
-    re_path(
-        r"^sensor_trend$",
-        SensorTrendView.as_view(),
-        name="sensor_trend",
-    ),
-    # path(r"^customers/")
+    path("customer-trees/", CustomerTreesView.as_view(), name="customer_trees_info"),
+    re_path(r"^sensor_trend/$", SensorTrendView.as_view(), name="sensor_trend"),
 ]
