@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import datetime
 
 from cloud.models import bson_to_dict
@@ -10,16 +11,13 @@ class SensorTrendService(BaseService):
     def get_sensor_trend_data(cls, sensor_list: list, start_date: str, end_date: str) -> dict:
         start_date = datetime.strptime(start_date, "%Y-%m-%d")
         end_date = datetime.strptime(end_date, "%Y-%m-%d")
-        tmp = {}
+        sensor_type_dict = defaultdict(list)
         for sensor in sensor_list:
             sensor_id = sensor.get('sensor_id', '')
             sensor_type = sensor.get('sensor_type', '')
-            if sensor_type in tmp:
-                tmp[sensor_type].append(sensor_id)
-            else:
-                tmp[sensor_type] = [sensor_id]
-        res = []
-        for sensor_type, sensor_id_list in tmp.items():
+            sensor_type_dict[sensor_type].append(sensor_id)
+        res = defaultdict(list)
+        for sensor_type, sensor_id_list in sensor_type_dict.items():
             mongo_col = MONGO_CLIENT[sensor_type]
             sensor_data = mongo_col.find(
                 {
@@ -27,7 +25,5 @@ class SensorTrendService(BaseService):
                     "create_time": {"$gte": start_date, "$lte": end_date}
                 }
             )
-            for _ in sensor_data:
-                res.append(_)
+            res[sensor_type] = [_ for _ in sensor_data]
         return bson_to_dict(res)
-
