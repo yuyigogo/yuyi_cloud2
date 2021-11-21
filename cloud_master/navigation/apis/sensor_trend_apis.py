@@ -32,10 +32,5 @@ class SensorTrendView(BaseView):
         start_date = request.data.get('start_date', "")
         end_date = request.data.get('end_date', "")
         # todo check param
-        try:
-            sensor_trend_data = SensorTrendService.get_sensor_trend_data(sensor_list, start_date, end_date)
-        except Exception as e:
-            logger.info(f"{e}")
-            return BaseResponse(status_code=HTTP_500_INTERNAL_SERVER_ERROR)
-        else:
-            return BaseResponse(data=sensor_trend_data)
+        sensor_trend_data = SensorTrendService.get_sensor_trend_data(sensor_list, start_date, end_date)
+        return BaseResponse(data=sensor_trend_data)
