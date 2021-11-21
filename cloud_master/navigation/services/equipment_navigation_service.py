@@ -16,55 +16,44 @@ class SiteNavigationService(BaseService):
         return bson_to_dict(sensor_data) if sensor_data else {}
 
     @classmethod
-    def get_all_sensors_in_equipment(cls, equipment: ElectricalEquipment) -> dict:
-        equipment_sensors = {
-            "id": str(equipment.pk),
-            "label": equipment.device_name,
-            "type": equipment.device_type,
-            "children": [],
-        }
+    def get_all_sensors_in_equipment(cls, equipment: ElectricalEquipment) -> list:
+        equipment_sensors = []
         points = MeasurePoint.objects.only(
             "measure_name", "measure_type", "sensor_number"
         ).filter(equipment_id=equipment.pk)
         for point in points:
             sensor_number = point.sensor_number
             sensor_type = point.measure_type
-            equipment_sensors["children"].append(
+            equipment_sensors.append(
                 {
-                    "label": point.measure_name,
-                    "id": str(point.pk),
+                    "device_name": equipment.device_name,
+                    "point_name": point.measure_name,
+                    "point_id": str(point.pk),
                     "type": sensor_type,
-                    "children": cls.get_latest_sensor_info(sensor_number, sensor_type),
+                    "sensor_id": point.sensor_number,
+                    "sensor_info": cls.get_latest_sensor_info(
+                        sensor_number, sensor_type
+                    ),
                 }
             )
         return equipment_sensors
 
     @classmethod
-    def get_all_sensors_in_site(cls, site: Site) -> dict:
-        site_sensors = {
-            "id": str(site.pk),
-            "label": site.name,
-            "children": [],
-        }
+    def get_all_sensors_in_site(cls, site: Site) -> list:
+        site_sensors = []
         equipments = ElectricalEquipment.objects.only(
             "device_name", "device_type"
         ).filter(site_id=site.pk)
-        site_sensors["children"] = [
-            cls.get_all_sensors_in_equipment(equipment) for equipment in equipments
-        ]
+        for equipment in equipments:
+            site_sensors.extend(cls.get_all_sensors_in_equipment(equipment))
         return site_sensors
 
     @classmethod
-    def get_all_sensors_in_customer(cls, customer: Customer) -> dict:
-        customer_sensors = {
-            "id": str(customer.pk),
-            "label": customer.name,
-            "children": [],
-        }
-        sites = Site.objects.only("name").filter(customer=customer.pk)
-        customer_sensors["children"] = [
-            cls.get_all_sensors_in_site(site) for site in sites
-        ]
+    def get_all_sensors_in_customer(cls, customer: Customer) -> list:
+        customer_sensors = []
+        sites = Site.objects.only("id").filter(customer=customer.pk)
+        for site in sites:
+            customer_sensors.extend(cls.get_all_sensors_in_site(site))
         return customer_sensors
 
     @classmethod
