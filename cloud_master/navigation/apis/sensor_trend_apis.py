@@ -28,23 +28,9 @@ class SensorTrendView(BaseView):
                 }
         :return:
         """
-        sensor_list = request.POST.get('sensor_list', [
-            {
-                "sensor_id": "20210b0100010003",
-                "sensor_type": "ae"
-            },
-            {
-                "sensor_id": "58475012002e0062",
-                "sensor_type": "ae"
-            }
-        ])
-        start_date = request.POST.get('start_date', "2021-11-15")
-        end_date = request.POST.get('end_date', "2021-11-16")
+        sensor_list = request.data.get('sensor_list', [])
+        start_date = request.data.get('start_date', "")
+        end_date = request.data.get('end_date', "")
         # todo check param
-        try:
-            sensor_trend_data = SensorTrendService.get_sensor_trend_data(sensor_list, start_date, end_date)
-        except Exception as e:
-            logger.info(f"{e}")
-            return BaseResponse(status_code=HTTP_500_INTERNAL_SERVER_ERROR)
-        else:
-            return BaseResponse(data=sensor_trend_data)
+        sensor_trend_data = SensorTrendService.get_sensor_trend_data(sensor_list, start_date, end_date)
+        return BaseResponse(data=sensor_trend_data)
