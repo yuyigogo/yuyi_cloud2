@@ -95,7 +95,7 @@ WSGI_APPLICATION = "cloud.wsgi.application"
 MONGODB_DATABASES = {
     "default": {
         "name": "test",
-        "host": "208.64.228.73",
+        "host": "81.69.56.189",
         "port": "7085",
         "password": "",
         "username": "",
@@ -193,7 +193,7 @@ CSRF_COOKIE_SECURE = True
 
 MONGOENGINE_USER_DOCUMENT = "user_management.models.user.CloudUser"
 AUTHENTICATION_BACKENDS = ("common.framework.authentication.CloudLoginBackend",)
-mongoengine.connect("test", host="208.64.228.73:7085", connect=False)
+mongoengine.connect("test", host="81.69.56.189:7085", connect=False)
 
 MQTT_CLIENT_CONFIG = {
     "host": "121.37.185.39",
@@ -203,10 +203,10 @@ MQTT_CLIENT_CONFIG = {
     # "subscribe_client_id": "8E001302000001A5"
     "subscribe_client_id": "123123123",
 }
-REDIS_HOST = "208.64.228.73"
+REDIS_HOST = "81.69.56.189"
 REDIS_PORT = 7086
 
-MG_HOST = "208.64.228.73"
+MG_HOST = "81.69.56.189"
 MG_PORT = 7085
 MG_DB_NAME = "test"
 
