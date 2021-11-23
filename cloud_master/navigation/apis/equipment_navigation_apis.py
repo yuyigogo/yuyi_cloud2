@@ -44,10 +44,9 @@ class SiteSensorsView(BaseView):
 
 
 class EquipmentSensorsView(BaseView):
-    def get(self, request, site_id, equipment_id):
+    def get(self, request, equipment_id):
         """
         all points(sensors) in the corresponding equipment
-        :param site_id:
         :param equipment_id:
         :return:
         """
