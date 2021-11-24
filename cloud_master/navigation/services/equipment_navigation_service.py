@@ -57,7 +57,9 @@ class SiteNavigationService(BaseService):
         return customer_sensors
 
     @classmethod
-    def get_one_customer_tree_infos(cls, customer: Customer) -> dict:
+    def get_one_customer_tree_infos(
+        cls, customer: Customer, add_point: bool = False
+    ) -> dict:
         customer_tree_info = {
             "id": str(customer.pk),
             "label": customer.name,
@@ -66,12 +68,12 @@ class SiteNavigationService(BaseService):
         }
         sites = Site.objects.filter(customer=customer.pk)
         customer_tree_info["children"] = [
-            cls.get_one_site_tree_infos(site) for site in sites
+            cls.get_one_site_tree_infos(site, add_point) for site in sites
         ]
         return customer_tree_info
 
     @classmethod
-    def get_one_site_tree_infos(cls, site: Site) -> dict:
+    def get_one_site_tree_infos(cls, site: Site, add_point: bool = False) -> dict:
         site_tree_info = {
             "label": site.name,
             "id": str(site.pk),
@@ -82,16 +84,37 @@ class SiteNavigationService(BaseService):
             site_id=site.pk
         )
         site_tree_info["children"] = [
-            {
-                "label": equipment.device_name,
-                "id": str(equipment.pk),
-                "type": "equipment",
-            }
+            cls.get_one_equipment_tree_infos(equipment, add_point)
             for equipment in equipments
         ]
         return site_tree_info
 
     @classmethod
-    def get_customers_tree_infos(cls, named_all_customer: str) -> list:
+    def get_one_equipment_tree_infos(
+        cls, equipment: ElectricalEquipment, add_point: bool = False
+    ) -> dict:
+        equipment_tree_info = {
+            "label": equipment.device_name,
+            "id": str(equipment.pk),
+            "type": "equipment",
+            "children": [],
+        }
+        if add_point:
+            points = MeasurePoint.objects.only("measure_name").filter(
+                equipment_id=equipment.pk
+            )
+            equipment_tree_info["children"] = [
+                {"label": point.measure_name, "id": str(point.pk), "type": "point",}
+                for point in points
+            ]
+        return equipment_tree_info
+
+    @classmethod
+    def get_customers_tree_infos(
+        cls, named_all_customer: str, add_point: bool = False
+    ) -> list:
         customers = Customer.objects.filter(id__ne=named_all_customer)
-        return [cls.get_one_customer_tree_infos(customer) for customer in customers]
+        return [
+            cls.get_one_customer_tree_infos(customer, add_point)
+            for customer in customers
+        ]
