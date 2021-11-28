@@ -1,6 +1,7 @@
 import datetime
 import json
 import re
+from copy import deepcopy
 
 import dateutil.parser
 import pymongo
@@ -22,7 +23,9 @@ sensor_redis_cli = redis.Redis(
         host=REDIS_HOST, port=REDIS_PORT, db=5, decode_responses=True
     )
 )
-mg_cli = pymongo.MongoClient(f"mongodb://{MG_HOST}:{MG_PORT}/")[MG_DB_NAME]
+mg_cli = pymongo.MongoClient(f"mongodb://{MG_HOST}:{MG_PORT}/", connect=False)[
+    MG_DB_NAME
+]
 
 
 class DataLoader:
@@ -85,9 +88,9 @@ class DataLoader:
         }
         insert_res = my_col.insert_one(data)
         if insert_res.acknowledged:
-            print("插入数据成功！！！")
+            print(f"inset data succeed for {sensor_type}, {sensor_id=}, {client_id=}!")
         else:
-            print(f"{msg_dict}插入数据失败！！！")
+            print(f"inset data failed with {msg_dict=}!")
 
     @staticmethod
     def on_message(client, userdata, msg):
@@ -104,7 +107,10 @@ class DataLoader:
                         if sensor_type == "ae_tev":
                             for sensor_type in ["ae", "tev"]:
                                 DataLoader.insert(
-                                    client_id, sensor_id, sensor_type, msg_dict
+                                    client_id,
+                                    sensor_id,
+                                    sensor_type,
+                                    deepcopy(msg_dict),
                                 )
                         else:
                             DataLoader.insert(
