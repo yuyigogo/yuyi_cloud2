@@ -5,11 +5,12 @@ from customer.models.customer import Customer
 from common.framework.script import BaseHybridCloudScript
 from common.utils import get_the_range
 from py_scripts_db.models import ScriptEvidence
+from py_scripts_db.modify_tev_data import ModifyTEVData
 
 logger = logging.getLogger(__name__)
 
 # for every script added please add the class in the list, and be sure they are in order
-SCRIPT_LIST = []
+SCRIPT_LIST = [ModifyTEVData(),]
 
 NOT_LIMIT_SCRIPT_NAME = {}
 

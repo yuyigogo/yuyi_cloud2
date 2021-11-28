@@ -4,15 +4,12 @@ import re
 from copy import deepcopy
 
 import dateutil.parser
-import pymongo
 import redis
 from cloud.settings import (
-    MG_DB_NAME,
-    MG_HOST,
-    MG_PORT,
     MQTT_CLIENT_CONFIG,
     REDIS_HOST,
     REDIS_PORT,
+    MONGO_CLIENT,
 )
 from paho.mqtt import client as mqtt_client
 
@@ -23,9 +20,6 @@ sensor_redis_cli = redis.Redis(
         host=REDIS_HOST, port=REDIS_PORT, db=5, decode_responses=True
     )
 )
-mg_cli = pymongo.MongoClient(f"mongodb://{MG_HOST}:{MG_PORT}/", connect=False)[
-    MG_DB_NAME
-]
 
 
 class DataLoader:
@@ -39,7 +33,7 @@ class DataLoader:
         r"/(?P<client_id>[a-zA-Z0-9]+)/subnode/(?P<sensor_id>[a-zA-Z0-9]+)/data_ctrl/property"
     )
 
-    def __init__(self, client_id, host="121.37.185.39", port=10883):
+    def __init__(self, client_id, host, port):
         self.client_id = client_id
         self.host = host
         self.port = port
@@ -66,7 +60,7 @@ class DataLoader:
     @staticmethod
     def insert(client_id, sensor_id, sensor_type, msg_dict):
         cur_time = dateutil.parser.parse(datetime.datetime.utcnow().isoformat())
-        my_col = mg_cli[sensor_type]
+        my_col = MONGO_CLIENT[sensor_type]
         my_query = {"is_new": True, "sensor_id": sensor_id}
         new_values = {"$set": {"is_new": False, "update_time": cur_time}}
         my_col.update_many(my_query, new_values)
