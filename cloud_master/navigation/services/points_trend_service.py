@@ -33,7 +33,6 @@ class PointsTrendService(BaseService):
                     "sensor_type": 1,
                     "create_time": 1,
                     "params": 1,
-                    "_id": 0,
                 },
             )
             sensor_list = cls.assemble_sensor_data(sensors)
@@ -50,6 +49,7 @@ class PointsTrendService(BaseService):
             else:
                 parm_key = sensor_type.upper()
             sensor_dict = {
+                "id": str(sensor["_id"]),
                 "sensor_id": sensor["sensor_id"],
                 "sensor_type": sensor_type,
                 "create_time": sensor["create_time"],

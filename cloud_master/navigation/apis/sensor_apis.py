@@ -1,5 +1,7 @@
 import logging
 
+from bson import ObjectId
+
 from cloud.models import bson_to_dict
 from cloud.settings import MONGO_CLIENT
 from rest_framework.status import HTTP_404_NOT_FOUND
@@ -19,7 +21,7 @@ class SensorDetailsView(BaseView):
             raise APIException(f"invalid {sensor_type=}!")
         try:
             mongo_col = MONGO_CLIENT[sensor_type]
-            data = mongo_col.find_one({"sensor_id": sensor_id}, {"_id": 0})
+            data = mongo_col.find_one({"_id": ObjectId(sensor_id)})
         except Exception as e:
             logger.exception(
                 f"get {sensor_id=}, {sensor_type} failed with exception: {e}"
