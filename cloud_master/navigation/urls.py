@@ -29,7 +29,7 @@ urlpatterns = [
     path("gateway-trees/", GatewayTreesView.as_view(), name="customer_gateway_trees_info"),
     re_path(r"^points_trend/$", PointsTrendView.as_view(), name="points_trend"),
     re_path(
-        r"^sensor/(?P<sensor_id>[a-zA-Z0-9]+)/details/$",
+        r"^sensor/(?P<pk>[a-zA-Z0-9]+)/details/$",
         SensorDetailsView.as_view(),
         name="sensor_details",
     ),
