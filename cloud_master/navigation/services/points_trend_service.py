@@ -15,14 +15,18 @@ class PointsTrendService(BaseService):
     ) -> list:
         start_date = datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
         end_date = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
-        points = MeasurePoint.objects.only("sensor_number", "measure_type").filter(
-            pk__in=point_ids
-        )
+        points = MeasurePoint.objects.only(
+            "sensor_number", "measure_type", "measure_name"
+        ).filter(pk__in=point_ids)
         point_to_sensor = {
-            str(point.pk): (point.sensor_number, point.measure_type) for point in points
+            str(point.pk): (point.sensor_number, point.measure_type, point.measure_name)
+            for point in points
         }
         data = []
-        for point_id, (sensor_number, sensor_type) in point_to_sensor.items():
+        for (
+            point_id,
+            (sensor_number, sensor_type, measure_name),
+        ) in point_to_sensor.items():
             mongo_col = MONGO_CLIENT[sensor_type]
             sensors = mongo_col.find(
                 {
@@ -32,7 +36,13 @@ class PointsTrendService(BaseService):
                 {"sensor_id": 1, "sensor_type": 1, "create_time": 1, "params": 1,},
             )
             sensor_list = cls.assemble_sensor_data(sensors)
-            data.append({point_id: sensor_list})
+            data.append(
+                {
+                    "point_id": point_id,
+                    "measure_name": measure_name,
+                    "point_data": sensor_list,
+                }
+            )
         return data
 
     @classmethod

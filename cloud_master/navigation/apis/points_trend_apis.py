@@ -35,7 +35,7 @@ class PointsTrendView(BaseView):
 
 
 class PointsGraphView(BaseView):
-    def get(self, request):
+    def post(self, request):
         data, _ = self.get_validated_data(BasePointSerializer)
         point_ids = data["point_ids"]
         start_date = data["start_date"]
