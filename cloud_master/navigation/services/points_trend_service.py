@@ -61,7 +61,7 @@ class PointsTrendService(BaseService):
             }
             sensor_dict.update(sensor["params"][parm_key])
             sensor_list.append(sensor_dict)
-        return sensor_list
+        return bson_to_dict(sensor_list)
 
     @classmethod
     def get_point_graph_data_on_certain_time(
