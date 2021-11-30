@@ -12,8 +12,8 @@ class PointsTrendService(BaseService):
     def get_points_trend_data(
         cls, point_ids: list, start_date: str, end_date: str
     ) -> list:
-        start_date = datetime.strptime(start_date, "%Y-%m-%d")
-        end_date = datetime.strptime(end_date, "%Y-%m-%d")
+        start_date = datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
+        end_date = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
         points = MeasurePoint.objects.only("sensor_number", "measure_type").filter(
             pk__in=point_ids
         )
@@ -28,12 +28,7 @@ class PointsTrendService(BaseService):
                     "sensor_id": sensor_number,
                     "create_time": {"$gte": start_date, "$lte": end_date},
                 },
-                {
-                    "sensor_id": 1,
-                    "sensor_type": 1,
-                    "create_time": 1,
-                    "params": 1,
-                },
+                {"sensor_id": 1, "sensor_type": 1, "create_time": 1, "params": 1,},
             )
             sensor_list = cls.assemble_sensor_data(sensors)
             data.append({point_id: sensor_list})
