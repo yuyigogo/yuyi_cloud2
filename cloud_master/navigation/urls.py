@@ -6,8 +6,7 @@ from navigation.apis.equipment_navigation_apis import (
     SiteSensorsView,
 )
 from navigation.apis.gateway_navigation_apis import GatewayTreesView
-from navigation.apis.points_trend_apis import PointsTrendView
-from navigation.apis.sensor_apis import SensorDetailsView
+from navigation.apis.points_trend_apis import PointsTrendView, PointsGraphView
 
 urlpatterns = [
     re_path(
@@ -29,8 +28,8 @@ urlpatterns = [
     path("gateway-trees/", GatewayTreesView.as_view(), name="customer_gateway_trees_info"),
     re_path(r"^points_trend/$", PointsTrendView.as_view(), name="points_trend"),
     re_path(
-        r"^sensor/(?P<pk>[a-zA-Z0-9]+)/details/$",
-        SensorDetailsView.as_view(),
-        name="sensor_details",
+        r"^points-graph/$",
+        PointsGraphView.as_view(),
+        name="points_graph",
     ),
 ]
