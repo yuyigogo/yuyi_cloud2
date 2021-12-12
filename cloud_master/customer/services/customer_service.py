@@ -33,6 +33,7 @@ class CustomerService(BaseService):
             MeasurePoint.objects.filter(equipment_id__in=equipment_ids).delete()
             sites.delete()
             equipments.delete()
+            # todo delete corresponding sensor data
         CloudUser.filter(customer=customer.pk).delete()
         customer.delete()
 

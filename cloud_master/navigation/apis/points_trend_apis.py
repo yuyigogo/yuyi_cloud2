@@ -35,6 +35,9 @@ class PointsTrendView(BaseView):
 
 
 class PointsGraphView(BaseView):
+    """
+    点击测点，详情接口
+    """
     def post(self, request):
         data, _ = self.get_validated_data(BasePointSerializer)
         point_ids = data["point_ids"]

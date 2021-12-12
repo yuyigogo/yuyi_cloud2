@@ -10,6 +10,11 @@ logger = logging.getLogger(__name__)
 
 class GatewayTreesView(BaseView):
     def get(self, request):
+        """
+        网关配置树形图
+        :param request:
+        :return:
+        """
         user = request.user
         customer_id = user.customer
         logger.info(f"{user.username} request GatewayTrees with for {customer_id=}")
