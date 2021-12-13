@@ -79,7 +79,7 @@ class SiteNavigationService(BaseService):
         cls, site: Site, add_point: bool = False, is_gateway_tree: bool = False
     ) -> dict:
         site_tree_info = {
-            "parend_id": str(site.customer),
+            "parent_id": str(site.customer),
             "label": site.name,
             "id": str(site.pk),
             "type": "site",
@@ -107,7 +107,7 @@ class SiteNavigationService(BaseService):
         cls, equipment: ElectricalEquipment, add_point: bool = False
     ) -> dict:
         equipment_tree_info = {
-            "parend_id": str(equipment.site_id),
+            "parent_id": str(equipment.site_id),
             "label": equipment.device_name,
             "id": str(equipment.pk),
             "type": "equipment",
@@ -122,7 +122,7 @@ class SiteNavigationService(BaseService):
                     "label": point.measure_name,
                     "id": str(point.pk),
                     "type": "point",
-                    "parend_id": str(point.equipment_id),
+                    "parent_id": str(point.equipment_id),
                 }
                 for point in points
             ]
@@ -131,7 +131,7 @@ class SiteNavigationService(BaseService):
     @classmethod
     def get_one_gateway_tree_infos(cls, gateway: GateWay) -> dict:
         gateway_tree_info = {
-            "parend_id": str(gateway.site_id),
+            "parent_id": str(gateway.site_id),
             "label": gateway.name,
             "id": str(gateway.pk),
             "type": "gateway",
