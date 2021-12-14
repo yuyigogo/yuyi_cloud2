@@ -30,7 +30,7 @@ class Workbook(ABC):
         self._workbook = _workbook
 
     @abstractmethod
-    def get_columns(self, sheet_name=None):
+    def get_columns(self, sheet_name=None, r_offset: int = 1, c_offset: int = 1):
         pass
 
     @classmethod
@@ -43,7 +43,7 @@ class Workbook(ABC):
 
 
 class XlrdWorkbook(Workbook):
-    def get_columns(self, sheet_name=None):
+    def get_columns(self, sheet_name=None, r_offset: int = 1, c_offset: int = 1):
         if sheet_name is None:
             sheet = self._workbook.sheet_by_index(0)
         else:
@@ -88,7 +88,7 @@ class XlrdWorkbook(Workbook):
 
 
 class OpenpyxlWorkbook(Workbook):
-    def get_columns(self, sheet_name=None):
+    def get_columns(self, sheet_name=None, r_offset: int = 1, c_offset: int = 1):
         if sheet_name is None:
             sheet = list(self._workbook)[0]
         else:
@@ -97,7 +97,7 @@ class OpenpyxlWorkbook(Workbook):
         for r_i in range(sheet.max_row):
             result = []
             for c_i in range(max_column):
-                cell = sheet.cell(r_i + 1, c_i + 1)
+                cell = sheet.cell(r_i + r_offset, c_i + c_offset)
                 if isinstance(cell, MergedCell):
                     raise APIException(
                         "import excel contains merged cells",
