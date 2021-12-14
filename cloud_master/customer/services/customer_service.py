@@ -34,7 +34,7 @@ class CustomerService(BaseService):
             sites.delete()
             equipments.delete()
             # todo delete corresponding sensor data
-        CloudUser.filter(customer=customer.pk).delete()
+        CloudUser.objects.filter(customer=customer.pk).delete()
         customer.delete()
 
     @classmethod
