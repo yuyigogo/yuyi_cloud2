@@ -65,7 +65,7 @@ class CustomerSiteView(BaseView):
             BaseSiteSerializer, customer_id=customer_id, site_id=site_id
         )
         site = context["site"]
-        return BaseResponse(data=site.to_dict)
+        return BaseResponse(data=site.to_dict())
 
     def put(self, request, customer_id, site_id):
         user = request.user
