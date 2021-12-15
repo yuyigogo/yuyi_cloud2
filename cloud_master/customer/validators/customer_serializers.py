@@ -16,7 +16,7 @@ class CustomerCreateSerializer(BaseSerializer):
     def validate_name(self, name: str) -> str:
         if Customer.objects(name=name).count() > 0:
             raise APIException(
-                "customer name duplicate!",
+                "公司名称已存在!",
                 code=StatusCode.CUSTOMER_NAME_DUPLICATE.value,
             )
         return name
@@ -55,7 +55,7 @@ class UpdateCustomerSerializer(DeleteCustomerSerializer):
         name = data.get("name")
         if name and Customer.objects.filter(name=name).count():
             raise APIException(
-                "customer name duplicate!",
+                "公司名称已存在!",
                 code=StatusCode.CUSTOMER_NAME_DUPLICATE.value,
             )
         return data
