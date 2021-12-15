@@ -153,7 +153,28 @@ MAX_MESSAGE_LENGTH = 2000
 
 
 class SensorType(str, BaseEnum):
+    """传感器/测点类型"""
     ae = "ae"
     tev = "tev"
     temp = "temp"
     uhf = "uhf"
+
+
+class DeviceType(str, BaseEnum):
+    """设备类型"""
+    switch_cabinet = "开关柜"
+    gis = "GIS"
+    voltage_transformer = "变压器"
+    electric_cable = "电缆"
+
+
+class VoltageLevel(str, BaseEnum):
+    """电压等级"""
+    k1 = "10kV"
+    k20 = "20kV"
+    k35 = "35kV"
+    k66 = "66kV"
+    k110 = "110kV"
+    k220 = "220kV"
+    k330 = "330kV"
+    k500 = "500kV"

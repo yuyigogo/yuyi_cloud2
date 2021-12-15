@@ -1,9 +1,11 @@
+from collections import defaultdict
 from typing import Union
 
 from bson import ObjectId
 
 from common.framework.service import BaseService
 from file_management.models.electrical_equipment import ElectricalEquipment
+from file_management.models.measure_point import MeasurePoint
 
 
 class EquipmentService(BaseService):
@@ -41,3 +43,14 @@ class EquipmentService(BaseService):
             }
             for e in equipments
         ]
+
+    @classmethod
+    def delete_equipment(cls, equipment_id: Union[str, ObjectId], clear_resource=False):
+        points = MeasurePoint.objects(equipment_id=equipment_id)
+        if clear_resource:
+            # todo delete sensor data
+            sensor_dict = defaultdict(list)
+            for p in points:
+                sensor_dict[p.measure_type].append(p.sensor_number)
+        points.delete()
+        ElectricalEquipment.objects(id=equipment_id).delete()
