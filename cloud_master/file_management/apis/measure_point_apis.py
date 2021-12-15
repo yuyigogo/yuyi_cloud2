@@ -5,6 +5,7 @@ from file_management.services.meansure_point_service import MeasurePointService
 from file_management.validators.measure_point_serializers import (
     CreatePointSerializer,
     UpdatePointSerializer,
+    DeletePointSerializer,
 )
 from rest_framework.status import HTTP_201_CREATED
 
@@ -46,7 +47,7 @@ class MeasurePointView(BaseView):
         PermissionFactory(
             RoleLevel.CLIENT_SUPER_ADMIN.value,
             RoleLevel.CLOUD_SUPER_ADMIN.value,
-            method_list=("PUT",),
+            method_list=("PUT", "DELETE"),
         ),
     )
 
@@ -77,3 +78,10 @@ class MeasurePointView(BaseView):
         if update_fields:
             point.update(**update_fields)
         return BaseResponse(data=update_fields)
+
+    def delete(self, request, equipment_id, point_id):
+        user = request.user
+        data, _ = self.get_validated_data(DeletePointSerializer)
+        logger.info(f"{user.username} request delete point: {point_id} with {data=}")
+        MeasurePointService.delete_point(point_id)
+        return BaseResponse()

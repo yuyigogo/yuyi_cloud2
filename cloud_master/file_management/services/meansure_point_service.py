@@ -1,9 +1,10 @@
 from typing import Union
 
 from bson import ObjectId
+from cloud.settings import MONGO_CLIENT
+from file_management.models.measure_point import MeasurePoint
 
 from common.framework.service import BaseService
-from file_management.models.measure_point import MeasurePoint
 
 
 class MeasurePointService(BaseService):
@@ -33,3 +34,11 @@ class MeasurePointService(BaseService):
             }
             for mp in measure_points
         ]
+
+    @classmethod
+    def delete_point(cls, point_id, clear_resource=False):
+        point = MeasurePoint.objects.get(id=point_id)
+        if clear_resource:
+            mongo_col = MONGO_CLIENT[point.measure_type.lower()]
+            mongo_col.delete_many({"sensor_id": point.sensor_number})
+        point.delete()
