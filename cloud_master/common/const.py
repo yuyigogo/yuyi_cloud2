@@ -148,7 +148,7 @@ class RoleLevel(int, BaseEnum):
         return [cls.CLIENT_SUPER_ADMIN.value, cls.ADMIN.value, cls.NORMAL.value]
 
 
-ALL = "all"
+ALL = "ALL"
 MAX_MESSAGE_LENGTH = 2000
 
 
