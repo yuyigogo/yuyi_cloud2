@@ -13,6 +13,8 @@ from cloud.settings import (
 )
 from paho.mqtt import client as mqtt_client
 
+from common.const import SensorType
+
 uhf_loading_data, ae_tev_loading_data = {}, {}
 
 sensor_redis_cli = redis.Redis(
@@ -49,11 +51,11 @@ class DataLoader:
     def get_sensor_type(msg_dict):
         params = msg_dict.get("params", {})
         if "TEV" in params or "AE" in params:
-            return "ae_tev"
+            return SensorType.ae_tev()
         elif "Temp" in params:
-            return "temp"
+            return SensorType.temp.value
         elif "UHF" in params:
-            return "uhf"
+            return SensorType.uhf.value
         else:
             return ""
 
@@ -65,10 +67,9 @@ class DataLoader:
         new_values = {"$set": {"is_new": False, "update_time": cur_time}}
         my_col.update_many(my_query, new_values)
         params = msg_dict.get("params", {})
-        # todo use SensorType to match the constant
-        if sensor_type == "ae":
+        if sensor_type == SensorType.ae.value:
             params.pop("TEV")
-        if sensor_type == "tev":
+        if sensor_type == SensorType.tev.value:
             params.pop("AE")
         data = {
             "client_id": client_id,
@@ -98,8 +99,8 @@ class DataLoader:
                     msg_dict = json.loads(msg.payload.decode("utf-8"))
                     sensor_type = DataLoader.get_sensor_type(msg_dict)
                     if sensor_type:
-                        if sensor_type == "ae_tev":
-                            for sensor_type in ["ae", "tev"]:
+                        if sensor_type == SensorType.ae_tev():
+                            for sensor_type in SensorType.ae_tev():
                                 DataLoader.insert(
                                     client_id,
                                     sensor_id,

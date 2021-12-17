@@ -154,10 +154,14 @@ MAX_MESSAGE_LENGTH = 2000
 
 class SensorType(str, BaseEnum):
     """传感器/测点类型"""
-    ae = "ae"
-    tev = "tev"
-    temp = "temp"
-    uhf = "uhf"
+    ae = "AE"
+    tev = "TEV"
+    temp = "Temp"
+    uhf = "UHF"
+
+    @classmethod
+    def ae_tev(cls):
+        return [cls.ae.value, cls.tev.value]
 
 
 class DeviceType(str, BaseEnum):

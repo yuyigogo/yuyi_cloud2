@@ -25,7 +25,7 @@ class BaseService(object):
         # todo delete Sensor model
         for sensor_type, sensor_ids in sensor_dict.items():
             try:
-                mongo_col = MONGO_CLIENT[sensor_type.lower()]
+                mongo_col = MONGO_CLIENT[sensor_type]
                 mongo_col.delete_many({"sensor_id": {"$in": sensor_ids}})
             except Exception as e:
                 logger.error(
