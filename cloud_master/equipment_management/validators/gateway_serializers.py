@@ -1,10 +1,12 @@
+from equipment_management.models.gateway import GateWay
 from mongoengine import DoesNotExist
 from rest_framework.fields import CharField, IntegerField
+from sites.models.site import Site
 
 from common.const import MAX_LENGTH_NAME, MAX_MESSAGE_LENGTH
-from common.framework.exception import InvalidException
+from common.error_code import StatusCode
+from common.framework.exception import APIException, InvalidException
 from common.framework.serializer import BaseSerializer
-from sites.models.site import Site
 
 
 class CreateGatewaySerializer(BaseSerializer):
@@ -20,4 +22,35 @@ class CreateGatewaySerializer(BaseSerializer):
             site = Site.objects.get(id=site_id)
         except DoesNotExist:
             raise InvalidException(f"invalid {site_id=}")
+        if GateWay.objects.filter(site_id=site_id, name=data["name"]).count() > 0:
+            raise APIException(
+                "主机名称已存在!", code=StatusCode.GATEWAY_NAME_DUPLICATE.value,
+            )
+        return data
+
+
+class UpdateGatewaySerializer(BaseSerializer):
+    name = CharField(required=False, max_length=MAX_LENGTH_NAME)
+    client_number = CharField(required=False)
+    time_adjusting = IntegerField(required=False)
+    remarks = CharField(required=False, max_length=MAX_MESSAGE_LENGTH)
+
+    def validate(self, data: dict) -> dict:
+        gateway_id = self.context["gateway_id"]
+        try:
+            gateway = GateWay.objects.get(pk=gateway_id)
+        except DoesNotExist:
+            raise InvalidException(f"invalid {gateway_id=}")
+        data["gateway"] = gateway
+        name = data.get("name")
+        client_number = data.get("client_number")
+        if name and name != gateway.name:
+            if GateWay.objects(site_id=gateway.site_id, name=name).count() > 0:
+                raise APIException(
+                    "主机名称已存在!", code=StatusCode.GATEWAY_NAME_DUPLICATE.value,
+                )
+        if client_number and client_number != gateway.client_number:
+            raise APIException(
+                "该主机已配置!", code=StatusCode.GATEWAY_DUPLICATE_CONFIGURED.value,
+            )
         return data
