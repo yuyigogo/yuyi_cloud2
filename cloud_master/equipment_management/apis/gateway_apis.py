@@ -39,3 +39,8 @@ class GatewayView(BaseView):
         except DoesNotExist:
             return BaseResponse(status_code=HTTP_404_NOT_FOUND)
         return BaseResponse(data=gateway.to_dict())
+
+    def delete(self, request, gateway_id):
+        logger.info(f"{request.user.username} delete a {gateway_id}")
+        GateWay.objects.get(pk=gateway_id).delete()
+        return BaseResponse()

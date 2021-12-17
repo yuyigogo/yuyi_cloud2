@@ -22,6 +22,7 @@ class BaseService(object):
 
     @classmethod
     def delete_sensor_data(cls, sensor_dict: dict):
+        # todo delete Sensor model
         for sensor_type, sensor_ids in sensor_dict.items():
             try:
                 mongo_col = MONGO_CLIENT[sensor_type.lower()]
