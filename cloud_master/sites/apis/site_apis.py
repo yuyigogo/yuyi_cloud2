@@ -93,7 +93,6 @@ class CustomerSiteView(BaseView):
         return BaseResponse(data=update_fields)
 
     def delete(self, request, customer_id, site_id):
-        # todo delete site resource include what?
         user = request.user
         data, context = self.get_validated_data(DeleteSiteSerializer, site_id=site_id)
         logger.info(

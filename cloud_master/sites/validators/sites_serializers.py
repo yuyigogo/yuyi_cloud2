@@ -85,10 +85,11 @@ class UpdateSiteSerializer(BaseSerializer):
         site = get_site(site_id)
         self.context["site"] = site
         name = data.get("name")
-        if name and Site.objects.filter(name=name).count() > 0:
-            raise APIException(
-                "站点名称已存在!", code=StatusCode.SITE_NAME_DUPLICATE.value,
-            )
+        if name and name != site.name:
+            if Site.objects.filter(name=name).count() > 0:
+                raise APIException(
+                    "站点名称已存在!", code=StatusCode.SITE_NAME_DUPLICATE.value,
+                )
         if user.is_cloud_or_client_super_admin():
             return data
         else:
@@ -107,4 +108,9 @@ class DeleteSiteSerializer(BaseSerializer):
         self.context["site"] = site
         if site.name == ALL:
             raise ForbiddenException("named ALL site can not be deleted!")
+        if user.is_cloud_or_client_super_admin():
+            return data
+        else:
+            if ObjectId(site_id) not in user.sites:
+                raise ForbiddenException("user can't modify not belong to its own sits")
         return data

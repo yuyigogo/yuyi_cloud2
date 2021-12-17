@@ -70,23 +70,23 @@ class CustomerView(BaseView):
     )
 
     def get(self, request, pk):
-        _, context = self.get_validated_data(CustomerSerializer, pk=pk)
-        customer = context["customer"]
+        data, _ = self.get_validated_data(CustomerSerializer, pk=pk)
+        customer = data["customer"]
         return BaseResponse(data=customer.to_dict())
 
     def delete(self, request, pk):
-        data, context = self.get_validated_data(DeleteCustomerSerializer, pk=pk)
+        data, _ = self.get_validated_data(DeleteCustomerSerializer, pk=pk)
         clear_resource = data["clear_resource"]
-        customer = context["customer"]
+        customer = data["customer"]
         logger.info(f"{request.user.username} request delete {customer=}")
         CustomerService.delete_customer(customer, clear_resource)
         return BaseResponse()
 
     def put(self, request, pk):
         user = request.user
-        data, context = self.get_validated_data(UpdateCustomerSerializer, pk=pk)
+        data, _ = self.get_validated_data(UpdateCustomerSerializer, pk=pk)
         logger.info(f"{user.username} request update customer: {pk} with {data=}")
-        customer = context["customer"]
+        customer = data["customer"]
         name = data.get("name")
         administrative_division = data.get("administrative_division")
         remarks = data.get("remarks")
