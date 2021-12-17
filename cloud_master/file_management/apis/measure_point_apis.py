@@ -4,8 +4,8 @@ from file_management.models.measure_point import MeasurePoint
 from file_management.services.meansure_point_service import MeasurePointService
 from file_management.validators.measure_point_serializers import (
     CreatePointSerializer,
-    UpdatePointSerializer,
     DeletePointSerializer,
+    UpdatePointSerializer,
 )
 from rest_framework.status import HTTP_201_CREATED
 
@@ -83,5 +83,6 @@ class MeasurePointView(BaseView):
         user = request.user
         data, _ = self.get_validated_data(DeletePointSerializer)
         logger.info(f"{user.username} request delete point: {point_id} with {data=}")
-        MeasurePointService.delete_point(point_id)
+        points = MeasurePoint.objects.filter(id=point_id)
+        MeasurePointService.delete_points(points, clear_resource=data["clear_resource"])
         return BaseResponse()

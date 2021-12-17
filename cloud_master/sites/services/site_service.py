@@ -3,6 +3,7 @@ from typing import Optional, Union
 from bson import ObjectId
 from mongoengine import queryset
 
+from equipment_management.models.gateway import GateWay
 from file_management.models.electrical_equipment import ElectricalEquipment
 from file_management.models.measure_point import MeasurePoint
 from sites.models.site import Site
@@ -46,12 +47,13 @@ class SiteService(BaseService):
     @classmethod
     def delete_site(cls, site: Site, clear_resource: bool):
         site_id = site.pk
-        if clear_resource:
-            equipments = ElectricalEquipment.objects.filter(site_id=site_id)
-            equipment_ids = equipments.values_list("id")
-            MeasurePoint.objects.filter(equipment_id__in=equipment_ids).delete()
-            equipments.delete()
         CloudUser.objects.filter(sites__in=[site_id]).delete()
+        GateWay.objects.filter(site_id=site_id).delete()
+        equipments = ElectricalEquipment.objects.filter(site_id=site_id)
+        equipment_ids = equipments.values_list("id")
+        points = MeasurePoint.objects.filter(equipment_id__in=equipment_ids)
+        cls.delete_points(points, clear_resource=clear_resource)
+        equipments.delete()
         site.delete()
 
     @classmethod
