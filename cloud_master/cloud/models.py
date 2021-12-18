@@ -52,9 +52,9 @@ class CloudDocument(Document, DocumentMixin, metaclass=CloudDocumentMetaclass):
     meta = {"abstract": True, "strict": False}
 
     # create date
-    create_date = DateTimeField(default=lambda: datetime.now(tz=pytz.utc))
+    create_date = DateTimeField(default=lambda: datetime.now())
     # update date
-    update_date = DateTimeField(default=lambda: datetime.now(tz=pytz.utc))
+    update_date = DateTimeField(default=lambda: datetime.now())
     # the version of the structure of the mongo document
     version_structure = StringField(max_length=100, default="1")
 

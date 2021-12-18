@@ -61,7 +61,7 @@ class DataLoader:
 
     @staticmethod
     def insert(client_id, sensor_id, sensor_type, msg_dict):
-        cur_time = dateutil.parser.parse(datetime.datetime.utcnow().isoformat())
+        cur_time = dateutil.parser.parse(datetime.datetime.now().isoformat())
         my_col = MONGO_CLIENT[sensor_type]
         my_query = {"is_new": True, "sensor_id": sensor_id}
         new_values = {"$set": {"is_new": False, "update_time": cur_time}}
