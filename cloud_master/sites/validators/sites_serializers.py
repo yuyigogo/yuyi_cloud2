@@ -10,7 +10,7 @@ from common.framework.exception import (
     ForbiddenException,
     InvalidException,
 )
-from common.framework.serializer import BaseSerializer
+from common.framework.serializer import AdministrativeDivisionSerializer, BaseSerializer
 
 
 def get_site(site_id: str) -> Site:
@@ -37,7 +37,7 @@ class GetCustomerSitesSerializer(BaseSerializer):
 
 class CreateSiteSerializer(BaseSerializer):
     name = CharField(required=True, max_length=MAX_LENGTH_NAME)
-    administrative_division = CharField(required=True)
+    administrative_division = AdministrativeDivisionSerializer(required=True)
     remarks = CharField(max_length=MAX_MESSAGE_LENGTH)
     voltage_level = CharField(required=True)
     site_location = ListField()
@@ -74,7 +74,7 @@ class BaseSiteSerializer(BaseSerializer):
 
 class UpdateSiteSerializer(BaseSerializer):
     name = CharField(max_length=MAX_LENGTH_NAME)
-    administrative_division = CharField()
+    administrative_division = AdministrativeDivisionSerializer()
     remarks = CharField(max_length=MAX_MESSAGE_LENGTH)
     voltage_level = CharField()
     site_location = ListField()

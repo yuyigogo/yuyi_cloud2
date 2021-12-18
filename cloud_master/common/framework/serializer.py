@@ -7,6 +7,7 @@ from typing import Callable, List, Union
 
 from bson import ObjectId
 from rest_framework.exceptions import ValidationError
+from rest_framework.fields import CharField
 from rest_framework.serializers import Serializer
 
 
@@ -48,6 +49,12 @@ class BaseSerializer(Serializer):
         """
         obj_ids = [ObjectId(obj_id) for obj_id in value if cls.check_object_id(obj_id)]
         return obj_ids
+
+
+class AdministrativeDivisionSerializer(BaseSerializer):
+    province = CharField(required=True)
+    city = CharField(required=True)
+    region = CharField(required=True)
 
 
 def validate_and_save_data_list(data_list, get_validated_serializer):

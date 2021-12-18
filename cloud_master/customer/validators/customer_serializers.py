@@ -5,12 +5,12 @@ from rest_framework.fields import BooleanField, CharField
 from common.const import MAX_LENGTH_NAME, MAX_MESSAGE_LENGTH
 from common.error_code import StatusCode
 from common.framework.exception import APIException, ForbiddenException
-from common.framework.serializer import BaseSerializer
+from common.framework.serializer import AdministrativeDivisionSerializer, BaseSerializer
 
 
 class CustomerCreateSerializer(BaseSerializer):
     name = CharField(required=True, max_length=MAX_LENGTH_NAME)
-    administrative_division = CharField(required=True)
+    administrative_division = AdministrativeDivisionSerializer()
     remarks = CharField(max_length=MAX_MESSAGE_LENGTH)
 
     def validate_name(self, name: str) -> str:
@@ -52,7 +52,7 @@ class DeleteCustomerSerializer(BaseSerializer):
 
 class UpdateCustomerSerializer(BaseSerializer):
     name = CharField(max_length=MAX_LENGTH_NAME, required=False)
-    administrative_division = CharField(required=False)
+    administrative_division = AdministrativeDivisionSerializer(required=False)
     remarks = CharField(required=False)
 
     def validate(self, data: dict) -> dict:

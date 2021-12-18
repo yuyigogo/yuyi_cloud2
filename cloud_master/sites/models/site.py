@@ -1,12 +1,12 @@
 from cloud.models import CloudDocument
-from mongoengine import ListField, ObjectIdField, StringField
+from mongoengine import DictField, ListField, ObjectIdField, StringField
 
 from common.const import MAX_LENGTH_NAME, MAX_MESSAGE_LENGTH
 
 
 class Site(CloudDocument):
     name = StringField(unique=True, max_length=MAX_LENGTH_NAME)
-    administrative_division = StringField(required=True)
+    administrative_division = DictField(required=True)
     voltage_level = StringField(required=True)
     site_location = ListField()
     remarks = StringField(max_length=MAX_MESSAGE_LENGTH)
