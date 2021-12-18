@@ -25,14 +25,17 @@ class CreateEquipmentSerializer(BaseSerializer):
             raise APIException(
                 msg="电力设备名称已存在！", code=StatusCode.EQUIPMENT_NAME_DUPLICATE.value
             )
+        return device_name
 
     def validated_device_type(self, device_type):
         if device_type not in DeviceType.values():
             raise APIException("非法的电力设备类型！")
+        return device_type
 
     def validated_voltage_level(self, voltage_level):
         if voltage_level not in VoltageLevel.values():
             raise APIException("非法的电压等级！")
+        return voltage_level
 
     def validate(self, data: dict) -> dict:
         site_id = self.context["site_id"]
@@ -70,10 +73,12 @@ class UpdateEquipmentSerializer(BaseSerializer):
     def validated_device_type(self, device_type):
         if device_type not in DeviceType.values():
             raise APIException("非法的电力设备类型！")
+        return device_type
 
     def validated_voltage_level(self, voltage_level):
         if voltage_level not in VoltageLevel.values():
             raise APIException("非法的电压等级！")
+        return voltage_level
 
 
 class DeleteEquipmentSerializer(BaseSerializer):

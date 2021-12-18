@@ -70,7 +70,7 @@ class MeasurePointView(BaseView):
         if measure_name:
             update_fields["measure_name"] = measure_name
         if measure_type:
-            update_fields["measure_name"] = measure_name
+            update_fields["measure_type"] = measure_type
         if sensor_number:
             update_fields["sensor_number"] = sensor_number
         if remarks:

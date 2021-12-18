@@ -26,6 +26,7 @@ class CreatePointSerializer(BaseSerializer):
             raise APIException(
                 msg="测点名称已存在！", code=StatusCode.POINT_NAME_DUPLICATE.value
             )
+        return measure_name
 
     def validate_measure_type(self, measure_type: str) -> str:
         if measure_type not in SensorType.values():
@@ -59,6 +60,7 @@ class UpdatePointSerializer(BaseSerializer):
             raise APIException(
                 msg="测点名称已存在！", code=StatusCode.POINT_NAME_DUPLICATE.value
             )
+        return measure_name
 
     def validate_measure_type(self, measure_type: str) -> str:
         if measure_type not in SensorType.values():
