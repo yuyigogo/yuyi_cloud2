@@ -15,7 +15,6 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import mongoengine
 import pymongo
-from bson import ObjectId
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -202,7 +201,7 @@ MQTT_CLIENT_CONFIG = {
     "user": "guest",
     "pw": "guest",
     # "subscribe_client_id": "8E001302000001A5"
-    "subscribe_client_id": str(ObjectId()),
+    "cloud_client_id": "61c1d9b016109f6005a9616d",
 }
 REDIS_HOST = "81.69.56.189"
 REDIS_PORT = 7086

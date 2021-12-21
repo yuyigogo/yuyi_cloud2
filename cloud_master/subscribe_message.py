@@ -135,10 +135,10 @@ class DataLoader:
         self.client.loop_forever()
 
 
-subscribe_client_id = MQTT_CLIENT_CONFIG.get("subscribe_client_id", "")
+cloud_client_id = MQTT_CLIENT_CONFIG.get("cloud_client_id", "")
 host = MQTT_CLIENT_CONFIG.get("host", "")
 port = MQTT_CLIENT_CONFIG.get("port", "")
-data_loader = DataLoader(subscribe_client_id, host, port)
+data_loader = DataLoader(cloud_client_id, host, port)
 
 if __name__ == "__main__":
     data_loader.run()
