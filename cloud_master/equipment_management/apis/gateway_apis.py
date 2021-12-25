@@ -1,11 +1,11 @@
 import logging
 
 from cloud.settings import CLIENT_IDS
-from common.storage.redis import redis
 from equipment_management.models.gateway import GateWay
 from equipment_management.services.gateway_services import GatewayService
 from equipment_management.validators.gateway_serializers import (
     CreateGatewaySerializer,
+    DeleteGatewaySerializer,
     UpdateGatewaySerializer,
 )
 from mongoengine import DoesNotExist
@@ -15,6 +15,7 @@ from common.const import RoleLevel
 from common.framework.permissions import PermissionFactory
 from common.framework.response import BaseResponse
 from common.framework.view import BaseView
+from common.storage.redis import redis
 
 logger = logging.getLogger(__name__)
 
@@ -73,9 +74,13 @@ class GatewayView(BaseView):
         return BaseResponse(data=update_fields)
 
     def delete(self, request, gateway_id):
+        data, _ = self.get_validated_data(
+            DeleteGatewaySerializer, gateway_id=gateway_id
+        )
         logger.info(f"{request.user.username} delete a {gateway_id}")
-        gateway = GateWay.objects(pk=gateway_id).first()
-        if gateway:
-            redis.srem(CLIENT_IDS, gateway.client_number)
-            gateway.delete()
+        gateway = data["gateway"]
+        clear_resource = data["clear_resource"]
+        GatewayService.delete_sensor_data_from_gateway(
+            gateway, clear_resource=clear_resource
+        )
         return BaseResponse()

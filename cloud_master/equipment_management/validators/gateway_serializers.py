@@ -1,6 +1,6 @@
 from equipment_management.models.gateway import GateWay
 from mongoengine import DoesNotExist
-from rest_framework.fields import CharField, IntegerField
+from rest_framework.fields import BooleanField, CharField, IntegerField
 from sites.models.site import Site
 
 from common.const import MAX_LENGTH_NAME, MAX_MESSAGE_LENGTH
@@ -61,4 +61,17 @@ class UpdateGatewaySerializer(BaseSerializer):
                     "该主机编号已绑定!", code=StatusCode.GATEWAY_DUPLICATE_CONFIGURED.value,
                 )
             data["changed_client_id"] = True
+        return data
+
+
+class DeleteGatewaySerializer(BaseSerializer):
+    clear_resource = BooleanField(default=False)
+
+    def validate(self, data):
+        gateway_id = self.context["gateway_id"]
+        try:
+            gateway = GateWay.objects.get(pk=gateway_id)
+        except DoesNotExist:
+            raise InvalidException(f"invalid {gateway_id=}")
+        data["gateway"] = gateway
         return data
