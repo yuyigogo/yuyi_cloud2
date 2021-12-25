@@ -43,7 +43,7 @@ class DataLoader:
 
     @staticmethod
     def on_connect(client, userdata, flags, rc):
-        print("Connected with result code " + str(rc))
+        print(f"{datetime.datetime.now()} Connected with result code " + str(rc))
         client.subscribe("#")  # 订阅消息
         # client.subscribe("8E001302000001A5")  # 订阅消息
 
@@ -89,10 +89,11 @@ class DataLoader:
 
     @staticmethod
     def on_message(client, userdata, msg):
-        print(f"msg.topic:{msg.topic}")
+        print(f"time: {datetime.datetime.now()} msg.topic:{msg.topic}")
         ret = DataLoader.pattern.match(msg.topic)
         if ret is not None:
             client_id, sensor_id = ret.groups()[0], ret.groups()[1]
+            print(f"matched for {client_id=}, {sensor_id=}")
             try:
                 if sensor_redis_cli.sismember("client_ids", client_id):
 
