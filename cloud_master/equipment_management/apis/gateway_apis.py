@@ -1,5 +1,7 @@
 import logging
 
+from cloud.settings import CLIENT_IDS
+from common.storage.redis import redis
 from equipment_management.models.gateway import GateWay
 from equipment_management.services.gateway_services import GatewayService
 from equipment_management.validators.gateway_serializers import (
@@ -32,6 +34,8 @@ class GatewaysView(BaseView):
         data, _ = self.get_validated_data(CreateGatewaySerializer, site_id=site_id)
         logger.info(f"{user.username} create a gateway with data: {data}")
         gateway = GatewayService.create_gateway(data, site_id)
+        # add this client_number to redis
+        redis.sadd(CLIENT_IDS, gateway.client_number)
         return BaseResponse(data=gateway.to_dict(), status_code=HTTP_201_CREATED)
 
 
@@ -50,6 +54,7 @@ class GatewayView(BaseView):
         )
         logger.info(f"{user.username} request to put gateway with {data}")
         gateway = data["gateway"]
+        old_client_id = gateway.client_number
         name = data.get("name")
         client_number = data.get("client_number")
         remarks = data.get("remarks")
@@ -62,9 +67,15 @@ class GatewayView(BaseView):
             update_fields["remarks"] = remarks
         if update_fields:
             gateway.update(**update_fields)
+        if data["changed_client_id"]:
+            redis.srem(CLIENT_IDS, old_client_id)
+            redis.sadd(CLIENT_IDS, client_number)
         return BaseResponse(data=update_fields)
 
     def delete(self, request, gateway_id):
         logger.info(f"{request.user.username} delete a {gateway_id}")
-        GateWay.objects.get(pk=gateway_id).delete()
+        gateway = GateWay.objects(pk=gateway_id).first()
+        if gateway:
+            redis.srem(CLIENT_IDS, gateway.client_number)
+            gateway.delete()
         return BaseResponse()

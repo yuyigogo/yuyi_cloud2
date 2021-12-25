@@ -16,6 +16,11 @@ class CreateGatewaySerializer(BaseSerializer):
     time_adjusting = IntegerField(required=True)
     remarks = CharField(max_length=MAX_MESSAGE_LENGTH)
 
+    def validate_client_number(self, client_number):
+        raise APIException(
+            "该主机编号已绑定!", code=StatusCode.GATEWAY_DUPLICATE_CONFIGURED.value,
+        )
+
     def validate(self, data: dict) -> dict:
         site_id = self.context["site_id"]
         try:
@@ -49,8 +54,11 @@ class UpdateGatewaySerializer(BaseSerializer):
                 raise APIException(
                     "主机名称已存在!", code=StatusCode.GATEWAY_NAME_DUPLICATE.value,
                 )
+        data["changed_client_id"] = False
         if client_number and client_number != gateway.client_number:
-            raise APIException(
-                "该主机已配置!", code=StatusCode.GATEWAY_DUPLICATE_CONFIGURED.value,
-            )
+            if GateWay.objects(client_number=client_number).count() > 0:
+                raise APIException(
+                    "该主机编号已绑定!", code=StatusCode.GATEWAY_DUPLICATE_CONFIGURED.value,
+                )
+            data["changed_client_id"] = True
         return data

@@ -206,9 +206,12 @@ MQTT_CLIENT_CONFIG = {
 }
 REDIS_HOST = "81.69.56.189"
 REDIS_PORT = 7086
+CLIENT_IDS = "client_ids"  # It's a key which stored enabled client ids in redis(set)
 
 MG_HOST = "81.69.56.189"
 MG_PORT = 7085
 MG_DB_NAME = "test"
 
-MONGO_CLIENT = pymongo.MongoClient(f"mongodb://{MG_HOST}:{MG_PORT}/", connect=False)[MG_DB_NAME]
+MONGO_CLIENT = pymongo.MongoClient(f"mongodb://{MG_HOST}:{MG_PORT}/", connect=False)[
+    MG_DB_NAME
+]
