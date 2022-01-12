@@ -25,16 +25,23 @@ class GatewaysView(BaseView):
         PermissionFactory(
             RoleLevel.CLIENT_SUPER_ADMIN.value,
             RoleLevel.CLOUD_SUPER_ADMIN.value,
-            method_list=("POST",),
+            RoleLevel.ADMIN.value,
         ),
     )
+
+    def get(self, request, site_id):
+        # 站点下主机列表信息
+        user = request.user
+        logger.info(f"{user.username} request list gateways in {site_id=}")
+        gateways = GatewayService(site_id).get_list_gateway_in_site()
+        return BaseResponse(data=gateways)
 
     def post(self, request, site_id):
         """ create a new gateway"""
         user = request.user
         data, _ = self.get_validated_data(CreateGatewaySerializer, site_id=site_id)
         logger.info(f"{user.username} create a gateway with data: {data}")
-        gateway = GatewayService.create_gateway(data, site_id)
+        gateway = GatewayService(site_id).create_gateway(data)
         # add this client_number to redis
         redis.sadd(CLIENT_IDS, gateway.client_number)
         return BaseResponse(data=gateway.to_dict(), status_code=HTTP_201_CREATED)

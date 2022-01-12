@@ -17,9 +17,11 @@ class CreateGatewaySerializer(BaseSerializer):
     remarks = CharField(max_length=MAX_MESSAGE_LENGTH)
 
     def validate_client_number(self, client_number):
-        raise APIException(
-            "该主机编号已绑定!", code=StatusCode.GATEWAY_DUPLICATE_CONFIGURED.value,
-        )
+        if GateWay.objects(client_number=client_number).count() > 0:
+            raise APIException(
+                "该主机编号已绑定!", code=StatusCode.GATEWAY_DUPLICATE_CONFIGURED.value,
+            )
+        return client_number
 
     def validate(self, data: dict) -> dict:
         site_id = self.context["site_id"]
