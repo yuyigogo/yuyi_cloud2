@@ -28,3 +28,8 @@ class GatewayService(BaseService):
             {"name": gateway.name, "client_number": gateway.client_number}
             for gateway in gateways
         ]
+
+    @classmethod
+    def get_sensor_info_in_gateway(cls, client_number: str):
+        sensor_ids = GateWay.objects.get(client_number=client_number).sensor_ids
+        pass

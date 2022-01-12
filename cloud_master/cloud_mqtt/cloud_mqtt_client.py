@@ -55,14 +55,11 @@ class CloudMqtt(object):
         self.client.on_disconnect = self.on_mqtt_disconnect
         self.client.connect_async(MQTT_CLIENT_CONFIG["host"], MQTT_CLIENT_CONFIG["port"], 60)
         self.client.loop_start()
-        return self.client
+        return self
 
 
 cloud_mqtt_client = CloudMqtt(str(ObjectId())).run()
 
-
-if __name__ == '__main__':
-    cloud_mqtt_client = CloudMqtt(str(ObjectId())).run()
 
 
 

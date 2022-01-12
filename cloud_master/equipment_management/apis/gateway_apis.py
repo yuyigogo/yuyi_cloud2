@@ -1,6 +1,8 @@
 import logging
 
 from cloud.settings import CLIENT_IDS
+from cloud_mqtt.cloud_mqtt_client import cloud_mqtt_client
+from customer.models.customer import Customer
 from equipment_management.models.gateway import GateWay
 from equipment_management.services.gateway_services import GatewayService
 from equipment_management.validators.gateway_serializers import (
@@ -10,6 +12,7 @@ from equipment_management.validators.gateway_serializers import (
 )
 from mongoengine import DoesNotExist
 from rest_framework.status import HTTP_201_CREATED, HTTP_404_NOT_FOUND
+from sites.models.site import Site
 
 from common.const import RoleLevel
 from common.framework.permissions import PermissionFactory
@@ -53,7 +56,11 @@ class GatewayView(BaseView):
             gateway = GateWay.objects.get(pk=gateway_id)
         except DoesNotExist:
             return BaseResponse(status_code=HTTP_404_NOT_FOUND)
-        return BaseResponse(data=gateway.to_dict())
+        customer_name = Customer.objects.get(pk=gateway.customer).name
+        site_name = Site.objects.get(id=gateway.site_id).name
+        data = {"customer_name": customer_name, "site_name": site_name}
+        data.update(gateway.to_dict())
+        return BaseResponse(data=data)
 
     def put(self, request, gateway_id):
         user = request.user
@@ -91,3 +98,19 @@ class GatewayView(BaseView):
             gateway, clear_resource=clear_resource
         )
         return BaseResponse()
+
+
+class GatewaySensorsView(BaseView):
+    def get(self, request, client_number):
+        pass
+
+
+class SensorsByPublishView(BaseView):
+    def get(self, request, client_number):
+        gateway = GateWay.objects.get(client_number=client_number)
+        logger.info(
+            f"{request.user.username} request list sensors in {client_number=} by mqtt publish client"
+        )
+        topic = f"{client_number}/serivice/sub_get"
+        cloud_mqtt_client.mqtt_publish(topic)
+        pass
