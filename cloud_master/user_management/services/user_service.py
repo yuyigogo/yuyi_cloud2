@@ -3,7 +3,7 @@ from typing import Optional, Tuple
 from mongoengine import Q
 from user_management.models.user import CloudUser
 
-from common.const import ALL
+from common.const import ROLE_DICT
 from common.framework.service import BaseService
 from common.utils import get_objects_pagination
 
@@ -81,7 +81,7 @@ class UserService(BaseService):
             {
                 "username": user.username,
                 "customer_name": customer_dict.get(user.customer, ""),
-                "role_level": user.role_level,
+                "role_level": ROLE_DICT[user.role_level],
                 "status": user.is_active,
                 "email": user.email,
                 "phone": user.phone,
