@@ -15,12 +15,12 @@ urlpatterns = [
         name="site_actions",
     ),
     re_path(
-        r"^gateways/(?P<client_number>[a-zA-Z0-9]+)/sensor_info/$",
+        r"^gateways/(?P<gateway_id>[a-zA-Z0-9]+)/sensor_info/$",
         GatewaySensorsView.as_view(),
         name="sensor_info_in_gateway",
     ),
     re_path(
-        r"^gateways/(?P<client_number>[a-zA-Z0-9]+)/sensors/$",
+        r"^gateways/(?P<gateway_id>[a-zA-Z0-9]+)/sensors/$",
         SensorsByPublishView.as_view(),
         name="sensors_by_publish",
     ),

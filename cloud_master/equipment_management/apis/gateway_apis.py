@@ -101,16 +101,16 @@ class GatewayView(BaseView):
 
 
 class GatewaySensorsView(BaseView):
-    def get(self, request, client_number):
+    def get(self, request, gateway_id):
         pass
 
 
 class SensorsByPublishView(BaseView):
-    def get(self, request, client_number):
-        gateway = GateWay.objects.get(client_number=client_number)
+    def get(self, request, gateway_id):
+        client_number = GateWay.objects.get(id=gateway_id).client_number
         logger.info(
             f"{request.user.username} request list sensors in {client_number=} by mqtt publish client"
         )
         topic = f"{client_number}/serivice/sub_get"
         cloud_mqtt_client.mqtt_publish(topic)
-        pass
+        return BaseResponse()

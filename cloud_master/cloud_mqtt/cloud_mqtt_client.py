@@ -42,8 +42,10 @@ class CloudMqtt(object):
         else:
             logger.info("disconnection !!!")
 
-    def mqtt_publish(self, topic, payload):
+    def mqtt_publish(self, topic, payload=None):
         # todo specify some topics
+        if not payload:
+            payload = {}
         payload.update({"id": "123", "version": "1.0"})
         self.client.publish(topic, payload=json.dumps(payload), qos=0)
 

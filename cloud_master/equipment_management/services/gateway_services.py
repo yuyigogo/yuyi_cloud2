@@ -25,7 +25,11 @@ class GatewayService(BaseService):
             site_id=self.site_id
         )
         return [
-            {"name": gateway.name, "client_number": gateway.client_number}
+            {
+                "gateway_id": str(gateway.id),
+                "name": gateway.name,
+                "client_number": gateway.client_number,
+            }
             for gateway in gateways
         ]
 
