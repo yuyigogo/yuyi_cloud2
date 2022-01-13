@@ -142,4 +142,7 @@ port = MQTT_CLIENT_CONFIG.get("port", "")
 data_loader = DataLoader(subscribe_client_id, host, port)
 
 if __name__ == "__main__":
-    data_loader.run()
+    try:
+        data_loader.run()
+    except Exception as e:
+        print(e)
