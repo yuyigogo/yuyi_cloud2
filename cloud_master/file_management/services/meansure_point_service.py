@@ -1,9 +1,12 @@
+import logging
 from typing import Union
 
 from bson import ObjectId
+from file_management.models.measure_point import MeasurePoint
 
 from common.framework.service import BaseService
-from file_management.models.measure_point import MeasurePoint
+
+logger = logging.getLogger(__name__)
 
 
 class MeasurePointService(BaseService):

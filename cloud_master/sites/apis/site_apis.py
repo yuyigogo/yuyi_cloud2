@@ -65,7 +65,7 @@ class CustomerSiteView(BaseView):
             BaseSiteSerializer, customer_id=customer_id, site_id=site_id
         )
         site = context["site"]
-        return BaseResponse(data=site.to_dict)
+        return BaseResponse(data=site.to_dict())
 
     def put(self, request, customer_id, site_id):
         user = request.user
@@ -93,7 +93,6 @@ class CustomerSiteView(BaseView):
         return BaseResponse(data=update_fields)
 
     def delete(self, request, customer_id, site_id):
-        # todo delete site resource include what?
         user = request.user
         data, context = self.get_validated_data(DeleteSiteSerializer, site_id=site_id)
         logger.info(

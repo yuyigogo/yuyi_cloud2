@@ -1,9 +1,10 @@
 from typing import Union
 
 from bson import ObjectId
+from file_management.models.electrical_equipment import ElectricalEquipment
+from file_management.models.measure_point import MeasurePoint
 
 from common.framework.service import BaseService
-from file_management.models.electrical_equipment import ElectricalEquipment
 
 
 class EquipmentService(BaseService):
@@ -41,3 +42,9 @@ class EquipmentService(BaseService):
             }
             for e in equipments
         ]
+
+    @classmethod
+    def delete_equipment(cls, equipment_id: Union[str, ObjectId], clear_resource=False):
+        ElectricalEquipment.objects(id=equipment_id).delete()
+        points = MeasurePoint.objects(equipment_id=equipment_id)
+        cls.delete_points(points, clear_resource=clear_resource)

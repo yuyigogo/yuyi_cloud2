@@ -1,19 +1,19 @@
 import datetime
 import json
 import re
+from copy import deepcopy
 
 import dateutil.parser
-import pymongo
 import redis
 from cloud.settings import (
-    MG_DB_NAME,
-    MG_HOST,
-    MG_PORT,
     MQTT_CLIENT_CONFIG,
     REDIS_HOST,
     REDIS_PORT,
+    MONGO_CLIENT,
 )
 from paho.mqtt import client as mqtt_client
+
+from common.const import SensorType
 
 uhf_loading_data, ae_tev_loading_data = {}, {}
 
@@ -22,7 +22,6 @@ sensor_redis_cli = redis.Redis(
         host=REDIS_HOST, port=REDIS_PORT, db=5, decode_responses=True
     )
 )
-mg_cli = pymongo.MongoClient(f"mongodb://{MG_HOST}:{MG_PORT}/")[MG_DB_NAME]
 
 
 class DataLoader:
@@ -36,7 +35,7 @@ class DataLoader:
         r"/(?P<client_id>[a-zA-Z0-9]+)/subnode/(?P<sensor_id>[a-zA-Z0-9]+)/data_ctrl/property"
     )
 
-    def __init__(self, client_id, host="121.37.185.39", port=10883):
+    def __init__(self, client_id, host, port):
         self.client_id = client_id
         self.host = host
         self.port = port
@@ -44,7 +43,7 @@ class DataLoader:
 
     @staticmethod
     def on_connect(client, userdata, flags, rc):
-        print("Connected with result code " + str(rc))
+        print(f"{datetime.datetime.now()} Connected with result code " + str(rc))
         client.subscribe("#")  # 订阅消息
         # client.subscribe("8E001302000001A5")  # 订阅消息
 
@@ -52,26 +51,25 @@ class DataLoader:
     def get_sensor_type(msg_dict):
         params = msg_dict.get("params", {})
         if "TEV" in params or "AE" in params:
-            return "ae_tev"
+            return SensorType.ae_tev()
         elif "Temp" in params:
-            return "temp"
+            return SensorType.temp.value
         elif "UHF" in params:
-            return "uhf"
+            return SensorType.uhf.value
         else:
             return ""
 
     @staticmethod
     def insert(client_id, sensor_id, sensor_type, msg_dict):
-        cur_time = dateutil.parser.parse(datetime.datetime.utcnow().isoformat())
-        my_col = mg_cli[sensor_type]
+        cur_time = dateutil.parser.parse(datetime.datetime.now().isoformat())
+        my_col = MONGO_CLIENT[sensor_type]
         my_query = {"is_new": True, "sensor_id": sensor_id}
         new_values = {"$set": {"is_new": False, "update_time": cur_time}}
         my_col.update_many(my_query, new_values)
         params = msg_dict.get("params", {})
-        # todo use SensorType to match the constant
-        if sensor_type == "ae":
+        if sensor_type == SensorType.ae.value:
             params.pop("TEV")
-        if sensor_type == "tev":
+        if sensor_type == SensorType.tev.value:
             params.pop("AE")
         data = {
             "client_id": client_id,
@@ -85,26 +83,30 @@ class DataLoader:
         }
         insert_res = my_col.insert_one(data)
         if insert_res.acknowledged:
-            print("插入数据成功！！！")
+            print(f"inset data succeed for {sensor_type}, {sensor_id=}, {client_id=}!")
         else:
-            print(f"{msg_dict}插入数据失败！！！")
+            print(f"inset data failed with {msg_dict=}!")
 
     @staticmethod
     def on_message(client, userdata, msg):
-        print(f"msg.topic:{msg.topic}")
+        print(f"time: {datetime.datetime.now()} msg.topic:{msg.topic}")
         ret = DataLoader.pattern.match(msg.topic)
         if ret is not None:
             client_id, sensor_id = ret.groups()[0], ret.groups()[1]
+            print(f"matched for {client_id=}, {sensor_id=}")
             try:
                 if sensor_redis_cli.sismember("client_ids", client_id):
 
                     msg_dict = json.loads(msg.payload.decode("utf-8"))
                     sensor_type = DataLoader.get_sensor_type(msg_dict)
                     if sensor_type:
-                        if sensor_type == "ae_tev":
-                            for sensor_type in ["ae", "tev"]:
+                        if sensor_type == SensorType.ae_tev():
+                            for sensor_type in SensorType.ae_tev():
                                 DataLoader.insert(
-                                    client_id, sensor_id, sensor_type, msg_dict
+                                    client_id,
+                                    sensor_id,
+                                    sensor_type,
+                                    deepcopy(msg_dict),
                                 )
                         else:
                             DataLoader.insert(

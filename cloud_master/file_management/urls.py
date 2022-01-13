@@ -1,5 +1,6 @@
 from django.urls import path, re_path
-from file_management.apis.equipment_apis import EquipmentListView
+from file_management.apis.equipment_apis import EquipmentListView, EquipmentView
+from file_management.apis.excel_apis import ImportFileView
 from file_management.apis.measure_point_apis import (
     MeasurePointListView,
     MeasurePointView,
@@ -12,6 +13,11 @@ urlpatterns = [
         name="equipments_actions",
     ),
     re_path(
+        r"^sites/(?P<site_id>[a-zA-Z0-9]+)/equipments/(?P<equipment_id>[a-zA-Z0-9]+)/$",
+        EquipmentView.as_view(),
+        name="equipment_actions",
+    ),
+    re_path(
         r"^equipment/(?P<equipment_id>[a-zA-Z0-9]+)/point/$",
         MeasurePointListView.as_view(),
         name="measure_points_actions",
@@ -21,4 +27,5 @@ urlpatterns = [
         MeasurePointView.as_view(),
         name="measure_point_actions",
     ),
+    re_path(r"^file_import/$", ImportFileView.as_view(), name="import_file",),
 ]

@@ -10,7 +10,7 @@ from common.framework.exception import (
     ForbiddenException,
     InvalidException,
 )
-from common.framework.serializer import BaseSerializer
+from common.framework.serializer import AdministrativeDivisionSerializer, BaseSerializer
 
 
 def get_site(site_id: str) -> Site:
@@ -37,7 +37,7 @@ class GetCustomerSitesSerializer(BaseSerializer):
 
 class CreateSiteSerializer(BaseSerializer):
     name = CharField(required=True, max_length=MAX_LENGTH_NAME)
-    administrative_division = CharField(required=True)
+    administrative_division = AdministrativeDivisionSerializer(required=True)
     remarks = CharField(max_length=MAX_MESSAGE_LENGTH)
     voltage_level = CharField(required=True)
     site_location = ListField()
@@ -50,7 +50,7 @@ class CreateSiteSerializer(BaseSerializer):
             or Site.objects.filter(customer=customer_id, name=name).count() > 0
         ):
             raise APIException(
-                "site name duplicate!", code=StatusCode.SITE_NAME_DUPLICATE.value,
+                "站点名称已存在!", code=StatusCode.SITE_NAME_DUPLICATE.value,
             )
         return data
 
@@ -74,7 +74,7 @@ class BaseSiteSerializer(BaseSerializer):
 
 class UpdateSiteSerializer(BaseSerializer):
     name = CharField(max_length=MAX_LENGTH_NAME)
-    administrative_division = CharField()
+    administrative_division = AdministrativeDivisionSerializer()
     remarks = CharField(max_length=MAX_MESSAGE_LENGTH)
     voltage_level = CharField()
     site_location = ListField()
@@ -85,10 +85,11 @@ class UpdateSiteSerializer(BaseSerializer):
         site = get_site(site_id)
         self.context["site"] = site
         name = data.get("name")
-        if name and Site.objects.filter(name=name).count() > 0:
-            raise APIException(
-                "site name duplicate!", code=StatusCode.SITE_NAME_DUPLICATE.value,
-            )
+        if name and name != site.name:
+            if Site.objects.filter(name=name).count() > 0:
+                raise APIException(
+                    "站点名称已存在!", code=StatusCode.SITE_NAME_DUPLICATE.value,
+                )
         if user.is_cloud_or_client_super_admin():
             return data
         else:
@@ -107,4 +108,9 @@ class DeleteSiteSerializer(BaseSerializer):
         self.context["site"] = site
         if site.name == ALL:
             raise ForbiddenException("named ALL site can not be deleted!")
+        if user.is_cloud_or_client_super_admin():
+            return data
+        else:
+            if ObjectId(site_id) not in user.sites:
+                raise ForbiddenException("user can't modify not belong to its own sits")
         return data

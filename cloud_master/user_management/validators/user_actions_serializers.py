@@ -1,4 +1,3 @@
-from bson import ObjectId
 from customer.models.customer import Customer
 from mongoengine import DoesNotExist
 from rest_framework.fields import (
@@ -28,9 +27,7 @@ class UserListSerializer(BaseSerializer):
     def validate(self, data: dict) -> dict:
         customer = data.get("customer")
         sites = data.get("sites")
-        print(f"{data=}")
         if customer is None and sites:
-            print("1"*100)
             raise APIException("invalid query parameters!")
         elif customer and sites:
             user = self.context["request"].user

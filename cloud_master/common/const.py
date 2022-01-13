@@ -148,12 +148,47 @@ class RoleLevel(int, BaseEnum):
         return [cls.CLIENT_SUPER_ADMIN.value, cls.ADMIN.value, cls.NORMAL.value]
 
 
-ALL = "all"
+ROLE_DICT = {
+    RoleLevel.CLOUD_SUPER_ADMIN: "超级管理员",
+    RoleLevel.CLIENT_SUPER_ADMIN: "超级管理员",
+    RoleLevel.ADMIN: "管理员",
+    RoleLevel.NORMAL: "普通用户",
+}
+
+ALL = "ALL"
 MAX_MESSAGE_LENGTH = 2000
 
 
 class SensorType(str, BaseEnum):
-    ae = "ae"
-    tev = "tev"
-    temp = "temp"
-    uhf = "uhf"
+    """传感器/测点类型"""
+
+    ae = "AE"
+    tev = "TEV"
+    temp = "Temp"
+    uhf = "UHF"
+
+    @classmethod
+    def ae_tev(cls):
+        return [cls.ae.value, cls.tev.value]
+
+
+class DeviceType(str, BaseEnum):
+    """设备类型"""
+
+    switch_cabinet = "开关柜"
+    gis = "GIS"
+    voltage_transformer = "变压器"
+    electric_cable = "电缆"
+
+
+class VoltageLevel(str, BaseEnum):
+    """电压等级"""
+
+    k1 = "10kV"
+    k20 = "20kV"
+    k35 = "35kV"
+    k66 = "66kV"
+    k110 = "110kV"
+    k220 = "220kV"
+    k330 = "330kV"
+    k500 = "500kV"

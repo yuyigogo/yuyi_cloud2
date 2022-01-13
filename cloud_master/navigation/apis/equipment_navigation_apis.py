@@ -15,6 +15,11 @@ logger = logging.getLogger(__name__)
 
 class CustomerTreesView(BaseView):
     def get(self, request):
+        """
+        设备/测点树形图
+        :param request:
+        :return:
+        """
         user = request.user
         customer_id = user.customer
         add_point = bool(request.GET.get("add_point", 0))
@@ -38,7 +43,8 @@ class CustomerTreesView(BaseView):
 class SiteSensorsView(BaseView):
     def get(self, request, site_id):
         """
-        all points(sensors) in the corresponding site
+        all points(sensors) in the corresponding site；
+        站点下所有最新一条传感器的数据详情
         :param site_id:
         :return:
         """
@@ -54,7 +60,8 @@ class SiteSensorsView(BaseView):
 class EquipmentSensorsView(BaseView):
     def get(self, request, equipment_id):
         """
-        all points(sensors) in the corresponding equipment
+        all points(sensors) in the corresponding equipment；
+        设备下所有最新一条传感器的数据
         :param equipment_id:
         :return:
         """
@@ -72,7 +79,8 @@ class EquipmentSensorsView(BaseView):
 class CustomerSensorsView(BaseView):
     def get(self, request, customer_id):
         """
-        all points(sensors) in the corresponding customer
+        all points(sensors) in the corresponding customer；
+        公司下所有最新一条传感器的数据(暂时没用，最大粒度在站点)
         :param request:
         :param customer_id:
         :return:
