@@ -2,6 +2,7 @@ import logging
 
 from cloud.settings import CLIENT_IDS
 from cloud_mqtt.cloud_mqtt_client import cloud_mqtt_client
+from cloud_mqtt.sub_pub_topics import BASE_GATEWAY_PUBLISH_TOPIC
 from customer.models.customer import Customer
 from equipment_management.models.gateway import GateWay
 from equipment_management.services.gateway_services import GatewayService
@@ -111,6 +112,6 @@ class SensorsByPublishView(BaseView):
         logger.info(
             f"{request.user.username} request list sensors in {client_number=} by mqtt publish client"
         )
-        topic = f"{client_number}/serivice/sub_get"
+        topic = f"/8E00000213000265{BASE_GATEWAY_PUBLISH_TOPIC}"
         cloud_mqtt_client.mqtt_publish(topic)
         return BaseResponse()

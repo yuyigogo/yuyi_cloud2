@@ -196,11 +196,19 @@ MONGOENGINE_USER_DOCUMENT = "user_management.models.user.CloudUser"
 AUTHENTICATION_BACKENDS = ("common.framework.authentication.CloudLoginBackend",)
 mongoengine.connect("test", host="81.69.56.189:7085", connect=False)
 
+# MQTT_CLIENT_CONFIG = {
+#     "host": "121.37.185.39",
+#     "port": 10883,
+#     "user": "guest",
+#     "pw": "guest",
+#     # "subscribe_client_id": "8E001302000001A5"
+#     "subscribe_client_id": str(ObjectId()),
+# }
 MQTT_CLIENT_CONFIG = {
-    "host": "121.37.185.39",
-    "port": 10883,
-    "user": "guest",
-    "pw": "guest",
+    "host": "101.133.217.147",
+    "port": 1883,
+    "user": "xyjf",
+    "pw": "xyjf321",
     # "subscribe_client_id": "8E001302000001A5"
     "subscribe_client_id": str(ObjectId()),
 }

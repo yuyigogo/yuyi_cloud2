@@ -16,12 +16,12 @@ class CloudMqtt(object):
 
     def on_mqtt_connect(self, client, userdata, flags, rc):
         if rc == 0:
-            print("1"*100)
             logger.info(f"{self.client_id} success to connected to MQTT Broker!")
         else:
             logger.info(f"{self.client_id} failed to connect to MQTT Broker!")
         # todo specify topics
-        client.subscribe("#")
+        # client.subscribe("/8e01000213000283/serivice_reply/sub_get")
+        # client.subscribe("/8E00000213000265/serivice_reply/sub_get")
         # sensors_subscribe_topics()  # 订阅消息
         # cmd_send_login()  #
 
@@ -29,6 +29,9 @@ class CloudMqtt(object):
     def on_mqtt_message(client, userdata, msg):
         """The callback for when a PUBLISH message is received from the server."""
         logger.info(f"{msg.topic=}, {str(msg.payload)}")
+        print(msg.topic)
+        print(2222)
+        print(msg.payload)
         # todo add corresponding function to deal with subscribed topics
 
     @staticmethod
@@ -43,7 +46,6 @@ class CloudMqtt(object):
             logger.info("disconnection !!!")
 
     def mqtt_publish(self, topic, payload=None):
-        # todo specify some topics
         if not payload:
             payload = {}
         payload.update({"id": "123", "version": "1.0"})
