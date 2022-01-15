@@ -5,6 +5,7 @@ import paho.mqtt.client as mqtt_client
 from bson import ObjectId
 
 from cloud.settings import MQTT_CLIENT_CONFIG
+from cloud_mqtt.deal_with_publish_message import OnMqttMessage
 
 logger = logging.getLogger(__name__)
 
@@ -19,20 +20,14 @@ class CloudMqtt(object):
             logger.info(f"{self.client_id} success to connected to MQTT Broker!")
         else:
             logger.info(f"{self.client_id} failed to connect to MQTT Broker!")
-        # todo specify topics
-        # client.subscribe("/8e01000213000283/serivice_reply/sub_get")
-        # client.subscribe("/8E00000213000265/serivice_reply/sub_get")
+        client.subscribe("#")
         # sensors_subscribe_topics()  # 订阅消息
-        # cmd_send_login()  #
 
     @staticmethod
     def on_mqtt_message(client, userdata, msg):
         """The callback for when a PUBLISH message is received from the server."""
-        logger.info(f"{msg.topic=}, {str(msg.payload)}")
-        print(msg.topic)
-        print(2222)
-        print(msg.payload)
-        # todo add corresponding function to deal with subscribed topics
+        msg_dict = json.loads(msg.payload.decode("utf-8"))
+        OnMqttMessage.deal_with_msg(msg.topic, msg_dict)
 
     @staticmethod
     def on_mqtt_subscribe(client, userdata, mid, granted_qos):

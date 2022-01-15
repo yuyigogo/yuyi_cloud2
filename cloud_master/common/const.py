@@ -192,3 +192,10 @@ class VoltageLevel(str, BaseEnum):
     k220 = "220kV"
     k330 = "330kV"
     k500 = "500kV"
+
+
+MODEL_KEY_TO_SENSOR_TYPE = {
+    "0000000000000002": SensorType.ae_tev(),
+    "0000000000000003": SensorType.uhf.value,
+    "0000000000000004": SensorType.temp.value
+}

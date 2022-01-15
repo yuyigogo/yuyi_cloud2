@@ -2,7 +2,7 @@ import logging
 
 from cloud.settings import CLIENT_IDS
 from cloud_mqtt.cloud_mqtt_client import cloud_mqtt_client
-from cloud_mqtt.sub_pub_topics import BASE_GATEWAY_PUBLISH_TOPIC
+from cloud_mqtt.deal_with_publish_message import BASE_GATEWAY_PUBLISH_TOPIC
 from customer.models.customer import Customer
 from equipment_management.models.gateway import GateWay
 from equipment_management.services.gateway_services import GatewayService
@@ -12,7 +12,11 @@ from equipment_management.validators.gateway_serializers import (
     UpdateGatewaySerializer,
 )
 from mongoengine import DoesNotExist
-from rest_framework.status import HTTP_201_CREATED, HTTP_404_NOT_FOUND
+from rest_framework.status import (
+    HTTP_201_CREATED,
+    HTTP_400_BAD_REQUEST,
+    HTTP_404_NOT_FOUND,
+)
 from sites.models.site import Site
 
 from common.const import RoleLevel
@@ -107,11 +111,15 @@ class GatewaySensorsView(BaseView):
 
 
 class SensorsByPublishView(BaseView):
+    """匹配网关下传感器列表"""
     def get(self, request, gateway_id):
         client_number = GateWay.objects.get(id=gateway_id).client_number
         logger.info(
             f"{request.user.username} request list sensors in {client_number=} by mqtt publish client"
         )
-        topic = f"/8E00000213000265{BASE_GATEWAY_PUBLISH_TOPIC}"
-        cloud_mqtt_client.mqtt_publish(topic)
+        try:
+            cloud_mqtt_client.mqtt_publish(f"/{client_number}{BASE_GATEWAY_PUBLISH_TOPIC}")
+        except Exception as e:
+            logger.exception(f"get list sensors failed in mqtt with {e=}")
+            return BaseResponse(status_code=HTTP_400_BAD_REQUEST)
         return BaseResponse()
