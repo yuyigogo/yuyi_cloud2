@@ -1,5 +1,4 @@
-from cloud.models import bson_to_dict
-from cloud.settings import MONGO_CLIENT
+
 from customer.models.customer import Customer
 from equipment_management.models.gateway import GateWay
 from file_management.models.electrical_equipment import ElectricalEquipment
@@ -10,12 +9,6 @@ from common.framework.service import BaseService
 
 
 class SiteNavigationService(BaseService):
-    @classmethod
-    def get_latest_sensor_info(cls, sensor_number: str, sensor_type: str) -> dict:
-        mongo_col = MONGO_CLIENT[sensor_type]
-        sensor_data = mongo_col.find_one({"sensor_id": sensor_number, "is_new": True},)
-        return bson_to_dict(sensor_data) if sensor_data else {}
-
     @classmethod
     def get_all_sensors_in_equipment(cls, equipment: ElectricalEquipment) -> list:
         equipment_sensors = []

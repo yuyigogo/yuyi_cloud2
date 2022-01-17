@@ -3,7 +3,7 @@ from mongoengine import DoesNotExist
 from rest_framework.fields import BooleanField, CharField, IntegerField
 from sites.models.site import Site
 
-from common.const import MAX_LENGTH_NAME, MAX_MESSAGE_LENGTH
+from common.const import MAX_LENGTH_NAME, MAX_MESSAGE_LENGTH, SensorType
 from common.error_code import StatusCode
 from common.framework.exception import APIException, InvalidException
 from common.framework.serializer import BaseSerializer
@@ -75,5 +75,27 @@ class DeleteGatewaySerializer(BaseSerializer):
             gateway = GateWay.objects.get(pk=gateway_id)
         except DoesNotExist:
             raise InvalidException(f"invalid {gateway_id=}")
+        data["gateway"] = gateway
+        return data
+
+
+class SensorConfigSerializer(BaseSerializer):
+    page = IntegerField(required=False)
+    limit = IntegerField(required=False)
+    sensor_name = CharField(required=False)
+    sensor_id = CharField(required=False)
+    sensor_type = CharField(required=False)
+
+    def validate_sensor_type(self, sensor_type):
+        if sensor_type not in SensorType.values():
+            raise APIException(f"invalid sensor_type")
+        return sensor_type
+
+    def validate(self, data):
+        gateway_id = self.context["gateway_id"]
+        try:
+            gateway = GateWay.objects.get(pk=gateway_id)
+        except DoesNotExist:
+            raise APIException(f"invalid gateway_id")
         data["gateway"] = gateway
         return data

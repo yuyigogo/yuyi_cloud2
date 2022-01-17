@@ -171,6 +171,11 @@ class SensorType(str, BaseEnum):
     def ae_tev(cls):
         return [cls.ae.value, cls.tev.value]
 
+    @classmethod
+    def ae_and_tev(cls):
+        """二合一传感器，存储到db时分为ae和tev存"""
+        return f"{cls.ae.vaue}_{cls.tev.value}"
+
 
 class DeviceType(str, BaseEnum):
     """设备类型"""
@@ -195,7 +200,7 @@ class VoltageLevel(str, BaseEnum):
 
 
 MODEL_KEY_TO_SENSOR_TYPE = {
-    "0000000000000002": SensorType.ae_tev(),
+    "0000000000000002": SensorType.ae_and_tev(),  # 默认成对出现
     "0000000000000003": SensorType.uhf.value,
     "0000000000000004": SensorType.temp.value
 }

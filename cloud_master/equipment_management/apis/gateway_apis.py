@@ -9,6 +9,7 @@ from equipment_management.services.gateway_services import GatewayService
 from equipment_management.validators.gateway_serializers import (
     CreateGatewaySerializer,
     DeleteGatewaySerializer,
+    SensorConfigSerializer,
     UpdateGatewaySerializer,
 )
 from mongoengine import DoesNotExist
@@ -107,18 +108,37 @@ class GatewayView(BaseView):
 
 class GatewaySensorsView(BaseView):
     def get(self, request, gateway_id):
-        pass
+        """主机下传感器列表信息"""
+        data, _ = self.get_validated_data(SensorConfigSerializer, gateway_id=gateway_id)
+        gateway = data["gateway"]
+        page = data.get("page", 1)
+        limit = data.get("limit", 10)
+        sensor_id = data.get("sensor_id")
+        sensor_name = data.get("sensor_name")
+        sensor_type = data.get("sensor_type")
+        total, data = GatewayService.get_sensor_info_in_gateway(
+            page,
+            limit,
+            gateway.client_number,
+            sensor_name=sensor_name,
+            sensor_id=sensor_id,
+            sensor_type=sensor_type,
+        )
+        return BaseResponse(data={"total": total, "sensor_info": data})
 
 
 class SensorsByPublishView(BaseView):
     """匹配网关下传感器列表"""
+
     def get(self, request, gateway_id):
         client_number = GateWay.objects.get(id=gateway_id).client_number
         logger.info(
             f"{request.user.username} request list sensors in {client_number=} by mqtt publish client"
         )
         try:
-            cloud_mqtt_client.mqtt_publish(f"/{client_number}{BASE_GATEWAY_PUBLISH_TOPIC}")
+            cloud_mqtt_client.mqtt_publish(
+                f"/{client_number}{BASE_GATEWAY_PUBLISH_TOPIC}"
+            )
         except Exception as e:
             logger.exception(f"get list sensors failed in mqtt with {e=}")
             return BaseResponse(status_code=HTTP_400_BAD_REQUEST)

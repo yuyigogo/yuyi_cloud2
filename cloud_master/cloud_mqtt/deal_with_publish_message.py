@@ -3,8 +3,7 @@ import re
 
 from cloud.settings import CLIENT_IDS
 from equipment_management.models.gateway import GateWay
-
-# 获取网关下传感器列表的主题
+from equipment_management.services.sensor_config_service import SensorConfigService
 from mongoengine import DoesNotExist
 
 from common.const import MODEL_KEY_TO_SENSOR_TYPE
@@ -13,7 +12,7 @@ from common.storage.redis import redis
 # this file is to add the corresponding subscribe and published topics
 # and each topic is paired
 
-
+# 获取网关下传感器列表的主题
 BASE_GATEWAY_SUBSCRIBE_TOPIC = "/serivice_reply/sub_get"
 BASE_GATEWAY_PUBLISH_TOPIC = "/serivice/sub_get"
 # 匹配网关下传感器列表
@@ -51,5 +50,11 @@ class OnMqttMessage(object):
         sensors_ids = params.get("sensor", [])
         model_keys = params.get("modelkey", [])
         sensor_types = [MODEL_KEY_TO_SENSOR_TYPE[model_key] for model_key in model_keys]
-        sensor_dict = dict(zip(sensors_ids, sensor_types))
-        gateway.update(sensor_dict=sensor_dict)
+        current_sensors = set(zip(sensors_ids, sensor_types))
+        existing_sensors = set(gateway.sensor_dict)
+        new_sensors = current_sensors - existing_sensors
+        all_sensor_dict = dict(current_sensors | existing_sensors)
+        gateway.update(sensor_dict=all_sensor_dict)
+        if new_sensors is not None:
+            # create sensor_config model
+            SensorConfigService(client_id).bulk_insert_sensor_configs(new_sensors)

@@ -1,6 +1,7 @@
 import logging
 from collections import defaultdict
 
+from cloud.models import bson_to_dict
 from cloud.settings import CLIENT_IDS, MONGO_CLIENT
 from equipment_management.models.gateway import GateWay
 
@@ -55,3 +56,9 @@ class BaseService(object):
     @classmethod
     def remove_client_ids_from_redis(cls, client_ids: tuple):
         redis.srem(CLIENT_IDS, client_ids)
+
+    @classmethod
+    def get_latest_sensor_info(cls, sensor_number: str, sensor_type: str) -> dict:
+        mongo_col = MONGO_CLIENT[sensor_type]
+        sensor_data = mongo_col.find_one({"sensor_id": sensor_number, "is_new": True}, )
+        return bson_to_dict(sensor_data) if sensor_data else {}
