@@ -174,7 +174,7 @@ class SensorType(str, BaseEnum):
     @classmethod
     def ae_and_tev(cls):
         """二合一传感器，存储到db时分为ae和tev存"""
-        return f"{cls.ae.vaue}_{cls.tev.value}"
+        return f"{cls.ae.value}_{cls.tev.value}"
 
 
 class DeviceType(str, BaseEnum):
