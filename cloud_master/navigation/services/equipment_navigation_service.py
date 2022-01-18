@@ -88,7 +88,7 @@ class SiteNavigationService(BaseService):
             ]
         else:
             gateways = GateWay.objects.only(
-                "name", "client_number", "sensor_ids", "site_id"
+                "name", "client_number", "site_id"
             ).filter(site_id=site.pk)
             site_tree_info["children"] = [
                 cls.get_one_gateway_tree_infos(gateway) for gateway in gateways
