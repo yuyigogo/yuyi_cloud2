@@ -55,31 +55,44 @@ class ExcelService(object):
     def assemble_excel_data(cls, data: list):
         customer = {
             "name": data[0],
-            "administrative_division": f"{data[1]}-{data[2]}-{data[3]}",
+            "administrative_division":
+                {
+                    "province": data[1],
+                    "city": data[2],
+                    "region": data[3],
+                },
             "remarks": data[4],
         }
+        o_site_location = data[10].replace(" ", "").split(",")
+        if len(o_site_location) == 1:
+            o_site_location = data[10].replace(" ", "").split("，")
         site = {
             "name": data[5],
             "voltage_level": data[6],
-            "administrative_division": data[7],
-            "site_location": data[8].replace(" ", "").split(","),
-            "remarks": data[9],
+            "administrative_division":
+                {
+                    "province": data[7],
+                    "city": data[8],
+                    "region": data[9],
+                },
+            "site_location": [int(s) for s in o_site_location],
+            "remarks": data[11],
         }
         equipment = {
-            "device_name": data[10],
-            "device_type": data[11],
-            "voltage_level": data[12],
-            "operation_number": data[13],
-            "asset_number": data[14],
-            "device_model": data[15],
-            "factory_number": data[16],
-            "remarks": data[17],
+            "device_name": data[12],
+            "device_type": data[13],
+            "voltage_level": data[14],
+            "operation_number": data[15],
+            "asset_number": data[16],
+            "device_model": data[17],
+            "factory_number": data[18],
+            "remarks": data[19],
         }
         point = {
-            "measure_name": data[18],
-            "sensor_number": data[19],
-            "measure_type": data[20],
-            "remarks": data[21],
+            "measure_name": data[20],
+            "sensor_number": data[21],
+            "measure_type": data[22],
+            "remarks": data[23],
         }
         return [customer, site, equipment, point]
 

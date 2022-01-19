@@ -1,6 +1,6 @@
 from bson import ObjectId
 from mongoengine import DoesNotExist
-from rest_framework.fields import BooleanField, CharField, ListField
+from rest_framework.fields import BooleanField, CharField, ListField, IntegerField
 from sites.models.site import Site
 
 from common.const import ALL, MAX_LENGTH_NAME, MAX_MESSAGE_LENGTH
@@ -40,7 +40,7 @@ class CreateSiteSerializer(BaseSerializer):
     administrative_division = AdministrativeDivisionSerializer(required=True)
     remarks = CharField(max_length=MAX_MESSAGE_LENGTH)
     voltage_level = CharField(required=True)
-    site_location = ListField()
+    site_location = ListField(child=IntegerField())
 
     def validate(self, data: dict) -> dict:
         name = data["name"]
@@ -77,7 +77,7 @@ class UpdateSiteSerializer(BaseSerializer):
     administrative_division = AdministrativeDivisionSerializer()
     remarks = CharField(max_length=MAX_MESSAGE_LENGTH)
     voltage_level = CharField()
-    site_location = ListField()
+    site_location = ListField(child=IntegerField())
 
     def validate(self, data: dict) -> dict:
         user = self.context["request"].user
