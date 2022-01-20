@@ -87,7 +87,7 @@ class UsersDeleteSerializer(BaseSerializer):
         user_role_levels = CloudUser.objects.filter(id__in=user_ids).values_list(
             "role_level"
         )
-        if user.role_level <= min(user_role_levels):
+        if user.role_level >= min(user_role_levels):
             raise ForbiddenException("无此操作权限！")
         return data
 
