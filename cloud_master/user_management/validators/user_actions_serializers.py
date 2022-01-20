@@ -46,32 +46,35 @@ class UserCreateSerializer(BaseSerializer):
     password = CharField()
     email = EmailField()
     role_level = ChoiceField(choices=RoleLevel.allowed_role_level())
-    customer = CharField()
+    customer = CharField(required=False)
     sites = ListField(
-        child=CharField(), required=True, allow_empty=False, allow_null=False
+        child=CharField(), required=False, allow_empty=False, allow_null=False
     )
     phone = CharField(required=False)
 
-    def validate_customer(self, customer: str) -> str:
-        user = self.context["request"].user
-        try:
-            customer_obj = Customer.objects.get(id=customer)
-        except DoesNotExist:
-            raise APIException("invalid customer!")
-        if customer_obj.name == ALL and not user.is_cloud_super_admin:
-            raise APIException("have no right to choose this customer!")
-        return customer
-
     def validate(self, data: dict) -> dict:
+        # 1. only normal user can't create new user:
+        # 2. only cloud super admin can create client super admin;
+        # 3. client super admin can have more then one;
+        # 4. the same role level user can't modify the others;
         user = self.context["request"].user
-        customer = data["customer"]
-        sites = data["sites"]
-        named_all_site = str(SiteService.named_all_site().id)
-        if sites == [named_all_site] and not user.is_cloud_super_admin:
-            raise APIException("have no right to choose this site!")
-        num = Site.objects.filter(customer=customer, id__in=sites).count()
-        if num != len(sites):
-            raise APIException("invalid sites")
+        current_role_level = user.role_level
+        role_level = data["role_level"]
+        if current_role_level >= role_level:
+            raise APIException("用户权限不够！")
+        if role_level >= RoleLevel.ADMIN.value:
+            customer = data.get("customer")
+            if not customer:
+                raise APIException("please choose customer!")
+            if Customer.objects(id=customer).count() != 1:
+                raise APIException("invalid customer!")
+            if role_level == RoleLevel.NORMAL.value:
+                sites = data.get("sites")
+                if not sites:
+                    raise APIException("please choose sites!")
+                num = Site.objects.filter(customer=customer, id__in=sites).count()
+                if num != len(sites):
+                    raise APIException("invalid sites")
         return data
 
 

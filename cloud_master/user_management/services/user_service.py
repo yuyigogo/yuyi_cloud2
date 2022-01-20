@@ -17,8 +17,8 @@ class UserService(BaseService):
         user = CloudUser(
             username=user_data["username"],
             password=user_data["password"],
-            customer=user_data["customer"],
-            sites=user_data["sites"],
+            customer=user_data.get("customer"),
+            sites=user_data.get("sites"),
             phone=user_data.get("phone", ""),
             email=user_data["email"],
             role_level=user_data["role_level"],

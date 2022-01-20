@@ -20,8 +20,8 @@ class CloudUser(User, DocumentMixin):
     username = StringField(
         max_length=MAX_LENGTH_NAME, required=True, verbose_name="username"
     )
-    customer = ObjectIdField(required=True)
-    sites = ListField(required=True)
+    customer = ObjectIdField(required=False)
+    sites = ListField()
     phone = StringField(max_length=50)
     email = EmailField(required=True, max_length=100)
     avatar = BinaryField()
@@ -29,7 +29,7 @@ class CloudUser(User, DocumentMixin):
     is_active = BooleanField(default=True)
 
     meta = {
-        "indexes": ["customer", "email", "username", "sites", "role_level"],
+        "indexes": ["email", "username", "role_level"],
         "index_background": True,
     }
 
