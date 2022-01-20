@@ -1,20 +1,18 @@
 from customer.models.customer import Customer
-from mongoengine import DoesNotExist
 from rest_framework.fields import (
+    BooleanField,
     CharField,
     ChoiceField,
     EmailField,
     IntegerField,
     ListField,
-    BooleanField,
 )
 from sites.models.site import Site
-from sites.services.site_service import SiteService
+from user_management.models.user import CloudUser
 
 from common.const import ALL, MAX_LENGTH_NAME, RoleLevel
 from common.framework.exception import APIException, ForbiddenException
 from common.framework.serializer import BaseSerializer
-from user_management.models.user import CloudUser
 
 
 class UserListSerializer(BaseSerializer):
@@ -24,21 +22,21 @@ class UserListSerializer(BaseSerializer):
     customer = CharField(required=False)
     sites = ListField(child=CharField(), required=False)
 
-    def validate(self, data: dict) -> dict:
-        customer = data.get("customer")
-        sites = data.get("sites")
-        if customer is None and sites:
-            raise APIException("invalid query parameters!")
-        elif customer and sites:
-            user = self.context["request"].user
-            if user.is_cloud_or_client_super_admin():
-                return data
-            user_sites = set(map(user.sites, str))
-            if str(user.customer) != customer:
-                raise APIException("have no right to query this customer!")
-            elif not set(sites).issubset(user_sites):
-                raise APIException("have no right to query this sites!")
-        return data
+    # def validate(self, data: dict) -> dict:
+    #     customer = data.get("customer")
+    #     sites = data.get("sites")
+    #     if customer is None and sites:
+    #         raise APIException("invalid query parameters!")
+    #     elif customer and sites:
+    #         user = self.context["request"].user
+    #         if user.is_cloud_or_client_super_admin():
+    #             return data
+    #         user_sites = set(map(user.sites, str))
+    #         if str(user.customer) != customer:
+    #             raise APIException("have no right to query this customer!")
+    #         elif not set(sites).issubset(user_sites):
+    #             raise APIException("have no right to query this sites!")
+    #     return data
 
 
 class UserCreateSerializer(BaseSerializer):
@@ -89,22 +87,8 @@ class UsersDeleteSerializer(BaseSerializer):
         user_role_levels = CloudUser.objects.filter(id__in=user_ids).values_list(
             "role_level"
         )
-        if user.is_cloud_super_admin:
-            return data
-        elif user.is_client_super_admin():
-            if (
-                RoleLevel.CLOUD_SUPER_ADMIN.value in user_role_levels
-                or RoleLevel.CLIENT_SUPER_ADMIN.value in user_role_levels
-            ):
-                raise ForbiddenException(
-                    "forbidden to delete users with more permissions than yourself!"
-                )
-        else:
-            # admin user
-            if RoleLevel.ADMIN.value in user_role_levels:
-                raise ForbiddenException(
-                    "forbidden to delete users with more permissions than yourself!"
-                )
+        if user.role_level <= min(user_role_levels):
+            raise ForbiddenException("无此操作权限！")
         return data
 
 

@@ -57,8 +57,8 @@ class SiteService(BaseService):
         site.delete()
 
     @classmethod
-    def named_all_site(cls):
-        return Site.objects.get(name=ALL)
+    def named_all_site_id(cls):
+        return str(Site.objects.get(name=ALL).pk)
 
     @classmethod
     def get_user_sites_info(cls, site_ids: list) -> list:

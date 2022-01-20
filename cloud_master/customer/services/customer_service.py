@@ -41,8 +41,8 @@ class CustomerService(BaseService):
         customer.delete()
 
     @classmethod
-    def named_all_customer(cls):
-        return Customer.objects.get(name=ALL)
+    def named_all_customer_id(cls):
+        return str(Customer.objects.get(name=ALL).pk)
 
     @classmethod
     def get_customer_id_name_dict(cls, customer_ids: Union[set, list]) -> dict:
