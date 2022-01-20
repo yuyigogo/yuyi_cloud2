@@ -31,7 +31,9 @@ class CustomersView(BaseView):
         user = request.user
         logger.info(f"{user.username} request list customers")
         if user.is_cloud_or_client_super_admin():
-            customers = Customer.objects.all()
+            customers = Customer.objects.filter(
+                id__ne=CustomerService.named_all_customer_id()
+            )
         else:
             customers = Customer.objects.filter(id=user.customer)
         total = customers.count()
