@@ -73,3 +73,27 @@ class UserService(BaseService):
             for user in users_by_page
         ]
         return total, user_info
+
+    @classmethod
+    def update_user(
+        cls,
+        update_user: CloudUser,
+        password: str,
+        role_level: int,
+        is_suspend: Optional[bool],
+        customer: Optional[str],
+        sites: Optional[list],
+    ):
+        update_dict = {"password": password, "role_level": role_level}
+        if is_suspend:
+            update_dict["is_active"] = is_suspend
+        if customer:
+            update_dict["customer"] = customer
+        if sites:
+            update_dict["sites"] = sites
+        if role_level == RoleLevel.CLIENT_SUPER_ADMIN.value:
+            update_dict["customer"] = CustomerService.named_all_customer_id()
+            update_dict["sites"] = [SiteService.named_all_site_id()]
+        elif role_level == RoleLevel.ADMIN.value:
+            update_dict["sites"] = [SiteService.named_all_site_id()]
+        update_user.update(**update_dict)

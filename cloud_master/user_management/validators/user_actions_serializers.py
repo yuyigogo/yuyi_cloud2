@@ -1,3 +1,5 @@
+from mongoengine import DoesNotExist
+
 from customer.models.customer import Customer
 from rest_framework.fields import (
     BooleanField,
@@ -21,22 +23,6 @@ class UserListSerializer(BaseSerializer):
     username = CharField(required=False)
     customer = CharField(required=False)
     sites = ListField(child=CharField(), required=False)
-
-    # def validate(self, data: dict) -> dict:
-    #     customer = data.get("customer")
-    #     sites = data.get("sites")
-    #     if customer is None and sites:
-    #         raise APIException("invalid query parameters!")
-    #     elif customer and sites:
-    #         user = self.context["request"].user
-    #         if user.is_cloud_or_client_super_admin():
-    #             return data
-    #         user_sites = set(map(user.sites, str))
-    #         if str(user.customer) != customer:
-    #             raise APIException("have no right to query this customer!")
-    #         elif not set(sites).issubset(user_sites):
-    #             raise APIException("have no right to query this sites!")
-    #     return data
 
 
 class UserCreateSerializer(BaseSerializer):
@@ -63,38 +49,49 @@ class UserCreateSerializer(BaseSerializer):
         if role_level >= RoleLevel.ADMIN.value:
             customer = data.get("customer")
             if not customer:
-                raise APIException("please choose customer!")
+                raise APIException("请选择公司！")
             if Customer.objects(id=customer).count() != 1:
-                raise APIException("invalid customer!")
+                raise APIException("公司不存在！")
             if role_level == RoleLevel.NORMAL.value:
                 sites = data.get("sites")
                 if not sites:
-                    raise APIException("please choose sites!")
+                    raise APIException("请选择站点！")
                 num = Site.objects.filter(customer=customer, id__in=sites).count()
                 if num != len(sites):
-                    raise APIException("invalid sites")
+                    raise APIException("站点不存在！")
         return data
 
 
 class UsersDeleteSerializer(BaseSerializer):
-    user_ids = ListField(child=CharField(), required=True)
+    user_id = CharField(required=True)
 
     def validate(self, data: dict) -> dict:
         user = self.context["request"].user
-        user_ids = data["user_ids"]
-        if str(user.id) in user_ids:
+        user_id = data["user_ids"]
+        if str(user.id) == user_id:
             raise APIException("禁止修改自己！")
-        user_role_levels = CloudUser.objects.filter(id__in=user_ids).values_list(
-            "role_level"
-        )
-        if user.role_level >= min(user_role_levels):
+        try:
+            d_user = CloudUser.objects.get(id=user_id)
+        except DoesNotExist:
+            raise APIException("invalid user_id!")
+        data["d_user"] = d_user
+        if user.role_level >= d_user.role_level:
             raise ForbiddenException("无此操作权限！")
         return data
 
 
-class PutUsersSerializer(UsersDeleteSerializer):
-    is_suspend = BooleanField(required=True)
+class PutUsersSerializer(UserCreateSerializer):
+    is_suspend = BooleanField(required=False)
+    user_id = CharField(required=True)
+
+    def validated_user_id(self, user_id):
+        try:
+            update_user = CloudUser.objects.get(id=user_id)
+        except DoesNotExist:
+            raise APIException("invalid user_id!")
+        self.context["update_user"] = update_user
+        return user_id
 
     def validate(self, data: dict) -> dict:
-        data = super(UsersDeleteSerializer, self).validate(data)
+        super(UserCreateSerializer, self).validate(data)
         return data

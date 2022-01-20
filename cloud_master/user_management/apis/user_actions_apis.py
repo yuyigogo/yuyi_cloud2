@@ -4,7 +4,6 @@ from customer.services.customer_service import CustomerService
 from mongoengine import DoesNotExist
 from rest_framework.status import HTTP_201_CREATED
 from sites.services.site_service import SiteService
-from user_management.models.user import CloudUser
 from user_management.services.user_service import UserService
 from user_management.services.user_token_service import UserTokenService
 from user_management.validators.user_actions_serializers import (
@@ -66,20 +65,26 @@ class UsersView(BaseView):
 
     def put(self, request):
         user = request.user
-        data, _ = self.get_validated_data(PutUsersSerializer)
-        update_user_ids = data["user_ids"]
-        logger.info(f"{user.username} request enable/suspend users: with {data=}")
-        CloudUser.objects.filter(id__in=update_user_ids).update(
-            is_active=data["is_suspend"]
+        data, context = self.get_validated_data(PutUsersSerializer)
+        update_user = context["update_user"]
+        logger.info(f"{user.username} request update users: with {data=}")
+        UserService.update_user(
+            update_user,
+            data["password"],
+            data["role_level"],
+            is_suspend=data.get("is_suspend"),
+            customer=data.get("customer"),
+            sites=data.get("sites")
         )
         return BaseResponse()
 
     def delete(self, request):
         user = request.user
         data, _ = self.get_validated_data(UsersDeleteSerializer)
-        delete_user_ids = data["user_ids"]
-        logger.info(f"{user.username} request delete users: {delete_user_ids}")
-        CloudUser.objects.filter(id__in=delete_user_ids).delete()
+        d_user = data["d_user"]
+        delete_user_id = data["user_id"]
+        logger.info(f"{user.username} request delete users: {delete_user_id}")
+        d_user.delete()
         return BaseResponse()
 
 
