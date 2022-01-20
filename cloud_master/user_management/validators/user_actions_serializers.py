@@ -83,7 +83,7 @@ class UsersDeleteSerializer(BaseSerializer):
         user = self.context["request"].user
         user_ids = data["user_ids"]
         if str(user.id) in user_ids:
-            raise APIException("should not delete yourself")
+            raise APIException("禁止修改自己！")
         user_role_levels = CloudUser.objects.filter(id__in=user_ids).values_list(
             "role_level"
         )

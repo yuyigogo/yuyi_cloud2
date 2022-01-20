@@ -68,6 +68,7 @@ class UserService(BaseService):
                 "email": user.email,
                 "phone": user.phone,
                 "id": str(user.pk),
+                "is_suspend": user.is_active,
             }
             for user in users_by_page
         ]
