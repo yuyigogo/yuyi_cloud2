@@ -80,11 +80,20 @@ class UsersDeleteSerializer(BaseSerializer):
         return data
 
 
-class PutUsersSerializer(UserCreateSerializer):
-    is_suspend = BooleanField(required=False)
+class PutUsersSerializer(BaseSerializer):
     user_id = CharField(required=True)
+    is_suspend = BooleanField(required=False)
+    password = CharField(required=False)
+    role_level = ChoiceField(required=True, choices=RoleLevel.allowed_role_level())
+    customer = CharField(required=False)
+    sites = ListField(
+        child=CharField(), required=False, allow_empty=False, allow_null=False
+    )
 
-    def validated_user_id(self, user_id):
+    def validate_user_id(self, user_id):
+        user = self.context["request"].user
+        if str(user.id) == user_id:
+            raise APIException("禁止修改自己！")
         try:
             update_user = CloudUser.objects.get(id=user_id)
         except DoesNotExist:
@@ -92,6 +101,26 @@ class PutUsersSerializer(UserCreateSerializer):
         self.context["update_user"] = update_user
         return user_id
 
+    def validated_role_level(self, role_level):
+        user = self.context["request"].user
+        current_role_level = user.role_level
+        if current_role_level >= role_level:
+            raise APIException("用户权限不够！")
+        return role_level
+
     def validate(self, data: dict) -> dict:
-        super(UserCreateSerializer, self).validate(data)
+        role_level = data["role_level"]
+        if role_level >= RoleLevel.ADMIN.value:
+            customer = data.get("customer")
+            if not customer:
+                raise APIException("请选择公司！")
+            if Customer.objects(id=customer).count() != 1:
+                raise APIException("公司不存在！")
+            if role_level == RoleLevel.NORMAL.value:
+                sites = data.get("sites")
+                if not sites:
+                    raise APIException("请选择站点！")
+                num = Site.objects.filter(customer=customer, id__in=sites).count()
+                if num != len(sites):
+                    raise APIException("站点不存在！")
         return data

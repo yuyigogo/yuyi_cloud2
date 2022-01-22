@@ -70,8 +70,8 @@ class UsersView(BaseView):
         logger.info(f"{user.username} request update users: with {data=}")
         UserService.update_user(
             update_user,
-            data["password"],
             data["role_level"],
+            password=data.get("password"),
             is_suspend=data.get("is_suspend"),
             customer=data.get("customer"),
             sites=data.get("sites")
