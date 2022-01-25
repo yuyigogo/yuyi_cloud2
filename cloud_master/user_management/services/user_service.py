@@ -5,7 +5,7 @@ from mongoengine import Q
 from sites.services.site_service import SiteService
 from user_management.models.user import CloudUser
 
-from common.const import ROLE_DICT, RoleLevel
+from common.const import RoleLevel
 from common.framework.service import BaseService
 from common.utils import get_objects_pagination
 
@@ -63,11 +63,12 @@ class UserService(BaseService):
             {
                 "username": user.username,
                 "customer_name": customer_dict.get(user.customer, ""),
-                "role_level": ROLE_DICT[user.role_level],
+                "role_level": user.role_level,
                 "status": user.is_active,
                 "email": user.email,
                 "phone": user.phone,
                 "id": str(user.pk),
+                "customer": str(user.customer),
                 "is_suspend": user.is_active,
             }
             for user in users_by_page
