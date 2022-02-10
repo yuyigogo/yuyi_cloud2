@@ -67,7 +67,7 @@ class UsersDeleteSerializer(BaseSerializer):
 
     def validate(self, data: dict) -> dict:
         user = self.context["request"].user
-        user_id = data["user_ids"]
+        user_id = data["user_id"]
         if str(user.id) == user_id:
             raise APIException("禁止修改自己！")
         try:
