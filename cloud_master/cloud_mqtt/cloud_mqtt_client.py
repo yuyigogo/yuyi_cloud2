@@ -36,7 +36,7 @@ class CloudMqtt(object):
     @staticmethod
     def on_mqtt_disconnect(client, userdata, rc):
         if rc != 0:
-            logger.info(f"Unexpected disconnection {rc=}")
+            logger.info(f"Unexpected disconnection {rc=} in cloud app!")
         else:
             logger.info("disconnection !!!")
 

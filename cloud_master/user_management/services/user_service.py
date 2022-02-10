@@ -81,15 +81,12 @@ class UserService(BaseService):
         update_user: CloudUser,
         role_level: int,
         password: Optional[str],
-        is_suspend: Optional[bool],
         customer: Optional[str],
         sites: Optional[list],
     ):
         update_dict = {"role_level": role_level}
         if password:
             update_dict["password"] = password
-        if is_suspend is not None:
-            update_dict["is_active"] = is_suspend
         if customer:
             update_dict["customer"] = customer
         if sites:

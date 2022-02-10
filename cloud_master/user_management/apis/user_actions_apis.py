@@ -68,11 +68,14 @@ class UsersView(BaseView):
         data, context = self.get_validated_data(PutUsersSerializer)
         update_user = context["update_user"]
         logger.info(f"{user.username} request update users: with {data=}")
+        is_suspend = data.get("is_suspend")
+        if is_suspend is not None:
+            update_user.update(is_active=is_suspend)
+            return BaseResponse()
         UserService.update_user(
             update_user,
             data["role_level"],
             password=data.get("password"),
-            is_suspend=data.get("is_suspend"),
             customer=data.get("customer"),
             sites=data.get("sites")
         )

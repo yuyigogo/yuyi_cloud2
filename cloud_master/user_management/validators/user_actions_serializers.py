@@ -12,14 +12,14 @@ from rest_framework.fields import (
 from sites.models.site import Site
 from user_management.models.user import CloudUser
 
-from common.const import ALL, MAX_LENGTH_NAME, RoleLevel
+from common.const import MAX_LENGTH_NAME, RoleLevel
 from common.framework.exception import APIException, ForbiddenException
 from common.framework.serializer import BaseSerializer
 
 
 class UserListSerializer(BaseSerializer):
-    page = IntegerField(required=False)
-    limit = IntegerField(required=False)
+    page = IntegerField(required=False, default=1)
+    limit = IntegerField(required=False, default=20)
     username = CharField(required=False)
     customer = CharField(required=False)
     sites = ListField(child=CharField(), required=False)
@@ -84,7 +84,7 @@ class PutUsersSerializer(BaseSerializer):
     user_id = CharField(required=True)
     is_suspend = BooleanField(required=False)
     password = CharField(required=False)
-    role_level = ChoiceField(required=True, choices=RoleLevel.allowed_role_level())
+    role_level = ChoiceField(required=False, choices=RoleLevel.allowed_role_level())
     customer = CharField(required=False)
     sites = ListField(
         child=CharField(), required=False, allow_empty=False, allow_null=False
@@ -99,6 +99,9 @@ class PutUsersSerializer(BaseSerializer):
         except DoesNotExist:
             raise APIException("invalid user_id!")
         self.context["update_user"] = update_user
+        request_role_level = user.role_level
+        if request_role_level >= update_user.role_level:
+            raise APIException("用户权限不够！")
         return user_id
 
     def validated_role_level(self, role_level):
@@ -109,7 +112,13 @@ class PutUsersSerializer(BaseSerializer):
         return role_level
 
     def validate(self, data: dict) -> dict:
-        role_level = data["role_level"]
+        if data.get("is_suspend"):
+            # just suspend one user
+            return data
+        # update user other property
+        role_level = data.get("role_level")
+        if role_level is None:
+            raise APIException("请选择角色！")
         if role_level >= RoleLevel.ADMIN.value:
             customer = data.get("customer")
             if not customer:
