@@ -112,7 +112,7 @@ class PutUsersSerializer(BaseSerializer):
         return role_level
 
     def validate(self, data: dict) -> dict:
-        if data.get("is_suspend"):
+        if data.get("is_suspend") is not None:
             # just suspend one user
             return data
         # update user other property
