@@ -70,7 +70,7 @@ class UserService(BaseService):
                 "id": str(user.pk),
                 "customer": str(user.customer),
                 "is_suspend": user.is_active,
-                "sites": user.sites,
+                # "sites": user.sites,
             }
             for user in users_by_page
         ]
