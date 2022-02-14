@@ -30,7 +30,7 @@ class UserCreateSerializer(BaseSerializer):
     password = CharField()
     email = EmailField()
     role_level = ChoiceField(choices=RoleLevel.allowed_role_level())
-    customer = CharField(required=False)
+    customer = CharField(required=False, allow_null=False, allow_blank=False)
     sites = ListField(
         child=CharField(), required=False, allow_empty=False, allow_null=False
     )

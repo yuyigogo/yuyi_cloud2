@@ -1,14 +1,18 @@
+import logging
 from datetime import datetime
 
 from customer.models.customer import Customer
 from file_management.models.electrical_equipment import ElectricalEquipment
 from file_management.models.measure_point import MeasurePoint
+from rest_framework.status import HTTP_400_BAD_REQUEST
 from sites.models.site import Site
 
 from common.const import DATE_FORMAT_EN
 from common.error_code import StatusCode
-from common.framework.exception import InvalidException
+from common.framework.exception import APIException, InvalidException
 from common.utils.excel_utils import Workbook
+
+logger = logging.getLogger(__name__)
 
 
 class ExcelService(object):
@@ -23,7 +27,10 @@ class ExcelService(object):
         """
         workbook = Workbook.open(excel_file_name=excel_file_name, excel_file=excel_file)
         workbook_data = list(cls.read_workbook_data(workbook, sheet_name))
-        assembled_data = [cls.assemble_excel_data(data) for data in workbook_data]
+        try:
+            assembled_data = [cls.assemble_excel_data(data) for data in workbook_data]
+        except Exception:
+            raise ExcelException("excel格式错误！")
         cls.save_workbook_data(assembled_data)
 
     @classmethod
@@ -33,10 +40,13 @@ class ExcelService(object):
                 "this file is empty", code=StatusCode.IMPORT_EXCEL_IS_EMPTY.value,
             )
         for data_list in workbook_data:
-            customer_id = cls.crete_or_update_customer(data_list[0])
-            site_id = cls.crete_or_update_site(data_list[1], customer_id)
-            equipment_id = cls.crete_or_update_equipment(data_list[2], site_id)
-            cls.crete_or_update_point(data_list[3], equipment_id)
+            try:
+                customer_id = cls.crete_or_update_customer(data_list[0])
+                site_id = cls.crete_or_update_site(data_list[1], customer_id)
+                equipment_id = cls.crete_or_update_equipment(data_list[2], site_id)
+                cls.crete_or_update_point(data_list[3], equipment_id)
+            except Exception as e:
+                logger.exception(f"save workbook data error, exception: {e=}")
 
     @classmethod
     def read_workbook_data(cls, workbook, sheet_name=None):
@@ -55,12 +65,11 @@ class ExcelService(object):
     def assemble_excel_data(cls, data: list):
         customer = {
             "name": data[0],
-            "administrative_division":
-                {
-                    "province": data[1],
-                    "city": data[2],
-                    "region": data[3],
-                },
+            "administrative_division": {
+                "province": data[1],
+                "city": data[2],
+                "region": data[3],
+            },
             "remarks": data[4],
         }
         o_site_location = data[10].replace(" ", "").split(",")
@@ -69,12 +78,11 @@ class ExcelService(object):
         site = {
             "name": data[5],
             "voltage_level": data[6],
-            "administrative_division":
-                {
-                    "province": data[7],
-                    "city": data[8],
-                    "region": data[9],
-                },
+            "administrative_division": {
+                "province": data[7],
+                "city": data[8],
+                "region": data[9],
+            },
             "site_location": [int(s) for s in o_site_location],
             "remarks": data[11],
         }
@@ -142,3 +150,7 @@ class ExcelService(object):
             point = MeasurePoint(**point_dict)
             point.save()
         return str(point.pk)
+
+
+class ExcelException(APIException):
+    status_code = HTTP_400_BAD_REQUEST
