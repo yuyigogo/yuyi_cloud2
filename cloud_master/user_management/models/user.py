@@ -17,9 +17,7 @@ from vendor.django_mongoengine.sessions import MongoSession
 
 class CloudUser(User, DocumentMixin):
     password = StringField(required=True, max_length=128)
-    username = StringField(
-        max_length=MAX_LENGTH_NAME, required=True, verbose_name="username"
-    )
+    username = StringField(max_length=MAX_LENGTH_NAME, required=True)
     customer = ObjectIdField(required=False)
     sites = ListField(ObjectIdField(), default=[])
     phone = StringField(max_length=50)
@@ -27,11 +25,6 @@ class CloudUser(User, DocumentMixin):
     avatar = BinaryField()
     role_level = IntField(required=True)
     is_active = BooleanField(default=True)
-
-    meta = {
-        "indexes": ["email", "username", "role_level"],
-        "index_background": True,
-    }
 
     def remove_sessions(self):
         user_sessions = UserSession.objects(user_id=self.id)
