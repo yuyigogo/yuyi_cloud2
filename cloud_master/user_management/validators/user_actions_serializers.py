@@ -36,6 +36,16 @@ class UserCreateSerializer(BaseSerializer):
     )
     phone = CharField(required=False)
 
+    def validate_username(self, username: str):
+        if CloudUser.objects.filter(username=username).count() > 0:
+            raise APIException("用户名已存在！")
+        return username
+
+    def validate_email(self, email: str):
+        if CloudUser.objects.filter(email=email).count() > 0:
+            raise APIException("邮箱已注册！")
+        return email
+
     def validate(self, data: dict) -> dict:
         # 1. only normal user can't create new user:
         # 2. only cloud super admin can create client super admin;
