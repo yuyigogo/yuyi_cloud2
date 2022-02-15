@@ -37,8 +37,10 @@ class GetCustomerSitesSerializer(BaseSerializer):
 
 class CreateSiteSerializer(BaseSerializer):
     name = CharField(required=True, max_length=MAX_LENGTH_NAME)
-    administrative_division = AdministrativeDivisionSerializer(required=True)
-    remarks = CharField(max_length=MAX_MESSAGE_LENGTH)
+    administrative_division = AdministrativeDivisionSerializer(
+        required=True, allow_null=False
+    )
+    remarks = CharField(max_length=MAX_MESSAGE_LENGTH, required=False)
     voltage_level = CharField(required=True)
     site_location = ListField(required=True)
 
@@ -73,10 +75,12 @@ class BaseSiteSerializer(BaseSerializer):
 
 
 class UpdateSiteSerializer(BaseSerializer):
-    name = CharField(max_length=MAX_LENGTH_NAME)
-    administrative_division = AdministrativeDivisionSerializer()
-    remarks = CharField(max_length=MAX_MESSAGE_LENGTH)
-    voltage_level = CharField()
+    name = CharField(max_length=MAX_LENGTH_NAME, required=False)
+    administrative_division = AdministrativeDivisionSerializer(
+        required=False, allow_null=False
+    )
+    remarks = CharField(max_length=MAX_MESSAGE_LENGTH, required=False)
+    voltage_level = CharField(required=False)
     site_location = ListField(required=False)
 
     def validate(self, data: dict) -> dict:
