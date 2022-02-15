@@ -36,11 +36,15 @@ class GetCustomerSitesSerializer(BaseSerializer):
 
 
 class CreateSiteSerializer(BaseSerializer):
-    name = CharField(required=True, max_length=MAX_LENGTH_NAME)
+    name = CharField(
+        required=True, max_length=MAX_LENGTH_NAME, allow_null=False, allow_blank=False
+    )
     administrative_division = AdministrativeDivisionSerializer(
         required=True, allow_null=False
     )
-    remarks = CharField(max_length=MAX_MESSAGE_LENGTH, required=False)
+    remarks = CharField(
+        max_length=MAX_MESSAGE_LENGTH, required=False, allow_null=True, allow_blank=True
+    )
     voltage_level = CharField(required=True)
     site_location = ListField(required=True)
 
