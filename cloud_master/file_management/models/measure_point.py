@@ -7,7 +7,7 @@ from common.const import MAX_LENGTH_NAME, MAX_MESSAGE_LENGTH
 class MeasurePoint(CloudDocument):
     measure_name = StringField(required=True, max_length=MAX_LENGTH_NAME)
     measure_type = StringField(required=True, max_length=MAX_LENGTH_NAME)
-    sensor_number = StringField(unique=True, required=True)
+    sensor_number = StringField(required=True)
     remarks = StringField(max_length=MAX_MESSAGE_LENGTH)
     equipment_id = ObjectIdField()
 
