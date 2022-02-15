@@ -83,7 +83,9 @@ class UpdateSiteSerializer(BaseSerializer):
     administrative_division = AdministrativeDivisionSerializer(
         required=False, allow_null=False
     )
-    remarks = CharField(max_length=MAX_MESSAGE_LENGTH, required=False)
+    remarks = CharField(
+        max_length=MAX_MESSAGE_LENGTH, required=False, allow_blank=True, allow_null=True
+    )
     voltage_level = CharField(required=False)
     site_location = ListField(required=False)
 
