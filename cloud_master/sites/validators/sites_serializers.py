@@ -40,7 +40,7 @@ class CreateSiteSerializer(BaseSerializer):
     administrative_division = AdministrativeDivisionSerializer(required=True)
     remarks = CharField(max_length=MAX_MESSAGE_LENGTH)
     voltage_level = CharField(required=True)
-    site_location = ListField(child=IntegerField())
+    site_location = ListField(required=True)
 
     def validate(self, data: dict) -> dict:
         name = data["name"]
@@ -77,7 +77,7 @@ class UpdateSiteSerializer(BaseSerializer):
     administrative_division = AdministrativeDivisionSerializer()
     remarks = CharField(max_length=MAX_MESSAGE_LENGTH)
     voltage_level = CharField()
-    site_location = ListField(child=IntegerField())
+    site_location = ListField(required=False)
 
     def validate(self, data: dict) -> dict:
         user = self.context["request"].user

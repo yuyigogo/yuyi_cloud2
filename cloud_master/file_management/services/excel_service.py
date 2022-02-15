@@ -83,7 +83,7 @@ class ExcelService(object):
                 "city": data[8],
                 "region": data[9],
             },
-            "site_location": [int(s) for s in o_site_location],
+            "site_location": o_site_location,
             "remarks": data[11],
         }
         equipment = {

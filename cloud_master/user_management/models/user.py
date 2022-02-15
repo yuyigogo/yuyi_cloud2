@@ -21,7 +21,7 @@ class CloudUser(User, DocumentMixin):
         max_length=MAX_LENGTH_NAME, required=True, verbose_name="username"
     )
     customer = ObjectIdField(required=False)
-    sites = ListField()
+    sites = ListField(ObjectIdField(), default=[])
     phone = StringField(max_length=50)
     email = EmailField(required=True, max_length=100)
     avatar = BinaryField()
