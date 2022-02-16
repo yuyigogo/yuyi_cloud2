@@ -53,7 +53,7 @@ class CreateSiteSerializer(BaseSerializer):
         customer_id = self.context["customer_id"]
         if (
             name == ALL
-            or Site.objects.filter(customer=customer_id, name=name).count() > 0
+            or Site.objects.filter(name=name).count() > 0
         ):
             raise APIException(
                 "站点名称已存在!", code=StatusCode.SITE_NAME_DUPLICATE.value,

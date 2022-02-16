@@ -39,6 +39,13 @@ class CreatePointSerializer(BaseSerializer):
             equipment = ElectricalEquipment.objects.get(id=equipment_id)
         except DoesNotExist:
             raise InvalidException(f"invalid {equipment_id=}")
+        if (
+            MeasurePoint.objects(
+                measure_type=data["measure_type"], sensor_number=data["sensor_number"]
+            ).count()
+            > 0
+        ):
+            raise APIException("传感器编号已绑定！")
         return data
 
 
@@ -75,6 +82,18 @@ class UpdatePointSerializer(BaseSerializer):
         except DoesNotExist:
             raise InvalidException(f"invalid {equipment_id=} or {point_id=}")
         self.context["point"] = point
+        if (
+            point.measure_type != data["measure_type"]
+            or point.sensor_number != data["sensor_number"]
+        ):
+            if (
+                MeasurePoint.objects(
+                    measure_type=data["measure_type"],
+                    sensor_number=data["sensor_number"],
+                ).count()
+                > 0
+            ):
+                raise APIException("传感器编号已绑定！")
         return data
 
 
