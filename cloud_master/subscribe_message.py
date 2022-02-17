@@ -127,7 +127,9 @@ class DataLoader:
             print("disconnection !!!")
 
     def run(self):
-        self.client.username_pw_set("guest", "guest")
+        self.client.username_pw_set(
+            MQTT_CLIENT_CONFIG["user"], MQTT_CLIENT_CONFIG["pw"]
+        )
         self.client.on_connect = DataLoader.on_connect
         self.client.on_message = DataLoader.on_message
         self.client.on_subscribe = DataLoader.on_subscribe
