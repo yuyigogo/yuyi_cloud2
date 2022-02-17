@@ -51,14 +51,14 @@ class BaseService(object):
                         f"delete sensor data failed with {sensor_type=}- client_id: {client_id} - {e=}"
                     )
         gateway.delete()
-        cls.remove_client_ids_from_redis((client_id,))
+        cls.remove_client_id_from_redis(client_id)
 
     @classmethod
-    def remove_client_ids_from_redis(cls, client_ids: tuple):
-        redis.srem(CLIENT_IDS, client_ids)
+    def remove_client_id_from_redis(cls, client_id: str):
+        redis.srem(CLIENT_IDS, client_id)
 
     @classmethod
     def get_latest_sensor_info(cls, sensor_number: str, sensor_type: str) -> dict:
         mongo_col = MONGO_CLIENT[sensor_type]
-        sensor_data = mongo_col.find_one({"sensor_id": sensor_number, "is_new": True}, )
+        sensor_data = mongo_col.find_one({"sensor_id": sensor_number, "is_new": True},)
         return bson_to_dict(sensor_data) if sensor_data else {}

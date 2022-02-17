@@ -1,3 +1,4 @@
+from customer.models.customer import Customer
 from equipment_management.models.gateway import GateWay
 from mongoengine import DoesNotExist
 from rest_framework.fields import BooleanField, CharField, IntegerField
@@ -9,12 +10,42 @@ from common.framework.exception import APIException, InvalidException
 from common.framework.serializer import BaseSerializer
 
 
+def validate_site_id(site_id: str):
+    try:
+        site = Site.objects.get(id=site_id)
+    except DoesNotExist:
+        raise InvalidException(f"invalid {site_id=}")
+    return site
+
+
+class SiteGatewaysSerializer(BaseSerializer):
+    def validate(self, data):
+        site_id = self.context["site_id"]
+        validate_site_id(site_id)
+        return data
+
+
 class CreateGatewaySerializer(BaseSerializer):
     name = CharField(required=True, max_length=MAX_LENGTH_NAME)
     customer = CharField(required=True)
+    site_id = CharField(required=True)
     client_number = CharField(required=True)
     time_adjusting = IntegerField(required=True)
-    remarks = CharField(max_length=MAX_MESSAGE_LENGTH)
+    remarks = CharField(max_length=MAX_MESSAGE_LENGTH, required=False)
+
+    def validate_customer(self, customer):
+        try:
+            Customer.objects.get(pk=customer)
+        except DoesNotExist:
+            raise APIException("公司不存在！")
+        return customer
+
+    def validate_site_id(self, site_id):
+        try:
+            Site.objects.get(pk=site_id)
+        except DoesNotExist:
+            raise APIException("站点不存在！")
+        return site_id
 
     def validate_client_number(self, client_number):
         if GateWay.objects(client_number=client_number).count() > 0:
@@ -24,12 +55,7 @@ class CreateGatewaySerializer(BaseSerializer):
         return client_number
 
     def validate(self, data: dict) -> dict:
-        site_id = self.context["site_id"]
-        try:
-            site = Site.objects.get(id=site_id)
-        except DoesNotExist:
-            raise InvalidException(f"invalid {site_id=}")
-        if GateWay.objects.filter(site_id=site_id, name=data["name"]).count() > 0:
+        if GateWay.objects.filter(name=data["name"]).count() > 0:
             raise APIException(
                 "主机名称已存在!", code=StatusCode.GATEWAY_NAME_DUPLICATE.value,
             )
@@ -38,9 +64,25 @@ class CreateGatewaySerializer(BaseSerializer):
 
 class UpdateGatewaySerializer(BaseSerializer):
     name = CharField(required=False, max_length=MAX_LENGTH_NAME)
+    customer = CharField(required=False)
+    site_id = CharField(required=False)
     client_number = CharField(required=False)
     time_adjusting = IntegerField(required=False)
     remarks = CharField(required=False, max_length=MAX_MESSAGE_LENGTH)
+
+    def validate_customer(self, customer):
+        try:
+            Customer.objects.get(pk=customer)
+        except DoesNotExist:
+            raise APIException("公司不存在！")
+        return customer
+
+    def validate_site_id(self, site_id):
+        try:
+            Site.objects.get(pk=site_id)
+        except DoesNotExist:
+            raise APIException("站点不存在！")
+        return site_id
 
     def validate(self, data: dict) -> dict:
         gateway_id = self.context["gateway_id"]
@@ -52,7 +94,7 @@ class UpdateGatewaySerializer(BaseSerializer):
         name = data.get("name")
         client_number = data.get("client_number")
         if name and name != gateway.name:
-            if GateWay.objects(site_id=gateway.site_id, name=name).count() > 0:
+            if GateWay.objects(name=name).count() > 0:
                 raise APIException(
                     "主机名称已存在!", code=StatusCode.GATEWAY_NAME_DUPLICATE.value,
                 )

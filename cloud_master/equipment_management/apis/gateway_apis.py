@@ -10,7 +10,7 @@ from equipment_management.validators.gateway_serializers import (
     CreateGatewaySerializer,
     DeleteGatewaySerializer,
     SensorConfigSerializer,
-    UpdateGatewaySerializer,
+    UpdateGatewaySerializer, SiteGatewaysSerializer,
 )
 from mongoengine import DoesNotExist
 from rest_framework.status import (
@@ -29,6 +29,16 @@ from common.storage.redis import redis
 logger = logging.getLogger(__name__)
 
 
+class SiteGatewaysView(BaseView):
+    def get(self, request, site_id):
+        # 站点下主机列表信息
+        user = request.user
+        logger.info(f"{user.username} request list gateways in {site_id=}")
+        self.get_validated_data(SiteGatewaysSerializer, site_id=site_id)
+        gateways = GatewayService(site_id).get_list_gateway_in_site()
+        return BaseResponse(data=gateways)
+
+
 class GatewaysView(BaseView):
     permission_classes = (
         PermissionFactory(
@@ -38,19 +48,12 @@ class GatewaysView(BaseView):
         ),
     )
 
-    def get(self, request, site_id):
-        # 站点下主机列表信息
-        user = request.user
-        logger.info(f"{user.username} request list gateways in {site_id=}")
-        gateways = GatewayService(site_id).get_list_gateway_in_site()
-        return BaseResponse(data=gateways)
-
-    def post(self, request, site_id):
+    def post(self, request):
         """ create a new gateway"""
         user = request.user
-        data, _ = self.get_validated_data(CreateGatewaySerializer, site_id=site_id)
+        data, _ = self.get_validated_data(CreateGatewaySerializer)
         logger.info(f"{user.username} create a gateway with data: {data}")
-        gateway = GatewayService(site_id).create_gateway(data)
+        gateway = GatewayService(data["site_id"]).create_gateway(data)
         # add this client_number to redis
         redis.sadd(CLIENT_IDS, gateway.client_number)
         return BaseResponse(data=gateway.to_dict(), status_code=HTTP_201_CREATED)
