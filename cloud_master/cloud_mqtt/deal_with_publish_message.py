@@ -38,10 +38,10 @@ class OnMqttMessage(object):
     @classmethod
     def deal_with_sensors_in_gateway_msg(cls, client_id: str, msg_dict: dict):
         """网关下传感器列表数据存储"""
-        print("1"*100)
         logger.info(f"deal_with_sensors_in_gateway_msg for {client_id=}")
         if not cls.is_gateway_enabled(client_id):
             return
+        print("1" * 100)
         try:
             gateway = GateWay.objects.get(client_number=client_id)
         except DoesNotExist:
