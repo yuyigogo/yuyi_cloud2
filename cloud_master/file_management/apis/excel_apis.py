@@ -7,7 +7,11 @@ from file_management.validators.excel_file_serializers import ExcelImportSeriali
 
 
 class ImportFileView(BaseView):
-    permission_classes = (PermissionFactory(RoleLevel.CLOUD_SUPER_ADMIN.value,),)
+    permission_classes = (
+        PermissionFactory(
+            RoleLevel.CLIENT_SUPER_ADMIN.value, RoleLevel.CLOUD_SUPER_ADMIN.value,
+        ),
+    )
 
     def post(self, request):
         data, _ = self.get_validated_data(ExcelImportSerializer)
