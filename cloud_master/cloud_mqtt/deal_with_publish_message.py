@@ -51,11 +51,16 @@ class OnMqttMessage(object):
         sensors_ids = params.get("sensor", [])
         model_keys = params.get("modelkey", [])
         sensor_types = [MODEL_KEY_TO_SENSOR_TYPE[model_key] for model_key in model_keys]
+        sensor_info = {"sensor_ids": sensors_ids, "sensor_types": sensor_types}
+        gateway.update(sensor_info=sensor_info)
+
         current_sensors = set(zip(sensors_ids, sensor_types))
-        existing_sensors = set(list(gateway.sensor_ids))
+        e_sensors_ids = gateway.sensor_info.get("sensor_ids", [])
+        e_sensor_types = gateway.sensor_info.get("sensor_types", [])
+        existing_sensors = set(zip(e_sensors_ids, e_sensor_types))
         new_sensors = current_sensors - existing_sensors
-        all_sensors = list(current_sensors | existing_sensors)
-        gateway.update(sensor_ids=all_sensors)
+        # all_sensors = list(current_sensors | existing_sensors)
+
         if new_sensors is not None:
             # create sensor_config model
             SensorConfigService(client_id).bulk_insert_sensor_configs(new_sensors)
