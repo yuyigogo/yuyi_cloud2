@@ -17,7 +17,7 @@ class SensorConfig(CloudDocument):
     filter_set = StringField()  # 全通 高/低.通
     sensor_type = StringField()
     remarks = StringField(max_length=MAX_MESSAGE_LENGTH)
-    client_number = ObjectIdField(required=True)
+    client_number = StringField(required=True)
 
     meta = {
         "indexes": ["name", "sensor_number", "sensor_type", "client_number"],

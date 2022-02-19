@@ -42,7 +42,7 @@ class SensorConfigService(BaseService):
         self, sensor_name: str, sensor_number: str, sensor_type: str
     ) -> SensorConfig:
         return SensorConfig(
-            id=ObjectId(),
+            pk=ObjectId(),
             name=sensor_name,
             sensor_number=sensor_number,
             sensor_type=sensor_type,

@@ -61,6 +61,6 @@ class OnMqttMessage(object):
         new_sensors = current_sensors - existing_sensors
         # all_sensors = list(current_sensors | existing_sensors)
 
-        if new_sensors is not None:
+        if len(new_sensors) > 0:
             # create sensor_config model
             SensorConfigService(client_id).bulk_insert_sensor_configs(new_sensors)
