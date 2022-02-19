@@ -20,7 +20,7 @@ class CloudMqtt(object):
             logger.info(f"{self.client_id} success to connected to MQTT Broker!")
         else:
             logger.info(f"{self.client_id} failed to connect to MQTT Broker!")
-        client.subscribe("#", qos=1)
+        client.subscribe("#")
         # sensors_subscribe_topics()  # 订阅消息
 
     @staticmethod
@@ -44,7 +44,7 @@ class CloudMqtt(object):
         if not payload:
             payload = {}
         payload.update({"id": "123", "version": "1.0"})
-        self.client.publish(topic, payload=json.dumps(payload), qos=1)
+        self.client.publish(topic, payload=json.dumps(payload))
 
     def run(self):
         self.client.username_pw_set(MQTT_CLIENT_CONFIG["user"], MQTT_CLIENT_CONFIG["pw"])
