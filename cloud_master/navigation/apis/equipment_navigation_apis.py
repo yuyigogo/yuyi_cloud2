@@ -34,9 +34,9 @@ class CustomerTreesView(BaseView):
         else:
             # get corresponding customer's tree info
             customer = Customer.objects.only("name").get(pk=customer_id)
-            data = list(
+            data = [
                 SiteNavigationService.get_one_customer_tree_infos(customer, add_point)
-            )
+            ]
         return BaseResponse(data=data)
 
 
