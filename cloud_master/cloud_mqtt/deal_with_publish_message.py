@@ -46,12 +46,13 @@ class OnMqttMessage(object):
         except DoesNotExist:
             logger.error(f"{client_id=} in redis, but not find in mongodb")
             return
+        logger.info(f"*****************")
         params = msg_dict.get("params", {})
         sensors_ids = params.get("sensor", [])
         model_keys = params.get("modelkey", [])
         sensor_types = [MODEL_KEY_TO_SENSOR_TYPE[model_key] for model_key in model_keys]
         current_sensors = set(zip(sensors_ids, sensor_types))
-        existing_sensors = set(gateway.sensor_ids)
+        existing_sensors = set(list(gateway.sensor_ids))
         new_sensors = current_sensors - existing_sensors
         all_sensors = list(current_sensors | existing_sensors)
         gateway.update(sensor_ids=all_sensors)
