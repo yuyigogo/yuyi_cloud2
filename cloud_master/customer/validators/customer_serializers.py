@@ -11,7 +11,9 @@ from common.framework.serializer import AdministrativeDivisionSerializer, BaseSe
 class CustomerCreateSerializer(BaseSerializer):
     name = CharField(required=True, max_length=MAX_LENGTH_NAME)
     administrative_division = AdministrativeDivisionSerializer()
-    remarks = CharField(max_length=MAX_MESSAGE_LENGTH, required=False)
+    remarks = CharField(
+        max_length=MAX_MESSAGE_LENGTH, required=False, allow_null=True, allow_blank=True
+    )
 
     def validate_name(self, name: str) -> str:
         if Customer.objects(name=name).count() > 0:
@@ -53,7 +55,7 @@ class DeleteCustomerSerializer(BaseSerializer):
 class UpdateCustomerSerializer(BaseSerializer):
     name = CharField(max_length=MAX_LENGTH_NAME, required=False)
     administrative_division = AdministrativeDivisionSerializer(required=False)
-    remarks = CharField(required=False)
+    remarks = CharField(required=False, allow_blank=True, allow_null=True)
 
     def validate(self, data: dict) -> dict:
         customer_id = self.context["pk"]
