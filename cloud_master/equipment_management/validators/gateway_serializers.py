@@ -31,7 +31,9 @@ class CreateGatewaySerializer(BaseSerializer):
     site_id = CharField(required=True)
     client_number = CharField(required=True)
     time_adjusting = IntegerField(required=True)
-    remarks = CharField(max_length=MAX_MESSAGE_LENGTH, required=False)
+    remarks = CharField(
+        max_length=MAX_MESSAGE_LENGTH, required=False, allow_blank=True, allow_null=True
+    )
 
     def validate_customer(self, customer):
         try:
@@ -50,14 +52,16 @@ class CreateGatewaySerializer(BaseSerializer):
     def validate_client_number(self, client_number):
         if GateWay.objects(client_number=client_number).count() > 0:
             raise APIException(
-                "该主机编号已绑定!", code=StatusCode.GATEWAY_DUPLICATE_CONFIGURED.value,
+                "该主机编号已绑定!",
+                code=StatusCode.GATEWAY_DUPLICATE_CONFIGURED.value,
             )
         return client_number
 
     def validate(self, data: dict) -> dict:
         if GateWay.objects.filter(name=data["name"]).count() > 0:
             raise APIException(
-                "主机名称已存在!", code=StatusCode.GATEWAY_NAME_DUPLICATE.value,
+                "主机名称已存在!",
+                code=StatusCode.GATEWAY_NAME_DUPLICATE.value,
             )
         return data
 
@@ -68,7 +72,9 @@ class UpdateGatewaySerializer(BaseSerializer):
     site_id = CharField(required=False)
     client_number = CharField(required=False)
     time_adjusting = IntegerField(required=False)
-    remarks = CharField(required=False, max_length=MAX_MESSAGE_LENGTH)
+    remarks = CharField(
+        required=False, max_length=MAX_MESSAGE_LENGTH, allow_blank=True, allow_null=True
+    )
 
     def validate_customer(self, customer):
         try:
@@ -96,13 +102,15 @@ class UpdateGatewaySerializer(BaseSerializer):
         if name and name != gateway.name:
             if GateWay.objects(name=name).count() > 0:
                 raise APIException(
-                    "主机名称已存在!", code=StatusCode.GATEWAY_NAME_DUPLICATE.value,
+                    "主机名称已存在!",
+                    code=StatusCode.GATEWAY_NAME_DUPLICATE.value,
                 )
         data["changed_client_id"] = False
         if client_number and client_number != gateway.client_number:
             if GateWay.objects(client_number=client_number).count() > 0:
                 raise APIException(
-                    "该主机编号已绑定!", code=StatusCode.GATEWAY_DUPLICATE_CONFIGURED.value,
+                    "该主机编号已绑定!",
+                    code=StatusCode.GATEWAY_DUPLICATE_CONFIGURED.value,
                 )
             data["changed_client_id"] = True
         return data

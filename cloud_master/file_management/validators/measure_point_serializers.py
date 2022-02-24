@@ -13,7 +13,9 @@ class CreatePointSerializer(BaseSerializer):
     measure_name = CharField(required=True, max_length=MAX_LENGTH_NAME)
     measure_type = CharField(required=True)
     sensor_number = CharField(required=True)
-    remarks = CharField(max_length=MAX_MESSAGE_LENGTH)
+    remarks = CharField(
+        max_length=MAX_MESSAGE_LENGTH, allow_blank=True, allow_null=True
+    )
 
     def validated_measure_name(self, measure_name):
         equipment_id = self.context["equipment_id"]
@@ -53,7 +55,9 @@ class UpdatePointSerializer(BaseSerializer):
     measure_name = CharField(max_length=MAX_LENGTH_NAME)
     measure_type = CharField()
     sensor_number = CharField()
-    remarks = CharField(max_length=MAX_MESSAGE_LENGTH)
+    remarks = CharField(
+        max_length=MAX_MESSAGE_LENGTH, allow_blank=True, allow_null=True
+    )
 
     def validate_measure_name(self, measure_name):
         equipment_id = self.context["equipment_id"]

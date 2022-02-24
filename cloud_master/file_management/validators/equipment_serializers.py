@@ -17,11 +17,18 @@ class CreateEquipmentSerializer(BaseSerializer):
     asset_number = CharField()
     device_model = CharField()
     factory_number = CharField()
-    remarks = CharField(max_length=MAX_MESSAGE_LENGTH)
+    remarks = CharField(
+        max_length=MAX_MESSAGE_LENGTH, allow_blank=True, allow_null=True
+    )
 
     def validated_device_name(self, device_name):
         site_id = self.context["site_id"]
-        if ElectricalEquipment.objects(site_id=site_id, device_name=device_name).count() > 0:
+        if (
+            ElectricalEquipment.objects(
+                site_id=site_id, device_name=device_name
+            ).count()
+            > 0
+        ):
             raise APIException(
                 msg="电力设备名称已存在！", code=StatusCode.EQUIPMENT_NAME_DUPLICATE.value
             )
@@ -54,7 +61,9 @@ class UpdateEquipmentSerializer(BaseSerializer):
     asset_number = CharField()
     device_model = CharField()
     factory_number = CharField()
-    remarks = CharField(max_length=MAX_MESSAGE_LENGTH)
+    remarks = CharField(
+        max_length=MAX_MESSAGE_LENGTH, allow_blank=True, allow_null=True
+    )
 
     def validate_device_name(self, device_name: str) -> str:
         site_id = self.context["site_id"]
