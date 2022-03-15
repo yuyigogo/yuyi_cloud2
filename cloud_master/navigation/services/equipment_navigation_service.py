@@ -1,3 +1,4 @@
+from typing import Optional
 
 from customer.models.customer import Customer
 from equipment_management.models.gateway import GateWay
@@ -52,7 +53,11 @@ class SiteNavigationService(BaseService):
 
     @classmethod
     def get_one_customer_tree_infos(
-        cls, customer: Customer, add_point: bool = False, is_gateway_tree: bool = False
+        cls,
+        customer: Customer,
+        add_point: bool = False,
+        is_gateway_tree: bool = False,
+        site_ids: Optional[list] = None,
     ) -> dict:
         customer_tree_info = {
             "id": str(customer.pk),
@@ -60,7 +65,11 @@ class SiteNavigationService(BaseService):
             "type": "customer",
             "children": [],
         }
-        sites = Site.objects.only("customer", "name").filter(customer=customer.pk)
+        if site_ids:
+            # normal user should only can see its belonging sites
+            sites = Site.objects.only("customer", "name").filter(id__in=site_ids)
+        else:
+            sites = Site.objects.only("customer", "name").filter(customer=customer.pk)
         customer_tree_info["children"] = [
             cls.get_one_site_tree_infos(site, add_point, is_gateway_tree)
             for site in sites
@@ -87,9 +96,9 @@ class SiteNavigationService(BaseService):
                 for equipment in equipments
             ]
         else:
-            gateways = GateWay.objects.only(
-                "name", "client_number", "site_id"
-            ).filter(site_id=site.pk)
+            gateways = GateWay.objects.only("name", "client_number", "site_id").filter(
+                site_id=site.pk
+            )
             site_tree_info["children"] = [
                 cls.get_one_gateway_tree_infos(gateway) for gateway in gateways
             ]

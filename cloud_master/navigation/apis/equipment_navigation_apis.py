@@ -34,8 +34,11 @@ class CustomerTreesView(BaseView):
         else:
             # get corresponding customer's tree info
             customer = Customer.objects.only("name").get(pk=customer_id)
+            query_sites = user.sites if user.is_normal_admin() else None
             data = [
-                SiteNavigationService.get_one_customer_tree_infos(customer, add_point)
+                SiteNavigationService.get_one_customer_tree_infos(
+                    customer, add_point, site_ids=query_sites
+                )
             ]
         return BaseResponse(data=data)
 

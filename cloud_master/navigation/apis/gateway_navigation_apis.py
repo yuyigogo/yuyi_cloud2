@@ -26,9 +26,10 @@ class GatewayTreesView(BaseView):
         else:
             # get corresponding customer's tree info
             customer = Customer.objects.only("name").get(pk=customer_id)
+            query_sites = user.sites if user.is_normal_admin() else None
             data = list(
                 SiteNavigationService.get_one_customer_tree_infos(
-                    customer, is_gateway_tree=True
+                    customer, is_gateway_tree=True, site_ids=query_sites
                 )
             )
         return BaseResponse(data=data)
