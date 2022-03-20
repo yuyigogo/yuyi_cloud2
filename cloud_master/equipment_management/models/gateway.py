@@ -18,7 +18,7 @@ class GateWay(CloudDocument):
     sensor_info = DictField()  # {"sensor_ids": [], "sensor_types": []}
 
     meta = {
-        "indexes": ["name", "customer", "site_id"],
+        "indexes": ["name", "customer", "site_id", "client_number"],
         "index_background": True,
         "collection": "gateway",
     }

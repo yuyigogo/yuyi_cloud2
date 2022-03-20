@@ -16,7 +16,7 @@ class ElectricalEquipment(CloudDocument):
     site_id = ObjectIdField()
 
     meta = {
-        "indexes": ["site_id", "device_name", "device_type"],
+        "indexes": ["device_name", "site_id", "device_name", "device_type"],
         "index_background": True,
         "collection": "electrical_equipment",
     }
