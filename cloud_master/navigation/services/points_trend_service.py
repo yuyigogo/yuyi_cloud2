@@ -28,12 +28,27 @@ class PointsTrendService(BaseService):
             (sensor_number, sensor_type, measure_name),
         ) in point_to_sensor.items():
             mongo_col = MONGO_CLIENT[sensor_type]
+            if sensor_type == SensorType.uhf.value:
+                display_fields = {
+                    "sensor_id": 1,
+                    "sensor_type": 1,
+                    "create_time": 1,
+                    f"params.{sensor_type.upper()}.ampmax": 1,
+                    f"params.{sensor_type.upper()}.ampmean": 1,
+                }
+            else:
+                display_fields = {
+                    "sensor_id": 1,
+                    "sensor_type": 1,
+                    "create_time": 1,
+                    "params": 1,
+                }
             sensors = mongo_col.find(
                 {
                     "sensor_id": sensor_number,
                     "create_time": {"$gte": start_date, "$lte": end_date},
                 },
-                {"sensor_id": 1, "sensor_type": 1, "create_time": 1, "params": 1,},
+                display_fields,
             )
             sensor_list = cls.assemble_sensor_data(sensors)
             data.append(
