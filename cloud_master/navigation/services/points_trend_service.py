@@ -92,12 +92,16 @@ class PointsTrendService(BaseService):
             sensor_id = point.sensor_number
             sensor_type = point.measure_type
             mongo_col = MONGO_CLIENT[sensor_type]
-            sensor = mongo_col.find_one(
-                {
-                    "sensor_id": sensor_id,
-                    "create_time": {"$gte": start_date, "$lt": end_date},
-                },
-                {"create_time": 1, "params": 1, "_id": 0},
+            sensor = (
+                mongo_col.find(
+                    {
+                        "sensor_id": sensor_id,
+                        "create_time": {"$gte": start_date, "$lt": end_date},
+                    },
+                    {"create_time": 1, "params": 1, "_id": 0},
+                )
+                .sort([("create_time", 1)])
+                .limit(1)
             )
             if sensor:
                 data.append(
@@ -106,7 +110,7 @@ class PointsTrendService(BaseService):
                         "measure_name": point.measure_name,
                         "sensor_type": sensor_type,
                         "sensor_number": point.sensor_number,
-                        "sensor_info": bson_to_dict(sensor),
+                        "sensor_info": bson_to_dict(sensor[0]),
                     }
                 )
         return data
