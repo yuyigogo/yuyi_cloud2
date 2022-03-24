@@ -8,6 +8,7 @@ from rest_framework.status import HTTP_404_NOT_FOUND
 from sites.models.site import Site
 
 from common.framework.response import BaseResponse
+from common.framework.serializer import PageLimitSerializer
 from common.framework.view import BaseView
 
 logger = logging.getLogger(__name__)
@@ -51,13 +52,18 @@ class SiteSensorsView(BaseView):
         :param site_id:
         :return:
         """
+        data, _ = self.get_validated_data(PageLimitSerializer)
+        page = data.get("page", 1)
+        limit = data.get("limit", 10)
         try:
             site = Site.objects.get(id=site_id)
         except DoesNotExist:
             logger.info(f"invalid {site_id=}")
             return BaseResponse(status_code=HTTP_404_NOT_FOUND)
-        site_sensors = SiteNavigationService.get_all_sensors_in_site(site)
-        return BaseResponse(data=site_sensors)
+        site_sensors, total = SiteNavigationService.get_all_sensors_in_site(
+            page, limit, site
+        )
+        return BaseResponse(data={"sensor_list": site_sensors, "total": total})
 
 
 class EquipmentSensorsView(BaseView):
@@ -68,15 +74,18 @@ class EquipmentSensorsView(BaseView):
         :param equipment_id:
         :return:
         """
+        data, _ = self.get_validated_data(PageLimitSerializer)
+        page = data.get("page", 1)
+        limit = data.get("limit", 10)
         try:
             equipment = ElectricalEquipment.objects.get(id=equipment_id)
         except DoesNotExist:
             logger.info(f"invalid {equipment_id=}")
             return BaseResponse(status_code=HTTP_404_NOT_FOUND)
-        equipment_sensors = SiteNavigationService.get_all_sensors_in_equipment(
-            equipment
+        equipment_sensors, total = SiteNavigationService.get_all_sensors_in_equipment(
+            page, limit, equipment
         )
-        return BaseResponse(data=equipment_sensors)
+        return BaseResponse(data={"sensor_list": equipment_sensors, "total": total})
 
 
 class CustomerSensorsView(BaseView):
@@ -89,10 +98,11 @@ class CustomerSensorsView(BaseView):
         :return:
         """
         # todo validate user has permissions or not.
-        try:
-            customer = Customer.objects.get(id=customer_id)
-        except DoesNotExist:
-            logger.info(f"invalid {customer_id=}")
-            return BaseResponse(status_code=HTTP_404_NOT_FOUND)
-        customer_sensors = SiteNavigationService.get_all_sensors_in_customer(customer)
-        return BaseResponse(data=customer_sensors)
+        # try:
+        #     customer = Customer.objects.get(id=customer_id)
+        # except DoesNotExist:
+        #     logger.info(f"invalid {customer_id=}")
+        #     return BaseResponse(status_code=HTTP_404_NOT_FOUND)
+        # customer_sensors = SiteNavigationService.get_all_sensors_in_customer(customer)
+        # return BaseResponse(data=customer_sensors)
+        pass

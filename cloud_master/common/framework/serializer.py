@@ -7,7 +7,7 @@ from typing import Callable, List, Union
 
 from bson import ObjectId
 from rest_framework.exceptions import ValidationError
-from rest_framework.fields import CharField
+from rest_framework.fields import CharField, IntegerField
 from rest_framework.serializers import Serializer
 
 
@@ -55,6 +55,11 @@ class AdministrativeDivisionSerializer(BaseSerializer):
     province = CharField(required=True)
     city = CharField(required=True)
     region = CharField(required=True)
+
+
+class PageLimitSerializer(BaseSerializer):
+    page = IntegerField(required=False, default=1)
+    limit = IntegerField(required=False, default=10)
 
 
 def validate_and_save_data_list(data_list, get_validated_serializer):

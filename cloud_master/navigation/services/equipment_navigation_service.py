@@ -7,16 +7,21 @@ from file_management.models.measure_point import MeasurePoint
 from sites.models.site import Site
 
 from common.framework.service import BaseService
+from common.utils import get_objects_pagination
 
 
 class SiteNavigationService(BaseService):
     @classmethod
-    def get_all_sensors_in_equipment(cls, equipment: ElectricalEquipment) -> list:
+    def get_all_sensors_in_equipment(
+        cls, page: int, limit: int, equipment: ElectricalEquipment
+    ) -> tuple:
         equipment_sensors = []
         points = MeasurePoint.objects.only(
             "measure_name", "measure_type", "sensor_number"
         ).filter(equipment_id=equipment.pk)
-        for point in points:
+        total = points.count()
+        points_by_page = get_objects_pagination(page, limit, points)
+        for point in points_by_page:
             sensor_number = point.sensor_number
             sensor_type = point.measure_type
             equipment_sensors.append(
@@ -31,25 +36,42 @@ class SiteNavigationService(BaseService):
                     ),
                 }
             )
-        return equipment_sensors
+        return equipment_sensors, total
 
     @classmethod
-    def get_all_sensors_in_site(cls, site: Site) -> list:
+    def get_all_sensors_in_site(cls, page: int, limit: int, site: Site) -> tuple:
         site_sensors = []
-        equipments = ElectricalEquipment.objects.only(
-            "device_name", "device_type"
-        ).filter(site_id=site.pk)
-        for equipment in equipments:
-            site_sensors.extend(cls.get_all_sensors_in_equipment(equipment))
-        return site_sensors
+        equipments = ElectricalEquipment.objects.filter(site_id=site.pk)
+        equipment_id_name = dict(equipments.values_list("id", "device_name"))
+        points = MeasurePoint.objects.only(
+            "measure_name", "measure_type", "sensor_number", "equipment_id"
+        ).filter(equipment_id__in=equipment_id_name.keys())
+        total = points.count()
+        points_by_page = get_objects_pagination(page, limit, points)
+        for point in points_by_page:
+            sensor_number = point.sensor_number
+            sensor_type = point.measure_type
+            site_sensors.append(
+                {
+                    "device_name": equipment_id_name.get(point.equipment_id, ""),
+                    "point_name": point.measure_name,
+                    "point_id": str(point.pk),
+                    "type": sensor_type,
+                    "sensor_id": point.sensor_number,
+                    "sensor_info": cls.get_latest_sensor_info(
+                        sensor_number, sensor_type
+                    ),
+                }
+            )
+        return site_sensors, total
 
-    @classmethod
-    def get_all_sensors_in_customer(cls, customer: Customer) -> list:
-        customer_sensors = []
-        sites = Site.objects.only("id").filter(customer=customer.pk)
-        for site in sites:
-            customer_sensors.extend(cls.get_all_sensors_in_site(site))
-        return customer_sensors
+    # @classmethod
+    # def get_all_sensors_in_customer(cls, customer: Customer) -> list:
+    #     customer_sensors = []
+    #     sites = Site.objects.only("id").filter(customer=customer.pk)
+    #     for site in sites:
+    #         customer_sensors.extend(cls.get_all_sensors_in_site(site))
+    #     return customer_sensors
 
     @classmethod
     def get_one_customer_tree_infos(

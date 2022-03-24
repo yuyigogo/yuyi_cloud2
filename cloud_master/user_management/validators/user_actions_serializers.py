@@ -19,7 +19,7 @@ from common.framework.serializer import BaseSerializer
 
 class UserListSerializer(BaseSerializer):
     page = IntegerField(required=False, default=1)
-    limit = IntegerField(required=False, default=20)
+    limit = IntegerField(required=False, default=10)
     username = CharField(required=False)
     customer = CharField(required=False)
     sites = ListField(child=CharField(), required=False)
