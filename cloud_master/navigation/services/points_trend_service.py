@@ -54,6 +54,7 @@ class PointsTrendService(BaseService):
             data.append(
                 {
                     "point_id": point_id,
+                    "measure_type": sensor_type,
                     "measure_name": measure_name,
                     "point_data": sensor_list,
                 }
