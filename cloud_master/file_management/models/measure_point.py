@@ -12,7 +12,11 @@ class MeasurePoint(CloudDocument):
     equipment_id = ObjectIdField()
 
     meta = {
-        "indexes": ["measure_name", "sensor_number", "equipment_id", "measure_type"],
+        "indexes": [
+            "measure_name",
+            "equipment_id",
+            ("sensor_number", "measure_type"),
+        ],
         "index_background": True,
         "collection": "measure_point",
     }
