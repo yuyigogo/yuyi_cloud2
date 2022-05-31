@@ -1,9 +1,11 @@
 import logging
 
+from common.framework.exception import APIException
 from customer.services.customer_service import CustomerService
 from mongoengine import DoesNotExist
 from rest_framework.status import HTTP_201_CREATED
 from sites.services.site_service import SiteService
+from user_management.models.user import CloudUser
 from user_management.services.user_service import UserService
 from user_management.services.user_token_service import UserTokenService
 from user_management.validators.user_actions_serializers import (
@@ -11,6 +13,7 @@ from user_management.validators.user_actions_serializers import (
     UserCreateSerializer,
     UserListSerializer,
     UsersDeleteSerializer,
+    UserActionsSerializer,
 )
 
 from common.const import RoleLevel
@@ -77,7 +80,7 @@ class UsersView(BaseView):
             data["role_level"],
             password=data.get("password"),
             customer=data.get("customer"),
-            sites=data.get("sites")
+            sites=data.get("sites"),
         )
         return BaseResponse()
 
@@ -112,3 +115,45 @@ class CurrentUserView(BaseView):
             "site_info": SiteService.get_user_sites_info(user.sites),
         }
         return BaseResponse(data=current_user)
+
+
+class UserActionView(BaseView):
+    def _get_user_by_id(self, user_id):
+        try:
+            return CloudUser.objects.get(id=user_id)
+        except DoesNotExist:
+            raise APIException("invalid user_id!")
+
+    def get(self, request, user_id):
+        user = self._get_user_by_id(user_id)
+        user_info = {
+            "username": user.username,
+            # "customer_name": customer_dict.get(user.customer, ""),
+            "role_level": user.role_level,
+            "status": user.is_active,
+            "email": user.email,
+            "phone": user.phone,
+            "id": str(user.pk),
+            "customer": str(user.customer),
+            "is_suspend": user.is_active,
+            "sites": map(str, user.sites),
+        }
+        return BaseResponse(data=user_info)
+
+    def put(self, request, user_id):
+        user = self._get_user_by_id(user_id)
+        data, _ = self.get_validated_data(UserActionsSerializer, cloud_user=user)
+        logger.info(f"{user.username} request update user: with {data=}")
+        email = data.get("email")
+        password = data.get("password")
+        phone = data.get("phone")
+        update_dict = {}
+        if email:
+            update_dict["email"] = email
+        if password:
+            update_dict["password"] = password
+        if phone:
+            update_dict["phone"] = phone
+        if update_dict:
+            user.update(**update_dict)
+        return BaseResponse()

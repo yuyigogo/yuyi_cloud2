@@ -143,3 +143,18 @@ class PutUsersSerializer(BaseSerializer):
                 if num != len(sites):
                     raise APIException("站点不存在！")
         return data
+
+
+class UserActionsSerializer(BaseSerializer):
+    password = CharField(required=False)
+    email = EmailField(required=False)
+    phone = CharField(required=False)
+
+    def validate_email(self, email: str):
+        cloud_user = self.context["cloud_user"]
+        if (
+            cloud_user.email != email
+            and CloudUser.objects.filter(email=email).count() > 0
+        ):
+            raise APIException("该邮箱已注册！")
+        return email
