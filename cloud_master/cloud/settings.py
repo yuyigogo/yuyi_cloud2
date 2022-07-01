@@ -54,9 +54,10 @@ INSTALLED_APPS = [
     "file_management",
     "navigation",
     "cloud_alarm",
+    "cloud_ws",
 ]
 
-INSTALLED_APPS += ["vendor.django_mongoengine"]
+INSTALLED_APPS += ["vendor.django_mongoengine", "channels"]
 
 MIDDLEWARE = [
     "common.framework.middleware.request.GlobalRequestMiddleware",
@@ -183,6 +184,7 @@ LOGGING = {
         },
         "navigation": {"handlers": ["console"], "level": "DEBUG", "propagate": False,},
         "cloud_alarm": {"handlers": ["console"], "level": "DEBUG", "propagate": False,},
+        "cloud_wa": {"handlers": ["console"], "level": "DEBUG", "propagate": False,},
     },
     "root": {"handlers": ["console"], "level": "INFO"},
 }
@@ -226,3 +228,14 @@ MG_DB_NAME = "test"
 MONGO_CLIENT = pymongo.MongoClient(f"mongodb://{MG_HOST}:{MG_PORT}/", connect=False)[
     MG_DB_NAME
 ]
+
+# settings for channels
+ASGI_APPLICATION = 'cloud.asgi.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [(REDIS_HOST, REDIS_PORT)],
+        },
+    },
+}
