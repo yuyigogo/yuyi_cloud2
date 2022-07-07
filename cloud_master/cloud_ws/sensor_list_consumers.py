@@ -1,5 +1,8 @@
 import json
+import logging
+
 from channels.generic.websocket import AsyncWebsocketConsumer
+logger = logging.getLogger(__name__)
 
 
 class SensorListConsumer(AsyncWebsocketConsumer):
@@ -16,6 +19,7 @@ class SensorListConsumer(AsyncWebsocketConsumer):
         )
 
         await self.accept()
+        logger.info(f"connect ws succeed to {self.sensor_group_name=}")
 
     async def disconnect(self, close_code):
         # Leave room group
@@ -23,26 +27,27 @@ class SensorListConsumer(AsyncWebsocketConsumer):
             self.sensor_group_name,
             self.channel_name
         )
+        logger.info(f"disconnect to {self.sensor_group_name=}")
 
     # Receive message from WebSocket
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        message = text_data_json['message']
-
+        data = text_data_json["data"]
+        logger.info(f"received ws data in {self.sensor_group_name=} with {text_data=}")
         # Send message to room group
         await self.channel_layer.group_send(
             self.sensor_group_name,
             {
-                'type': 'chat_message',
-                'message': message
+                'type': 'deal_send_sensor_data',
+                'data': data
             }
         )
 
     # Receive message from room group
-    async def chat_message(self, event):
-        message = event['message']
+    async def deal_send_sensor_data(self, event):
+        data = event['data']
 
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
-            'message': message
+            'message': data
         }))

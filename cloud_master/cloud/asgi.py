@@ -20,9 +20,9 @@ application = ProtocolTypeRouter({
     # WebSocket chat handler
     "websocket": AllowedHostsOriginValidator(
         AuthMiddlewareStack(
-            URLRouter([
+            URLRouter(
                 cloud_ws.routing.websocket_urlpatterns,
-            ])
+            )
         )
     ),
 })
