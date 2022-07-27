@@ -217,13 +217,22 @@ MQTT_CLIENT_CONFIG = {
     # "subscribe_client_id": "8E001302000001A5"
     "subscribe_client_id": str(ObjectId()),
 }
-REDIS_HOST = "81.69.56.189"
-REDIS_PORT = 7086
+# test config
+# REDIS_HOST = "81.69.56.189"
+# REDIS_PORT = 7086
+# CLIENT_IDS = "client_ids"  # It's a key which stored enabled client ids in redis(set)
+#
+# MG_HOST = "81.69.56.189"
+# MG_PORT = 7085
+# MG_DB_NAME = "test"
+
+REDIS_HOST = "127.0.0.1"
+REDIS_PORT = 6379
 CLIENT_IDS = "client_ids"  # It's a key which stored enabled client ids in redis(set)
 
-MG_HOST = "81.69.56.189"
-MG_PORT = 7085
-MG_DB_NAME = "test"
+MG_HOST = "127.0.0.1"
+MG_PORT = 27017
+MG_DB_NAME = "h_test_cloud"
 
 MONGO_CLIENT = pymongo.MongoClient(f"mongodb://{MG_HOST}:{MG_PORT}/", connect=False)[
     MG_DB_NAME

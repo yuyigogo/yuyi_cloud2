@@ -30,3 +30,4 @@ openpyxl==3.0.4
 xlrd==1.2.0
 channels==3.0.4
 channels-redis==3.4.0
+uwsgi==2.0.19.1
