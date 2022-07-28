@@ -95,15 +95,34 @@ WSGI_APPLICATION = "cloud.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
+# test config
+# REDIS_HOST = "81.69.56.189"
+# REDIS_PORT = 7086
+# CLIENT_IDS = "client_ids"  # It's a key which stored enabled client ids in redis(set)
+#
+# MG_HOST = "81.69.56.189"
+# MG_PORT = 7085
+# MG_DB_NAME = "test"
+
+MG_HOST = "127.0.0.1"
+MG_PORT = 27017
+MG_DB_NAME = "test_cloud_huawei"
+MG_PASSWORD = ""
+MG_USERNAME = ""
+
+MONGO_CLIENT = pymongo.MongoClient(f"mongodb://{MG_HOST}:{MG_PORT}/", connect=False)[
+    MG_DB_NAME
+]
+mongoengine.connect(MG_DB_NAME, host=f"{MG_HOST}:{MG_PORT}", connect=False)
 
 MONGODB_DATABASES = {
     "default": {
-        "name": "test",
-        "host": "81.69.56.189",
-        "port": "7085",
-        "password": "",
-        "username": "",
-        "tz_aware": True,  # if you using timezones in django (USE_TZ = True)
+        "name": MG_DB_NAME,
+        "host": MG_HOST,
+        "port": str(MG_PORT),
+        "password": MG_PASSWORD,
+        "username": MG_USERNAME,
+        "tz_aware": False,  # if you using timezones in django (USE_TZ = True)
     },
 }
 # Password validation
@@ -122,15 +141,15 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "zh-hans"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Shanghai"
 
 USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
@@ -199,7 +218,6 @@ CSRF_COOKIE_SECURE = True
 
 MONGOENGINE_USER_DOCUMENT = "user_management.models.user.CloudUser"
 AUTHENTICATION_BACKENDS = ("common.framework.authentication.CloudLoginBackend",)
-mongoengine.connect("test", host="81.69.56.189:7085", connect=False)
 
 # MQTT_CLIENT_CONFIG = {
 #     "host": "121.37.185.39",
@@ -217,34 +235,17 @@ MQTT_CLIENT_CONFIG = {
     # "subscribe_client_id": "8E001302000001A5"
     "subscribe_client_id": str(ObjectId()),
 }
-# test config
-# REDIS_HOST = "81.69.56.189"
-# REDIS_PORT = 7086
-# CLIENT_IDS = "client_ids"  # It's a key which stored enabled client ids in redis(set)
-#
-# MG_HOST = "81.69.56.189"
-# MG_PORT = 7085
-# MG_DB_NAME = "test"
 
+# settings for redis
 REDIS_HOST = "127.0.0.1"
 REDIS_PORT = 6379
 CLIENT_IDS = "client_ids"  # It's a key which stored enabled client ids in redis(set)
 
-MG_HOST = "127.0.0.1"
-MG_PORT = 27017
-MG_DB_NAME = "h_test_cloud"
-
-MONGO_CLIENT = pymongo.MongoClient(f"mongodb://{MG_HOST}:{MG_PORT}/", connect=False)[
-    MG_DB_NAME
-]
-
 # settings for channels
-ASGI_APPLICATION = 'cloud.asgi.application'
+ASGI_APPLICATION = "cloud.asgi.application"
 CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [(REDIS_HOST, REDIS_PORT)],
-        },
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {"hosts": [(REDIS_HOST, REDIS_PORT)],},
     },
 }
