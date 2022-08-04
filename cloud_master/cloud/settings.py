@@ -246,6 +246,6 @@ ASGI_APPLICATION = "cloud.asgi.application"
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {"hosts": [(REDIS_HOST, REDIS_PORT)],},
+        "CONFIG": {"hosts": [f"redis://{REDIS_HOST}:{REDIS_PORT}/1"],},
     },
 }

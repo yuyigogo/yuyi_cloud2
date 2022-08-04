@@ -37,7 +37,6 @@ class LoginView(BaseView):
         return token
 
     def post(self, request):
-        print(111)
         data, _ = self.get_validated_data(LoginViewViewSerializer)
         logger.info(f"{request.user.username} request login with {data=}")
         try:

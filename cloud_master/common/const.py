@@ -1,5 +1,5 @@
 # For constants defined
-from enum import Enum
+from enum import Enum, unique
 from functools import lru_cache
 
 B = 1
@@ -204,3 +204,9 @@ MODEL_KEY_TO_SENSOR_TYPE = {
     "0000000000000003": SensorType.uhf.value,
     "0000000000000004": SensorType.temp.value
 }
+
+
+@unique
+class WebsocketCode(int, Enum):
+    """10000---90000"""
+    SENSOR_LIST_PAGE = 10000

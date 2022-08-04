@@ -4,24 +4,13 @@ import re
 from copy import deepcopy
 
 import dateutil.parser
-import redis
-from cloud.settings import (
-    MQTT_CLIENT_CONFIG,
-    REDIS_HOST,
-    REDIS_PORT,
-    MONGO_CLIENT,
-)
+from cloud.settings import MONGO_CLIENT, MQTT_CLIENT_CONFIG
 from paho.mqtt import client as mqtt_client
 
 from common.const import SensorType
+from common.storage.redis import redis
 
 uhf_loading_data, ae_tev_loading_data = {}, {}
-
-sensor_redis_cli = redis.Redis(
-    connection_pool=redis.ConnectionPool(
-        host=REDIS_HOST, port=REDIS_PORT, db=5, decode_responses=True
-    )
-)
 
 
 class DataLoader:
@@ -95,7 +84,7 @@ class DataLoader:
             client_id, sensor_id = ret.groups()[0], ret.groups()[1]
             print(f"matched for {client_id=}, {sensor_id=}")
             try:
-                if sensor_redis_cli.sismember("client_ids", client_id):
+                if redis.sismember("client_ids", client_id):
 
                     msg_dict = json.loads(msg.payload.decode("utf-8"))
                     sensor_type = DataLoader.get_sensor_type(msg_dict)
