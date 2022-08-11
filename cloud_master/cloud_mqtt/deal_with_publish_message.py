@@ -37,6 +37,7 @@ class OnMqttMessage(object):
 
     @classmethod
     def deal_with_sensors_in_gateway_msg(cls, client_id: str, msg_dict: dict):
+        # todo 2 model changed; new db model needed.
         """网关下传感器列表数据存储"""
         logger.info(f"deal_with_sensors_in_gateway_msg for {client_id=}")
         if not cls.is_gateway_enabled(client_id):
@@ -53,6 +54,8 @@ class OnMqttMessage(object):
         model_keys = params.get("modelkey", [])
         sensor_types = [MODEL_KEY_TO_SENSOR_TYPE[model_key] for model_key in model_keys]
         sensor_info = {"sensor_ids": sensors_ids, "sensor_types": sensor_types}
+        # todo 3: how to store sensor_info in gateway model;
+        # todo 4: how to judge the difference between the old and new, so update or create
         gateway.update(sensor_info=sensor_info)
 
         current_sensors = set(zip(sensors_ids, sensor_types))
@@ -65,3 +68,8 @@ class OnMqttMessage(object):
         if len(new_sensors) > 0:
             # create sensor_config model
             SensorConfigService(client_id).bulk_insert_sensor_configs(new_sensors)
+
+    @classmethod
+    def deal_with_sensor_configs(cls, client_id: str, msg_dict: dict):
+        # todo 5: 下发传感器配置时先写redis
+        pass

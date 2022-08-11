@@ -53,7 +53,6 @@ INSTALLED_APPS = [
     "equipment_management",
     "file_management",
     "navigation",
-    "cloud_alarm",
     "cloud_ws",
 ]
 
@@ -202,7 +201,6 @@ LOGGING = {
             "propagate": False,
         },
         "navigation": {"handlers": ["console"], "level": "DEBUG", "propagate": False,},
-        "cloud_alarm": {"handlers": ["console"], "level": "DEBUG", "propagate": False,},
         "cloud_wa": {"handlers": ["console"], "level": "DEBUG", "propagate": False,},
     },
     "root": {"handlers": ["console"], "level": "INFO"},

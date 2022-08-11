@@ -164,8 +164,9 @@ class SensorType(str, BaseEnum):
 
     ae = "AE"
     tev = "TEV"
-    temp = "Temp"
+    temp = "TEMP"
     uhf = "UHF"
+    mech = "MECH"  # 机械特性
 
     @classmethod
     def ae_tev(cls):
@@ -210,3 +211,16 @@ MODEL_KEY_TO_SENSOR_TYPE = {
 class WebsocketCode(int, Enum):
     """10000---90000"""
     SENSOR_LIST_PAGE = 10000
+
+
+class AlertFlag(int, Enum):
+    """报警上送"""
+    NO_PUSH = 0
+    PUSH = 1
+
+
+class AlertLevel(int, Enum):
+    """报警等级 0: 正常，1：预警，2：报警"""
+    NORMAL = 0
+    WARNING = 1
+    ALARM = 2

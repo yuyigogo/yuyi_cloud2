@@ -21,6 +21,7 @@ class SiteNavigationService(BaseService):
         ).filter(equipment_id=equipment.pk)
         total = points.count()
         points_by_page = get_objects_pagination(page, limit, points)
+        # todo {"sensor_type": [sensor_id1, sensor_id2, ...]}
         for point in points_by_page:
             sensor_number = point.sensor_number
             sensor_type = point.measure_type

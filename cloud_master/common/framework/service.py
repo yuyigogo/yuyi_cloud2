@@ -60,5 +60,5 @@ class BaseService(object):
     @classmethod
     def get_latest_sensor_info(cls, sensor_number: str, sensor_type: str) -> dict:
         mongo_col = MONGO_CLIENT[sensor_type]
-        sensor_data = mongo_col.find_one({"sensor_id": sensor_number, "is_new": True},)
+        sensor_data = mongo_col.find_one({"sensor_id": sensor_number, "is_latest": True},)
         return bson_to_dict(sensor_data) if sensor_data else {}
