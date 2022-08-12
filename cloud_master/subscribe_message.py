@@ -1,6 +1,5 @@
 import datetime
 import json
-import logging
 import re
 from typing import Optional
 
@@ -11,8 +10,6 @@ from paho.mqtt import client as mqtt_client
 from common.const import AlertFlag, AlertLevel, SensorType
 from common.storage.redis import redis
 from common.utils import datetime_from_str
-
-logger = logging.getLogger(__name__)
 
 
 class DataLoader:
@@ -44,18 +41,18 @@ class DataLoader:
         """
         sensor_type = sensor_data.get("sensor_type")
         if sensor_type not in SensorType.values():
-            logger.warning(f"invalid {sensor_type=}")
+            print(f"************invalid {sensor_type=}")
             return
-        new_obj_id = cls.insert_and_update_sensor_data(
+        new_obj_dict = cls.insert_and_update_sensor_data(
             sensor_type, gateway_id, sensor_id, sensor_data
         )
-        if not new_obj_id:
+        if not new_obj_dict:
             return
 
     @classmethod
     def insert_and_update_sensor_data(
         cls, sensor_type: str, gateway_id: str, sensor_id: str, sensor_data: dict
-    ) -> Optional[ObjectId]:
+    ) -> Optional[dict]:
         """
         1. insert new sensor data to db;
         2. update old sensor data's is_latest to false
@@ -66,21 +63,21 @@ class DataLoader:
             )
             my_col = MONGO_CLIENT[sensor_type]
             # insert new sensor data
-            result = my_col.insert_one(parsed_sensor_dict)
-            new_obj_id = result.inserted_id
+            my_col.insert_one(parsed_sensor_dict)
         except Exception as e:
-            logger.error(f"insert new sensor data error with {e=}")
+            print(f"***************insert new sensor data error with {e=}")
             return
         my_query = {"is_latest": True, "sensor_id": sensor_id}
         new_values = {"$set": {"is_latest": False}}
         my_col.update_many(my_query, new_values)
-        return new_obj_id
+        return parsed_sensor_dict
 
     @classmethod
     def parse_origin_sensor_data(
         cls, sensor_type: str, gateway_id: str, sensor_id: str, sensor_data: dict
     ) -> dict:
         parsed_dict = {
+            "_id": ObjectId(),
             "sensor_type": sensor_type,
             "client_id": gateway_id,
             "sensor_id": sensor_id,
