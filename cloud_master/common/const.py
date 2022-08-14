@@ -203,24 +203,40 @@ class VoltageLevel(str, BaseEnum):
 MODEL_KEY_TO_SENSOR_TYPE = {
     "0000000000000002": SensorType.ae_and_tev(),  # 默认成对出现
     "0000000000000003": SensorType.uhf.value,
-    "0000000000000004": SensorType.temp.value
+    "0000000000000004": SensorType.temp.value,
 }
 
 
 @unique
 class WebsocketCode(int, Enum):
     """10000---90000"""
+
     SENSOR_LIST_PAGE = 10000
 
 
-class AlertFlag(int, Enum):
+class AlarmFlag(int, Enum):
     """报警上送"""
+
     NO_PUSH = 0
     PUSH = 1
 
 
-class AlertLevel(int, Enum):
+class AlarmLevel(int, Enum):
     """报警等级 0: 正常，1：预警，2：报警"""
+
     NORMAL = 0
     WARNING = 1
     ALARM = 2
+
+
+class AlarmType(int, Enum):
+    """报警类型：1：传感器报警；2：测点报警"""
+
+    SENSOR_ALARM = 1
+    POINT_ALARM = 2
+
+
+# store in redis db5---->normal key
+# store sensor_info,it's hset like:
+# {"sensor_id": {"site_id": "xxxxx", "equipment_id": xxxx", "measure_point_id": "xxxxxx"}}
+SENSOR_INFO_PREFIX = "cloud_sensor_info:sensor_id:"

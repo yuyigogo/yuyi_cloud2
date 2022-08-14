@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "file_management",
     "navigation",
     "cloud_ws",
+    "alarm_management",
 ]
 
 INSTALLED_APPS += ["vendor.django_mongoengine", "channels"]
@@ -201,7 +202,12 @@ LOGGING = {
             "propagate": False,
         },
         "navigation": {"handlers": ["console"], "level": "DEBUG", "propagate": False,},
-        "cloud_wa": {"handlers": ["console"], "level": "DEBUG", "propagate": False,},
+        "cloud_ws": {"handlers": ["console"], "level": "DEBUG", "propagate": False,},
+        "alarm_management": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
     },
     "root": {"handlers": ["console"], "level": "INFO"},
 }
