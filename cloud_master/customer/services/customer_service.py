@@ -15,7 +15,7 @@ from common.framework.service import BaseService
 class CustomerService(BaseService):
     @classmethod
     def create_customer(
-        cls, name: str, administrative_division: str, remarks: Optional[str] = None
+        cls, name: str, administrative_division: dict, remarks: Optional[str] = None
     ) -> Customer:
         customer = Customer(
             name=name, administrative_division=administrative_division, remarks=remarks

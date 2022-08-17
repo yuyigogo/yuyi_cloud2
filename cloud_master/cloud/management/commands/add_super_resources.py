@@ -14,20 +14,23 @@ class Command(BaseCommand):
         if CloudUser.objects(role_level=RoleLevel.CLOUD_SUPER_ADMIN).count() > 0:
             self.stdout.write("super admin has existed!")
             return
+        administrative_division = {"province": "北京市", "city": "市辖区", "region": "东城区"}
         customer = CustomerService.create_customer(
-            ALL, administrative_division="Chines", remarks="this is named ALL customer"
+            ALL,
+            administrative_division=administrative_division,
+            remarks="this is named ALL customer",
         )
         site = Site(
             name=ALL,
             customer=customer.pk,
-            administrative_division="Chines",
+            administrative_division=administrative_division,
             voltage_level="220V",
-            site_location=[110, 110],
+            site_location=[0, 0],
             remarks="this is named all Site.",
         )
         site.save()
         super_user = CloudUser(
-            username="cloud super admin",
+            username="cloud_super",
             password="1234567890",
             customer=customer.pk,
             sites=[site.pk],

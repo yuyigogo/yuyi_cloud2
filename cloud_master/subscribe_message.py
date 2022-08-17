@@ -50,22 +50,23 @@ class DataLoader:
                 key.decode(): value.decode() for key, value in data_from_redis.items()
             }
         else:
+            # todo get from sensor_config model
             try:
-                point = MeasurePoint.objects.only("measure_name", "equipment_id").get(
+                point = MeasurePoint.objects.only("equipment_id").get(
                     sensor_number=sensor_id
                 )
                 equipment_id = str(point.equipment_id)
                 point_id = str(point.id)
-                equipment = ElectricalEquipment.objects.only(
-                    "device_name", "site_id"
-                ).get(id=equipment_id)
+                equipment = ElectricalEquipment.objects.only("site_id").get(
+                    id=equipment_id
+                )
                 site_id = str(equipment.site_id)
                 # todo change this value when name changed or delete
                 sensor_info = {
                     "point_id": point_id,
-                    "measure_name": point.measure_name,
+                    # "measure_name": point.measure_name,
                     "equipment_id": equipment_id,
-                    "device_name": equipment.device_name,
+                    # "device_name": equipment.device_name,
                     "site_id": site_id,
                 }
             except Exception as e:
@@ -75,7 +76,7 @@ class DataLoader:
             redis.hmset(sensor_info_key, sensor_info)
 
     @classmethod
-    def insert_and_update_alarm_info(cls, sensor_obj_dict: dict):
+    def insert_and_update_alarm_info(cls, sensor_obj_dict: dict) -> Optional[dict]:
         sensor_id = sensor_obj_dict["sensor_id"]
         alarm_info = {
             "sensor_id": sensor_id,
@@ -99,6 +100,7 @@ class DataLoader:
         my_query = {"is_latest": True, "sensor_id": sensor_id}
         new_values = {"$set": {"is_latest": False}}
         my_col.update_many(my_query, new_values)
+        return alarm_info
 
     @classmethod
     def insert_and_update_sensor_data(
@@ -202,7 +204,8 @@ class DataLoader:
         )
         if not new_obj_dict:
             return
-        cls.insert_and_update_alarm_info(new_obj_dict)
+        alarm_info = cls.insert_and_update_alarm_info(new_obj_dict)
+        # ws: 1. push alarm data; 2. sensor_list data
 
     @staticmethod
     def on_message(client, userdata, msg):
