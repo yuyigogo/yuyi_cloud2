@@ -236,6 +236,14 @@ class AlarmType(int, Enum):
     POINT_ALARM = 2
 
 
+class SensorCommunicationMode(str, Enum):
+    LORA = "LoRa"
+    LORAWAN = "LoRaWan"
+    MHZ433 = "433MHz"
+    NB = "NB"
+    RS485 = "RS485"
+
+
 # store in redis db5---->normal key
 # store sensor_info,it's hset like:
 # {"sensor_id": {"site_id": "xxxxx", "equipment_id": xxxx", "measure_point_id": "xxxxxx"}}

@@ -10,7 +10,7 @@ class WsSensorDataSend(object):
     def __init__(self, sensor_id: str):
         self.sensor_id = sensor_id
 
-    def ws_send(self, data: dict):
+    async def ws_send(self, data: dict):
         sensor_id_group_names = SensorListConsumer.ws_sensor_id_to_group_names
         group_names = sensor_id_group_names.get(self.sensor_id)
         if not group_names:

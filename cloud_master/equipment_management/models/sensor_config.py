@@ -1,32 +1,36 @@
-from datetime import datetime
-
-import pytz
-
 from cloud.models import CloudDocument
-from mongoengine import ListField, ObjectIdField, StringField, DateTimeField, IntField
-
-from common.const import MAX_LENGTH_NAME, MAX_MESSAGE_LENGTH
+from mongoengine import BooleanField, ObjectIdField, StringField
 
 
 class SensorConfig(CloudDocument):
-    name = StringField(max_length=MAX_LENGTH_NAME)
+    """
+    1. create this model when create measure_point;
+    2. set model_key, client_number, can_senor_online, communication_mode fields when get sensor_list from
+        gateway;
+    3. delete this model when customer/site/point deleted
+    """
     sensor_number = StringField(required=True)
-    rtc_set = DateTimeField(default=lambda: datetime.now(tz=pytz.utc))  # time set
-    upload_interval = IntField(max_value=172800)  # second
-    gain_set = StringField()  # db, 增益选择
-    filter_set = StringField()  # 全通 高/低.通
     sensor_type = StringField()
-    remarks = StringField(max_length=MAX_MESSAGE_LENGTH)
-    client_number = StringField(required=True)
+    client_number = StringField()
+    model_key = StringField()
+    can_senor_online = BooleanField(default=False)  # 是否支持在线迷失
+    communication_mode = StringField()
+    # rtc_set = DateTimeField(default=lambda: datetime.now(tz=pytz.utc))  # time set
+    # gain_set = StringField()  # db, 增益选择
+    # filter_set = StringField()  # 全通 高/低.通
+    customer_id = ObjectIdField()
+    site_id = ObjectIdField()
+    equipment_id = ObjectIdField()
+    point_id = ObjectIdField()
 
     meta = {
-        "indexes": ["name", "sensor_number", "sensor_type", "client_number"],
+        "indexes": ["sensor_number", "client_number"],
         "index_background": True,
         "collection": "sensor_config",
     }
 
     def __str__(self):
-        return "SensorConfig: {}".format(self.name)
+        return "SensorConfig: {}-{}".format(self.sensor_number, self.sensor_type)
 
     def __repr__(self):
         return self.__str__()

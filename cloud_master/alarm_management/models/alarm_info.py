@@ -19,8 +19,6 @@ class AlarmInfo(CloudDocument):
     site_id = ObjectIdField()
     equipment_id = ObjectIdField()
     measure_point_id = ObjectIdField()
-    # measure_name = StringField()
-    # device_name = StringField()
 
     meta = {
         "indexes": [

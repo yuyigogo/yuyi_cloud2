@@ -5,6 +5,7 @@ from typing import Optional
 
 from bson import ObjectId
 from cloud.settings import MONGO_CLIENT, MQTT_CLIENT_CONFIG
+from cloud_ws.ws_group_send import WsSensorDataSend
 from file_management.models.electrical_equipment import ElectricalEquipment
 from file_management.models.measure_point import MeasurePoint
 from paho.mqtt import client as mqtt_client
@@ -50,7 +51,7 @@ class DataLoader:
                 key.decode(): value.decode() for key, value in data_from_redis.items()
             }
         else:
-            # todo get from sensor_config model
+            # todo get from sensor_config model, use lru_cache
             try:
                 point = MeasurePoint.objects.only("equipment_id").get(
                     sensor_number=sensor_id
@@ -87,6 +88,8 @@ class DataLoader:
             "alarm_level": sensor_obj_dict["alarm_level"],
             "alarm_describe": sensor_obj_dict["alarm_describe"],
             "sensor_data_id": sensor_obj_dict["_id"],
+            "is_online": True,
+            "is_processed": False,
         }
         sensor_info = cls.get_or_set_sensor_info_from_redis(sensor_id)
         if not sensor_info:
@@ -135,6 +138,7 @@ class DataLoader:
             "client_number": gateway_id,
             "sensor_id": sensor_id,
             "is_latest": True,
+            "is_online": True,
         }
         params = sensor_data.get("params", {})
         # if sensor_type in [SensorType.ae.value, SensorType.tev.value, SensorType.temp.value, SensorType.uhf.vale]:
@@ -206,6 +210,13 @@ class DataLoader:
             return
         alarm_info = cls.insert_and_update_alarm_info(new_obj_dict)
         # ws: 1. push alarm data; 2. sensor_list data
+        cls.deal_with_ws_data(new_obj_dict, alarm_info)
+
+    @classmethod
+    def deal_with_ws_data(cls, sensor_data: dict, alarm_data: dict):
+        sensor_id = sensor_data["sensor_id"]
+        await WsSensorDataSend(sensor_id).ws_send(sensor_data)
+        pass
 
     @staticmethod
     def on_message(client, userdata, msg):

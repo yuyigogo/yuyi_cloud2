@@ -2,14 +2,16 @@ import logging
 from datetime import datetime
 
 from customer.models.customer import Customer
+from equipment_management.models.sensor_config import SensorConfig
 from file_management.models.electrical_equipment import ElectricalEquipment
 from file_management.models.measure_point import MeasurePoint
 from rest_framework.status import HTTP_400_BAD_REQUEST
 from sites.models.site import Site
 
-from common.const import DATE_FORMAT_EN
+from common.const import DATE_FORMAT_EN, SENSOR_INFO_PREFIX
 from common.error_code import StatusCode
 from common.framework.exception import APIException, InvalidException
+from common.storage.redis import redis
 from common.utils.excel_utils import Workbook
 
 logger = logging.getLogger(__name__)
@@ -44,7 +46,10 @@ class ExcelService(object):
                 customer_id = cls.crete_or_update_customer(data_list[0])
                 site_id = cls.crete_or_update_site(data_list[1], customer_id)
                 equipment_id = cls.crete_or_update_equipment(data_list[2], site_id)
-                cls.crete_or_update_point(data_list[3], equipment_id)
+                point = cls.crete_or_update_point(data_list[3], equipment_id)
+                cls.create_or_update_sensor_config(
+                    customer_id, site_id, equipment_id, point
+                )
             except Exception as e:
                 logger.exception(f"save workbook data error, exception: {e=}")
 
@@ -75,6 +80,7 @@ class ExcelService(object):
         o_site_location = data[10].replace(" ", "").split(",")
         if len(o_site_location) == 1:
             o_site_location = data[10].replace(" ", "").split("，")
+        o_site_location = [int(i) for i in o_site_location]
         site = {
             "name": data[5],
             "voltage_level": data[6],
@@ -139,7 +145,7 @@ class ExcelService(object):
         return str(equipment.pk)
 
     @classmethod
-    def crete_or_update_point(cls, point_dict: dict, equipment_id: str) -> str:
+    def crete_or_update_point(cls, point_dict: dict, equipment_id: str) -> MeasurePoint:
         point = MeasurePoint.objects(
             equipment_id=equipment_id, measure_name=point_dict["measure_name"]
         ).first()
@@ -149,7 +155,41 @@ class ExcelService(object):
         else:
             point = MeasurePoint(**point_dict)
             point.save()
-        return str(point.pk)
+        return point
+
+    @classmethod
+    def create_or_update_sensor_config(
+        cls, customer_id: str, site_id: str, equipment_id: str, point: MeasurePoint,
+    ):
+        sensor_id = point.sensor_number
+        sensor_config = SensorConfig.objects(sensor_number=sensor_id).first()
+        if sensor_config:
+            sensor_config.update(
+                set__customer_id=customer_id,
+                set__site_id=site_id,
+                set__equipment_id=equipment_id,
+                set__point_id=point.pk,
+                set__sensor_type=point.measure_type,
+            )
+        else:
+            sensor_config = SensorConfig(
+                customer_id=customer_id,
+                site_id=site_id,
+                equipment_id=equipment_id,
+                point_id=point.pk,
+                sensor_number=sensor_id,
+                sensor_type=point.measure_type,
+            )
+            sensor_config.save()
+        # set sensor_info into redis
+        sensor_info_key = f"{SENSOR_INFO_PREFIX}{sensor_id}"
+        value = {
+            "customer_id": customer_id,
+            "site_id": site_id,
+            "equipment_id": equipment_id,
+            "point_id": str(point.pk),
+        }
+        redis.hmset(sensor_info_key, value)
 
 
 class ExcelException(APIException):
