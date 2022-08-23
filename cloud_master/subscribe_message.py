@@ -6,6 +6,7 @@ from typing import Optional
 from bson import ObjectId
 from cloud.settings import MONGO_CLIENT, MQTT_CLIENT_CONFIG
 from cloud_ws.ws_group_send import WsSensorDataSend
+from equipment_management.models.sensor_config import SensorConfig
 from file_management.models.electrical_equipment import ElectricalEquipment
 from file_management.models.measure_point import MeasurePoint
 from paho.mqtt import client as mqtt_client
@@ -224,9 +225,13 @@ class DataLoader:
         ret = DataLoader.pattern.match(msg.topic)
         if ret is not None:
             gateway_id, sensor_id = ret.groups()[0], ret.groups()[1]
-            print(f"matched for {gateway_id=}, {sensor_id=}")
+            # 网关已启用且档案已配置才会入库
             try:
-                if redis.sismember("client_ids", gateway_id):
+                if (
+                    redis.sismember("client_ids", gateway_id)
+                    and SensorConfig.objects(sensor_number=sensor_id).count() > 0
+                ):
+                    print(f"matched for {gateway_id=}, {sensor_id=}")
                     msg_dict = json.loads(msg.payload.decode("utf-8"))
                     DataLoader.deal_with_sensor_data(gateway_id, sensor_id, msg_dict)
             except Exception as e:
