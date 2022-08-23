@@ -12,6 +12,7 @@ from rest_framework.status import HTTP_201_CREATED
 from common.const import RoleLevel
 from common.framework.permissions import PermissionFactory
 from common.framework.response import BaseResponse
+from common.framework.service import SensorConfigService
 from common.framework.view import BaseView
 
 logger = logging.getLogger(__name__)
@@ -34,6 +35,16 @@ class MeasurePointListView(BaseView):
         )
         logger.info(f"{user.username} request create a new measure point with data")
         measure_point = MeasurePointService(equipment_id).create_new_measure_point(data)
+        # set sensor_info to redis
+        SensorConfigService(
+            measure_point.sensor_number
+        ).create_or_update_sensor_config_in_excel(
+            data["customer_id"],
+            data["site_id"],
+            equipment_id,
+            str(measure_point.pk),
+            measure_point.measure_type,
+        )
         return BaseResponse(data=measure_point.to_dict(), status_code=HTTP_201_CREATED)
 
     def get(self, request, equipment_id):
@@ -66,6 +77,7 @@ class MeasurePointView(BaseView):
         sensor_number = data.get("sensor_number")
         remarks = data.get("remarks")
         point = context["point"]
+        old_sensor_number = point.sensor_number
         update_fields = {}
         if measure_name:
             update_fields["measure_name"] = measure_name
@@ -77,6 +89,13 @@ class MeasurePointView(BaseView):
             update_fields["remarks"] = remarks
         if update_fields:
             point.update(**update_fields)
+        if context["changed_sensor_number"]:
+            # remove old sensor info from redis and set new sensor info to redis
+            customer_id = context["customer_id"]
+            site_id = context["site_id"]
+            SensorConfigService(sensor_number).update_and_set_sensor_info(
+                old_sensor_number, customer_id, site_id, equipment_id, point_id
+            )
         return BaseResponse(data=update_fields)
 
     def delete(self, request, equipment_id, point_id):

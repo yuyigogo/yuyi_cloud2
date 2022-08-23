@@ -3,7 +3,6 @@ import re
 
 from cloud.settings import CLIENT_IDS
 from equipment_management.models.gateway import GateWay
-from equipment_management.services.sensor_config_service import SensorConfigService
 from mongoengine import DoesNotExist
 
 from common.const import MODEL_KEY_TO_SENSOR_TYPE
@@ -66,8 +65,9 @@ class OnMqttMessage(object):
         # all_sensors = list(current_sensors | existing_sensors)
 
         if len(new_sensors) > 0:
+            pass
             # create sensor_config model
-            SensorConfigService(client_id).bulk_insert_sensor_configs(new_sensors)
+            # SensorConfigService(client_id).bulk_insert_sensor_configs(new_sensors)
 
     @classmethod
     def deal_with_sensor_configs(cls, client_id: str, msg_dict: dict):
