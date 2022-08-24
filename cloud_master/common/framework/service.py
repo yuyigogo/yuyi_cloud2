@@ -3,11 +3,9 @@ import logging
 from cloud.models import bson_to_dict
 from cloud.settings import CLIENT_IDS, MONGO_CLIENT
 from equipment_management.models.gateway import GateWay
-
-from common.const import SensorType
 from equipment_management.models.sensor_config import SensorConfig
 
-from common.const import SENSOR_INFO_PREFIX
+from common.const import SENSOR_INFO_PREFIX, SensorType
 from common.storage.redis import redis
 
 logger = logging.getLogger(__name__)
@@ -20,9 +18,9 @@ class BaseService(object):
 
     @classmethod
     def delete_points(cls, points, clear_resource=False):
-        deleted_sensor_numbers = points.value_list("sensor_number")
-        points.delete()
+        deleted_sensor_numbers = points.values_list("sensor_number")
         SensorConfigService.delete_sensor_config_resource(deleted_sensor_numbers)
+        points.delete()
         if clear_resource:
             cls.delete_sensor_data(deleted_sensor_numbers)
 
@@ -33,7 +31,12 @@ class BaseService(object):
         """
         delete_filters = {"sensor_id": {"$in": deleted_sensor_numbers}}
         alarm_info_col = MONGO_CLIENT["alarm_info"]
-        alarm_info_col.delete_many(delete_filters)
+        try:
+            alarm_info_col.delete_many(delete_filters)
+        except Exception as e:
+            logger.error(
+                f"delete alarm_info failed with {e=} for {deleted_sensor_numbers=}"
+            )
         for sensor_type in SensorType.values():
             try:
                 mongo_col = MONGO_CLIENT[sensor_type]
@@ -65,7 +68,9 @@ class BaseService(object):
     @classmethod
     def get_latest_sensor_info(cls, sensor_number: str, sensor_type: str) -> dict:
         mongo_col = MONGO_CLIENT[sensor_type]
-        sensor_data = mongo_col.find_one({"sensor_id": sensor_number, "is_latest": True},)
+        sensor_data = mongo_col.find_one(
+            {"sensor_id": sensor_number, "is_latest": True},
+        )
         return bson_to_dict(sensor_data) if sensor_data else {}
 
 
@@ -147,6 +152,8 @@ class SensorConfigService(BaseService):
         when delete point, should delete the corresponding sensor_config and sensor_info in redis
         """
         SensorConfig.objects.filter(sensor_number__in=sensor_ids).delete()
-        delete_sensor_info_keys = [f"{SENSOR_INFO_PREFIX}{sensor_id}" for sensor_id in sensor_ids]
+        delete_sensor_info_keys = [
+            f"{SENSOR_INFO_PREFIX}{sensor_id}" for sensor_id in sensor_ids
+        ]
         for d_key in delete_sensor_info_keys:
             redis.delete(d_key)

@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Optional, Union, List
 
 from bson import ObjectId
 from mongoengine import queryset
@@ -30,7 +30,7 @@ class SiteService(BaseService):
         name: str,
         administrative_division: str,
         voltage_level: int,
-        site_location: Optional[list] = None,
+        site_location: List[float],
         remarks: Optional[str] = None,
     ) -> Site:
         site = Site(
@@ -47,7 +47,9 @@ class SiteService(BaseService):
     @classmethod
     def delete_site(cls, site: Site, clear_resource: bool):
         site_id = site.pk
-        CloudUser.objects.filter(sites__in=[site_id]).delete()
+        # todo when delete a customer/site, the user should not deleted, but remove its sites
+        # or set the customer to none
+        # CloudUser.objects.filter(sites__in=[site_id]).delete()
         GateWay.objects.filter(site_id=site_id).delete()
         equipments = ElectricalEquipment.objects.filter(site_id=site_id)
         equipment_ids = equipments.values_list("id")

@@ -5,9 +5,9 @@ from sites.services.site_service import SiteService
 from sites.validators.sites_serializers import (
     BaseSiteSerializer,
     CreateSiteSerializer,
+    DeleteSiteSerializer,
     GetCustomerSitesSerializer,
     UpdateSiteSerializer,
-    DeleteSiteSerializer,
 )
 
 from common.const import RoleLevel
@@ -41,11 +41,12 @@ class CustomerSitesView(BaseView):
             f"{user.username} request create site for {customer_id=} with {data=}"
         )
         service = SiteService(user, customer_id)
+        site_location = [float(s) for s in data["site_location"]]
         site = service.create_site(
             name=data["name"],
             administrative_division=data["administrative_division"],
             voltage_level=data["voltage_level"],
-            site_location=data.get("site_location", ""),
+            site_location=site_location,
             remarks=data.get("remarks", ""),
         )
         return BaseResponse(data=site.to_dict(), status_code=HTTP_201_CREATED)

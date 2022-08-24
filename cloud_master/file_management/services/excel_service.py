@@ -31,7 +31,7 @@ class ExcelService(object):
         try:
             assembled_data = [cls.assemble_excel_data(data) for data in workbook_data]
         except Exception:
-            raise ExcelException("excel格式错误！")
+            raise ExcelException("Excel格式错误！or 解析Excel错误！")
         cls.save_workbook_data(assembled_data)
 
     @classmethod
@@ -85,7 +85,7 @@ class ExcelService(object):
         o_site_location = data[10].replace(" ", "").split(",")
         if len(o_site_location) == 1:
             o_site_location = data[10].replace(" ", "").split("，")
-        o_site_location = [int(i) for i in o_site_location]
+        o_site_location = [float(i) for i in o_site_location]
         site = {
             "name": data[5],
             "voltage_level": data[6],
