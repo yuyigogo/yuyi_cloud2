@@ -216,7 +216,7 @@ class DataLoader:
     @classmethod
     def deal_with_ws_data(cls, sensor_data: dict, alarm_data: dict):
         sensor_id = sensor_data["sensor_id"]
-        await WsSensorDataSend(sensor_id).ws_send(sensor_data)
+        WsSensorDataSend(sensor_id).ws_send(sensor_data)
         pass
 
     @staticmethod
