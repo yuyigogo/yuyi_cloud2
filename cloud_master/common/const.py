@@ -169,10 +169,6 @@ class SensorType(str, BaseEnum):
     mech = "MECH"  # 机械特性
 
     @classmethod
-    def ae_tev(cls):
-        return [cls.ae.value, cls.tev.value]
-
-    @classmethod
     def ae_and_tev(cls):
         """二合一传感器，存储到db时分为ae和tev存"""
         return f"{cls.ae.value}_{cls.tev.value}"

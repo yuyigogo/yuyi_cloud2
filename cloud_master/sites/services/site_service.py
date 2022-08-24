@@ -20,10 +20,6 @@ class SiteService(BaseService):
 
     def get_sites_by_customer_id(self) -> queryset:
         return Site.objects.filter(customer=self.customer_id)
-        # if self.user.is_cloud_or_client_super_admin():
-        #     return sites
-        # else:
-        #     return sites.filter(customer=self.customer_id)
 
     def create_site(
         self,

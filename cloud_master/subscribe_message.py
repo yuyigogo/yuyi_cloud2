@@ -48,9 +48,7 @@ class DataLoader:
         sensor_info_key = f"{SENSOR_INFO_PREFIX}{sensor_id}"
         data_from_redis = redis.hgetall(sensor_info_key)
         if data_from_redis:
-            return {
-                key.decode(): value.decode() for key, value in data_from_redis.items()
-            }
+            return data_from_redis
         else:
             # todo get from sensor_config model, use lru_cache
             try:
@@ -98,12 +96,12 @@ class DataLoader:
             return
         alarm_info.update(sensor_info)
         my_col = MONGO_CLIENT["alarm_info"]
-        # insert new sensor data
-        my_col.insert_one(alarm_info)
         # update is_latest filed to false
         my_query = {"is_latest": True, "sensor_id": sensor_id}
         new_values = {"$set": {"is_latest": False}}
         my_col.update_many(my_query, new_values)
+        # insert new sensor data
+        my_col.insert_one(alarm_info)
         return alarm_info
 
     @classmethod
@@ -114,19 +112,20 @@ class DataLoader:
         1. insert new sensor data to db;
         2. update old sensor data's is_latest to false
         """
+        my_query = {"is_latest": True, "sensor_id": sensor_id}
+        new_values = {"$set": {"is_latest": False}}
         try:
             parsed_sensor_dict = cls.parse_origin_sensor_data(
                 sensor_type, gateway_id, sensor_id, sensor_data
             )
             my_col = MONGO_CLIENT[sensor_type]
+            # update old data before insert new sensor data
+            my_col.update_many(my_query, new_values)
             # insert new sensor data
             my_col.insert_one(parsed_sensor_dict)
         except Exception as e:
             print(f"***************insert new sensor data error with {e=}")
             return
-        my_query = {"is_latest": True, "sensor_id": sensor_id}
-        new_values = {"$set": {"is_latest": False}}
-        my_col.update_many(my_query, new_values)
         return parsed_sensor_dict
 
     @classmethod
@@ -149,7 +148,7 @@ class DataLoader:
             data = params.get("data", {})
             parsed_dict["create_time"] = datetime_from_str(data["acqtime"])
             parsed_dict["alarm_flag"] = data.get("alert_flag", AlarmFlag.NO_PUSH.value)
-            parsed_dict["alarm_level"] = data.gvet(
+            parsed_dict["alarm_level"] = data.get(
                 "alert_level", AlarmLevel.NORMAL.value
             )
             parsed_dict["alarm_describe"] = data.get("alert_describe", "")
@@ -221,7 +220,7 @@ class DataLoader:
 
     @staticmethod
     def on_message(client, userdata, msg):
-        print(f"time: {datetime.datetime.now()} msg.topic:{msg.topic}")
+        # print(f"time: {datetime.datetime.now()} msg.topic:{msg.topic}")
         ret = DataLoader.pattern.match(msg.topic)
         if ret is not None:
             gateway_id, sensor_id = ret.groups()[0], ret.groups()[1]
