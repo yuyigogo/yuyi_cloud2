@@ -15,11 +15,11 @@
         const chatSocket = new WebSocket(
             'ws://'
             + window.location.host
-            + '/ws/sensor_list/sensor_type/'
-            + roomName
+            + '/ws/sensor_list/page_code/'
+            + 3333
             + '/'
             + 'sensor_id/'
-            + '123/'
+            + '584e500400200002/'
         );
 
         chatSocket.onmessage = function(e) {

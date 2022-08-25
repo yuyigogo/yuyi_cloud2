@@ -15,16 +15,17 @@ class SensorListConsumer(AsyncWebsocketConsumer):
 
     @classmethod
     def is_valid_page_code(cls, page_code):
-        return page_code == WebsocketCode.SENSOR_LIST_PAGE.value()
+        return page_code == WebsocketCode.SENSOR_LIST_PAGE.value
 
     async def connect(self):
         sensor_data = self.scope["url_route"]["kwargs"]
         page_code = sensor_data["page_code"]
         self.sensor_id = sensor_data["sensor_id"]
-        if not self.is_valid_page_code(page_code):
-            logger.info(f"invalid page_code: {page_code}")
-            # reject invali ws, just call close()
-            await self.close()
+        user = self.scope["user"]
+        # if not self.is_valid_page_code(page_code):
+        #     logger.info(f"invalid page_code: {page_code}")
+        #     # reject invali ws, just call close()
+        #     await self.close()
 
         self.sensor_group_name = (
             f"sensor_list-page_code-{page_code}-sensor_id-{self.sensor_id}"
