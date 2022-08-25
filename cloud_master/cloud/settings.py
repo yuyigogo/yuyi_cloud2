@@ -220,6 +220,7 @@ SESSION_COOKIE_AGE = 604800  # 7days
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
+AUTH_USER_MODEL = "mongo_auth.MongoUser"
 MONGOENGINE_USER_DOCUMENT = "user_management.models.user.CloudUser"
 AUTHENTICATION_BACKENDS = ("common.framework.authentication.CloudLoginBackend",)
 
