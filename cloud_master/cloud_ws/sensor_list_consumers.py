@@ -1,6 +1,5 @@
 import json
 import logging
-from collections import defaultdict
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 
@@ -11,7 +10,6 @@ logger = logging.getLogger(__name__)
 
 
 class SensorListConsumer(AsyncWebsocketConsumer):
-    ws_sensor_id_to_group_names = defaultdict(set)
 
     @classmethod
     def is_valid_page_code(cls, page_code):
@@ -32,7 +30,6 @@ class SensorListConsumer(AsyncWebsocketConsumer):
         )
         # Join sensor group
         await self.channel_layer.group_add(self.sensor_group_name, self.channel_name)
-        self.ws_sensor_id_to_group_names[self.sensor_id].add(self.sensor_group_name)
 
         await self.accept()
         logger.info(f"connect ws succeed to {self.sensor_group_name=}")
