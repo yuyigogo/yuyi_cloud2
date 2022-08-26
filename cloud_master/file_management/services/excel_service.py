@@ -46,9 +46,7 @@ class ExcelService(object):
                 site_id = cls.crete_or_update_site(data_list[1], customer_id)
                 equipment_id = cls.crete_or_update_equipment(data_list[2], site_id)
                 point = cls.crete_or_update_point(data_list[3], equipment_id)
-                SensorConfigService(
-                    point.sensor_number
-                ).create_or_update_sensor_config_in_excel(
+                SensorConfigService(point.sensor_number).create_or_update_sensor_config(
                     customer_id,
                     site_id,
                     equipment_id,

@@ -36,9 +36,7 @@ class MeasurePointListView(BaseView):
         logger.info(f"{user.username} request create a new measure point with data")
         measure_point = MeasurePointService(equipment_id).create_new_measure_point(data)
         # set sensor_info to redis
-        SensorConfigService(
-            measure_point.sensor_number
-        ).create_or_update_sensor_config_in_excel(
+        SensorConfigService(measure_point.sensor_number).create_or_update_sensor_config(
             data["customer_id"],
             data["site_id"],
             equipment_id,

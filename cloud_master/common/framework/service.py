@@ -81,7 +81,7 @@ class SensorConfigService(BaseService):
         self.sensor_id = sensor_id
         self.sensor_info_key = f"{SENSOR_INFO_PREFIX}{sensor_id}"
 
-    def create_or_update_sensor_config_in_excel(
+    def create_or_update_sensor_config(
         self,
         customer_id: str,
         site_id: str,
