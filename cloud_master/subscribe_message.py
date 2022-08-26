@@ -7,8 +7,6 @@ from typing import Optional
 from bson import ObjectId
 from cloud.settings import MONGO_CLIENT, MQTT_CLIENT_CONFIG
 from cloud_ws.ws_group_send import WsSensorDataSend
-from file_management.models.electrical_equipment import ElectricalEquipment
-from file_management.models.measure_point import MeasurePoint
 from paho.mqtt import client as mqtt_client
 
 from common.const import (
@@ -18,6 +16,7 @@ from common.const import (
     AlarmType,
     SensorType,
 )
+from common.framework.service import SensorConfigService
 from common.storage.redis import redis
 from common.utils import datetime_from_str
 
@@ -50,30 +49,32 @@ class DataLoader:
         if data_from_redis:
             return data_from_redis
         else:
-            # todo get from sensor_config model, use lru_cache
-            try:
-                point = MeasurePoint.objects.only("equipment_id").get(
-                    sensor_number=sensor_id
-                )
-                equipment_id = str(point.equipment_id)
-                point_id = str(point.id)
-                equipment = ElectricalEquipment.objects.only("site_id").get(
-                    id=equipment_id
-                )
-                site_id = str(equipment.site_id)
-                # todo change this value when name changed or delete
-                sensor_info = {
-                    "point_id": point_id,
-                    # "measure_name": point.measure_name,
-                    "equipment_id": equipment_id,
-                    # "device_name": equipment.device_name,
-                    "site_id": site_id,
-                }
-            except Exception as e:
-                print(f"get sensor: {sensor_id=} info error with exception: {e=}")
-                return
-            # set sensor_info to redis
-            redis.hmset(sensor_info_key, sensor_info)
+            sensor_info = SensorConfigService(
+                sensor_id
+            ).get_sensor_info_from_sensor_config()
+            if sensor_info is None:
+                print(f"get sensor_info failed for {sensor_id=}")
+            return sensor_info
+            # try:
+            #     point = MeasurePoint.objects.only("equipment_id").get(
+            #         sensor_number=sensor_id
+            #     )
+            #     equipment_id = str(point.equipment_id)
+            #     point_id = str(point.id)
+            #     equipment = ElectricalEquipment.objects.only("site_id").get(
+            #         id=equipment_id
+            #     )
+            #     site_id = str(equipment.site_id)
+            #     sensor_info = {
+            #         "point_id": point_id,
+            #         "equipment_id": equipment_id,
+            #         "site_id": site_id,
+            #     }
+            # except Exception as e:
+            #     print(f"get sensor: {sensor_id=} info error with exception: {e=}")
+            #     return
+            # # set sensor_info to redis
+            # redis.hmset(sensor_info_key, sensor_info)
 
     @classmethod
     def insert_and_update_alarm_info(cls, sensor_obj_dict: dict) -> Optional[dict]:

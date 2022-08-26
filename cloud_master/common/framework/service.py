@@ -1,4 +1,6 @@
 import logging
+from functools import lru_cache
+from typing import Optional
 
 from cloud.models import bson_to_dict
 from cloud.settings import CLIENT_IDS, MONGO_CLIENT
@@ -157,3 +159,24 @@ class SensorConfigService(BaseService):
         ]
         for d_key in delete_sensor_info_keys:
             redis.delete(d_key)
+
+    @lru_cache
+    def get_sensor_info_from_sensor_config(self) -> Optional[dict]:
+        try:
+            sensor_config = SensorConfig.objects.only(
+                "customer_id", "site_id", "equipment_id", "point_id"
+            ).get(sensor_number=self.sensor_id)
+        except Exception as e:
+            logger.warning(f"get sensor_info failed for {self.sensor_id=} with {e=}")
+            return
+        customer_id = sensor_config.customer_id
+        site_id = sensor_config.site_id
+        equipment_id = sensor_config.equipment_id
+        point_id = sensor_config.point_id
+        self.set_sensor_info_to_redis(customer_id, site_id, equipment_id, point_id)
+        return {
+            "customer_id": customer_id,
+            "site_id": site_id,
+            "equipment_id": equipment_id,
+            "point_id": point_id,
+        }
