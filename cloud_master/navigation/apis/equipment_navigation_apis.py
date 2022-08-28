@@ -1,14 +1,15 @@
 import logging
+from typing import Optional
 
 from customer.models.customer import Customer
 from file_management.models.electrical_equipment import ElectricalEquipment
-from mongoengine import DoesNotExist
 from navigation.services.equipment_navigation_service import SiteNavigationService
+from navigation.services.sensor_list_service import SensorListService
+from navigation.validators.sensor_list_sereializers import SensorListSerializer
 from rest_framework.status import HTTP_404_NOT_FOUND
 from sites.models.site import Site
 
 from common.framework.response import BaseResponse
-from common.framework.serializer import PageLimitSerializer
 from common.framework.view import BaseView
 
 logger = logging.getLogger(__name__)
@@ -17,7 +18,7 @@ logger = logging.getLogger(__name__)
 class CustomerTreesView(BaseView):
     def get(self, request):
         """
-        设备/测点树形图
+        公司树形图
         :param request:
         :return:
         """
@@ -44,7 +45,46 @@ class CustomerTreesView(BaseView):
         return BaseResponse(data=data)
 
 
-class SiteSensorsView(BaseView):
+class SensorsBaseView(BaseView):
+    @classmethod
+    def validate_site_or_equipment(
+        cls, site_id: Optional[str] = None, equipment_id: Optional[str] = None
+    ) -> int:
+        assert (
+            site_id or equipment_id
+        ), "should have one value in site_id or equipment_id "
+        if site_id:
+            return Site.objects(id=site_id).count()
+        else:
+            return ElectricalEquipment.objects(id=equipment_id).count()
+
+    @classmethod
+    def _get_sensor_list_from_site_or_equipment(
+        cls,
+        data: dict,
+        site_id: Optional[str] = None,
+        equipment_id: Optional[str] = None,
+    ) -> tuple:
+        page = data.get("page", 1)
+        limit = data.get("limit", 10)
+        point_id = data.get("point_id")
+        alarm_level = data.get("alarm_level")
+        is_online = data.get("is_online")
+        sensor_type = data.get("sensor_type")
+        total, data = SensorListService.get_sensor_list_from_site_or_equipment(
+            page,
+            limit,
+            site_id=site_id,
+            equipment_id=equipment_id,
+            point_id=point_id,
+            alarm_level=alarm_level,
+            is_online=is_online,
+            sensor_type=sensor_type,
+        )
+        return total, data
+
+
+class SiteSensorsView(SensorsBaseView):
     def get(self, request, site_id):
         """
         all points(sensors) in the corresponding site；
@@ -52,21 +92,17 @@ class SiteSensorsView(BaseView):
         :param site_id:
         :return:
         """
-        data, _ = self.get_validated_data(PageLimitSerializer)
-        page = data.get("page", 1)
-        limit = data.get("limit", 10)
-        try:
-            site = Site.objects.get(id=site_id)
-        except DoesNotExist:
+        data, _ = self.get_validated_data(SensorListSerializer)
+        if not self.validate_site_or_equipment(site_id=site_id):
             logger.info(f"invalid {site_id=}")
             return BaseResponse(status_code=HTTP_404_NOT_FOUND)
-        site_sensors, total = SiteNavigationService.get_all_sensors_in_site(
-            page, limit, site
+        site_sensor_infos, total = self._get_sensor_list_from_site_or_equipment(
+            data, site_id=site_id
         )
-        return BaseResponse(data={"sensor_list": site_sensors, "total": total})
+        return BaseResponse(data={"sensor_list": site_sensor_infos, "total": total})
 
 
-class EquipmentSensorsView(BaseView):
+class EquipmentSensorsView(SensorsBaseView):
     def get(self, request, equipment_id):
         """
         all points(sensors) in the corresponding equipment；
@@ -74,18 +110,16 @@ class EquipmentSensorsView(BaseView):
         :param equipment_id:
         :return:
         """
-        data, _ = self.get_validated_data(PageLimitSerializer)
-        page = data.get("page", 1)
-        limit = data.get("limit", 10)
-        try:
-            equipment = ElectricalEquipment.objects.get(id=equipment_id)
-        except DoesNotExist:
+        data, _ = self.get_validated_data(SensorListSerializer)
+        if not self.validate_site_or_equipment(equipment_id=equipment_id):
             logger.info(f"invalid {equipment_id=}")
             return BaseResponse(status_code=HTTP_404_NOT_FOUND)
-        equipment_sensors, total = SiteNavigationService.get_all_sensors_in_equipment(
-            page, limit, equipment
+        equipment_sensor_infos, total = self._get_sensor_list_from_site_or_equipment(
+            data, equipment_id=equipment_id
         )
-        return BaseResponse(data={"sensor_list": equipment_sensors, "total": total})
+        return BaseResponse(
+            data={"sensor_list": equipment_sensor_infos, "total": total}
+        )
 
 
 class CustomerSensorsView(BaseView):
@@ -97,7 +131,6 @@ class CustomerSensorsView(BaseView):
         :param customer_id:
         :return:
         """
-        # todo validate user has permissions or not.
         # try:
         #     customer = Customer.objects.get(id=customer_id)
         # except DoesNotExist:

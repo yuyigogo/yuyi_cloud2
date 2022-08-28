@@ -204,20 +204,20 @@ MODEL_KEY_TO_SENSOR_TYPE = {
 
 
 @unique
-class WebsocketCode(int, Enum):
+class WebsocketCode(int, BaseEnum):
     """10000---90000"""
 
     SENSOR_LIST_PAGE = 10000
 
 
-class AlarmFlag(int, Enum):
+class AlarmFlag(int, BaseEnum):
     """报警上送"""
 
     NO_PUSH = 0
     PUSH = 1
 
 
-class AlarmLevel(int, Enum):
+class AlarmLevel(int, BaseEnum):
     """报警等级 0: 正常，1：预警，2：报警"""
 
     NORMAL = 0
@@ -225,14 +225,14 @@ class AlarmLevel(int, Enum):
     ALARM = 2
 
 
-class AlarmType(int, Enum):
+class AlarmType(int, BaseEnum):
     """报警类型：1：传感器报警；2：测点报警"""
 
     SENSOR_ALARM = 1
     POINT_ALARM = 2
 
 
-class SensorCommunicationMode(str, Enum):
+class SensorCommunicationMode(str, BaseEnum):
     LORA = "LoRa"
     LORAWAN = "LoRaWan"
     MHZ433 = "433MHz"

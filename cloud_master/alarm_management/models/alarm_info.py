@@ -15,10 +15,9 @@ class AlarmInfo(CloudDocument):
     is_latest = BooleanField(default=True)
     sensor_data_id = ObjectIdField()
     client_number = StringField(required=True)
-    # todo get sensor_info from redis
     site_id = ObjectIdField()
     equipment_id = ObjectIdField()
-    measure_point_id = ObjectIdField()
+    point_id = ObjectIdField()
 
     meta = {
         "indexes": [
@@ -27,6 +26,7 @@ class AlarmInfo(CloudDocument):
             "alarm_level",
             "sensor_type",
             "is_latest",
+            # todo add join indexes
         ],
         "index_background": True,
         "collection": "alarm_info",

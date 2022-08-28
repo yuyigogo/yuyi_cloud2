@@ -147,7 +147,9 @@ class DataLoader:
             parsed_dict.update(params.get("status", {}))
             parsed_dict.update(params.get("wparam", {}))
             data = params.get("data", {})
-            parsed_dict["create_time"] = datetime_from_str(data["acqtime"])
+            create_time = datetime_from_str(data["acqtime"])
+            parsed_dict["create_time"] = create_time
+            parsed_dict["update_time"] = create_time
             parsed_dict["alarm_flag"] = data.get("alert_flag", AlarmFlag.NO_PUSH.value)
             parsed_dict["alarm_level"] = data.get(
                 "alert_level", AlarmLevel.NORMAL.value
@@ -175,7 +177,9 @@ class DataLoader:
                 parsed_dict["ampmean"] = data.get("ampmean")
         else:
             # Mech
-            parsed_dict["create_time"] = datetime_from_str(sensor_data["acqtime"])
+            create_time = datetime_from_str(sensor_data["acqtime"])
+            parsed_dict["create_time"] = create_time
+            parsed_dict["update_time"] = create_time
             parsed_dict["Mech_On_Coil_I"] = params.get("Mech_On_Coil_I", {})
             parsed_dict["Mech_Off_Coil_I"] = params.get("Mech_Off_Coil_I", {})
             parsed_dict["Mech_Motor_I"] = params.get("Mech_Motor_I", {})
