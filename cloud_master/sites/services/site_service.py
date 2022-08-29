@@ -42,11 +42,13 @@ class SiteService(BaseService):
     @classmethod
     def delete_site(cls, site: Site, clear_resource: bool):
         site_id = site.pk
-        GateWay.objects.filter(site_id=site_id).delete()
+        gateways = GateWay.objects.filter(site_id=site_id)
+        client_numbers = gateways.values_list("client_number")
         equipments = ElectricalEquipment.objects.filter(site_id=site_id)
         equipment_ids = equipments.values_list("id")
         points = MeasurePoint.objects.filter(equipment_id__in=equipment_ids)
         cls.delete_points(points, clear_resource=clear_resource)
+        gateways.delete()
         equipments.delete()
         site.delete()
         users = CloudUser.objects.filter(sites__in=[site_id])
@@ -60,6 +62,9 @@ class SiteService(BaseService):
         CloudUser.objects(id__in=remove_site_users).update(
             __raw__={"$pull": {"sites": {site_id}}}
         )
+        # clear client_id from redis
+        for client_id in client_numbers:
+            cls.remove_client_id_from_redis(client_id)
 
     @classmethod
     def named_all_site_id(cls):
