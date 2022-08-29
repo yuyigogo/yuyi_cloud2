@@ -46,7 +46,7 @@ class SensorListService(BaseService):
         alarm_infos = AlarmInfo.objects.filter(alarm_info_query)
         total = alarm_infos.count()
         alarm_infos_by_page = get_objects_pagination(
-            page, limit, alarm_infos.order_by("create_time")
+            page, limit, alarm_infos.order_by("create_date")
         )
         data = cls.assemble_alarm_infos(alarm_infos_by_page)
         return total, data
@@ -118,7 +118,7 @@ class SensorListService(BaseService):
                 "point_name": point_id_name.get(point_id, ""),
                 "is_online": sensor["is_online"],
                 "upload_interval": sensor["upload_interval"],
-                "update_time": bson_to_dict(sensor["create_time"]),
+                "update_time": bson_to_dict(sensor["create_date"]),
                 "alarm_level": sensor["alarm_level"],
                 "alarm_describe": sensor["alarm_describe"],
             }

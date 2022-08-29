@@ -32,7 +32,7 @@ class PointsTrendService(BaseService):
                 display_fields = {
                     "sensor_id": 1,
                     "sensor_type": 1,
-                    "create_time": 1,
+                    "create_date": 1,
                     f"params.{sensor_type.upper()}.ampmax": 1,
                     f"params.{sensor_type.upper()}.ampmean": 1,
                 }
@@ -40,13 +40,13 @@ class PointsTrendService(BaseService):
                 display_fields = {
                     "sensor_id": 1,
                     "sensor_type": 1,
-                    "create_time": 1,
+                    "create_date": 1,
                     "params": 1,
                 }
             sensors = mongo_col.find(
                 {
                     "sensor_id": sensor_number,
-                    "create_time": {"$gte": start_date, "$lte": end_date},
+                    "create_date": {"$gte": start_date, "$lte": end_date},
                 },
                 display_fields,
             )
@@ -73,7 +73,7 @@ class PointsTrendService(BaseService):
             sensor_dict = {
                 "sensor_id": sensor["sensor_id"],
                 "sensor_type": sensor_type,
-                "create_time": bson_to_dict(sensor["create_time"]),
+                "create_date": bson_to_dict(sensor["create_date"]),
             }
             sensor_dict.update(sensor["params"][parm_key])
             sensor_list.append(sensor_dict)
@@ -97,11 +97,11 @@ class PointsTrendService(BaseService):
                 mongo_col.find(
                     {
                         "sensor_id": sensor_id,
-                        "create_time": {"$gte": start_date, "$lt": end_date},
+                        "create_date": {"$gte": start_date, "$lt": end_date},
                     },
-                    {"create_time": 1, "params": 1, "_id": 0},
+                    {"create_date": 1, "params": 1, "_id": 0},
                 )
-                .sort([("create_time", 1)])
+                .sort([("create_date", 1)])
                 .limit(1)
             )
             if sensor:

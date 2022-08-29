@@ -4,6 +4,7 @@ import os
 import re
 from typing import Optional
 
+from alarm_management.models.alarm_info import AlarmInfo
 from bson import ObjectId
 from cloud.settings import MONGO_CLIENT, MQTT_CLIENT_CONFIG
 from cloud_ws.ws_group_send import WsSensorDataSend
@@ -90,19 +91,20 @@ class DataLoader:
             "sensor_data_id": sensor_obj_dict["_id"],
             "is_online": True,
             "is_processed": False,
+            "create_date": sensor_obj_dict["create_date"],
+            "update_date": sensor_obj_dict["update_date"],
         }
         sensor_info = cls.get_or_set_sensor_info_from_redis(sensor_id)
         if not sensor_info:
             print(f"can't get sensor_info in insert alarm data:{sensor_id=}")
             return
         alarm_info.update(sensor_info)
-        my_col = MONGO_CLIENT["alarm_info"]
         # update is_latest filed to false
-        my_query = {"is_latest": True, "sensor_id": sensor_id}
-        new_values = {"$set": {"is_latest": False}}
-        my_col.update_many(my_query, new_values)
-        # insert new sensor data
-        my_col.insert_one(alarm_info)
+        AlarmInfo.objects.filter(is_latest=True, sensor_id=sensor_id).update(
+            is_latest=False
+        )
+        new_alarm_info = AlarmInfo(**alarm_info)
+        new_alarm_info.save()
         return alarm_info
 
     @classmethod
@@ -148,8 +150,8 @@ class DataLoader:
             parsed_dict.update(params.get("wparam", {}))
             data = params.get("data", {})
             create_time = datetime_from_str(data["acqtime"])
-            parsed_dict["create_time"] = create_time
-            parsed_dict["update_time"] = create_time
+            parsed_dict["create_date"] = create_time
+            parsed_dict["update_date"] = create_time
             parsed_dict["alarm_flag"] = data.get("alert_flag", AlarmFlag.NO_PUSH.value)
             parsed_dict["alarm_level"] = data.get(
                 "alert_level", AlarmLevel.NORMAL.value
@@ -178,8 +180,8 @@ class DataLoader:
         else:
             # Mech
             create_time = datetime_from_str(sensor_data["acqtime"])
-            parsed_dict["create_time"] = create_time
-            parsed_dict["update_time"] = create_time
+            parsed_dict["create_date"] = create_time
+            parsed_dict["update_date"] = create_time
             parsed_dict["Mech_On_Coil_I"] = params.get("Mech_On_Coil_I", {})
             parsed_dict["Mech_Off_Coil_I"] = params.get("Mech_Off_Coil_I", {})
             parsed_dict["Mech_Motor_I"] = params.get("Mech_Motor_I", {})

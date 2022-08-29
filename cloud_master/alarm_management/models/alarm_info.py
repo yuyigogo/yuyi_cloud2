@@ -15,6 +15,7 @@ class AlarmInfo(CloudDocument):
     is_latest = BooleanField(default=True)
     sensor_data_id = ObjectIdField()
     client_number = StringField(required=True)
+    customer_id = ObjectIdField()  # for now, not used
     site_id = ObjectIdField()
     equipment_id = ObjectIdField()
     point_id = ObjectIdField()
@@ -27,6 +28,19 @@ class AlarmInfo(CloudDocument):
             "sensor_type",
             "is_latest",
             # todo add join indexes
+            {
+                "fields": (
+                    "alarm_type",
+                    "is_latest",
+                    "site_id",
+                    "equipment_id",
+                    "point_id",
+                    "sensor_type",
+                    "alarm_level",
+                    "is_online",
+                ),
+                "name": "sensor_list_index",
+            },
         ],
         "index_background": True,
         "collection": "alarm_info",
