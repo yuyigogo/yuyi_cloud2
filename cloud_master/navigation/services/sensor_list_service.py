@@ -53,19 +53,17 @@ class SensorListService(BaseService):
 
     @classmethod
     def assemble_alarm_infos(cls, alarm_infos: QuerySet) -> list:
-        alarm_id_data_id, alarm_id_equipment_id, alarm_id_point_id = {}, {}, {}
+        alarm_id_data_id, equipment_ids, point_ids = {}, [], []
         sensor_type_data_ids = defaultdict(list)
         for alarm_info in alarm_infos:
             alarm_info_id = alarm_info.pk
             sensor_type = alarm_info.sensor_type
             sensor_data_id = alarm_info.sensor_data_id
             alarm_id_data_id[alarm_info_id] = sensor_data_id
-            alarm_id_equipment_id[alarm_info_id] = alarm_info.equipment_id
-            alarm_id_point_id[alarm_info_id] = alarm_info.point_id
+            equipment_ids.append(alarm_info.equipment_id)
+            point_ids.append(alarm_info.point_id)
             sensor_type_data_ids[sensor_type].append(sensor_data_id)
-        equipment_id_name, point_id_name = cls.get_names_info(
-            alarm_id_equipment_id.values(), alarm_id_point_id.values()
-        )
+        equipment_id_name, point_id_name = cls.get_names_info(equipment_ids, point_ids)
         sensor_id_to_info = cls.get_sensor_data(
             sensor_type_data_ids, equipment_id_name, point_id_name
         )
@@ -95,12 +93,13 @@ class SensorListService(BaseService):
     ) -> dict:
         list_data = []
         for sensor_type, sensor_ids in sensor_type_id.items():
-            not_display_fields = {}
             my_col = MONGO_CLIENT[sensor_type]
+            raw_query = {"_id": {"$in": sensor_ids}}
             if sensor_type == SensorType.uhf.value:
                 not_display_fields = {"prps": 0}
-            raw_query = {"_id": {"$in": sensor_ids}}
-            sensors = my_col.find(raw_query, not_display_fields)
+                sensors = my_col.find(raw_query, not_display_fields)
+            else:
+                sensors = my_col.find(raw_query)
             list_data.extend(sensors)
         sensor_id_dict = {}
         for sensor in list_data:
@@ -112,10 +111,10 @@ class SensorListService(BaseService):
                 "sensor_data_id": str(sensor_obj_id),
                 "sensor_id": sensor["sensor_id"],
                 "sensor_type": sensor_type,
-                "equipment_id": str(equipment_id),
-                "equipment_name": equipment_id_name.get(equipment_id, ""),
-                "point_id": str(point_id),
-                "point_name": point_id_name.get(point_id, ""),
+                "equipment_id": equipment_id,
+                "equipment_name": equipment_id_name.get(ObjectId(equipment_id), ""),
+                "point_id": point_id,
+                "point_name": point_id_name.get(ObjectId(point_id), ""),
                 "is_online": sensor["is_online"],
                 "upload_interval": sensor["upload_interval"],
                 "update_time": bson_to_dict(sensor["create_date"]),

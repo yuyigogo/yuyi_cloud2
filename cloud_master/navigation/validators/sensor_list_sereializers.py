@@ -8,7 +8,7 @@ from common.framework.serializer import PageLimitSerializer
 class SensorListSerializer(PageLimitSerializer):
     point_id = CharField(required=False)
     alarm_level = IntegerField(required=False)
-    is_online = BooleanField(required=False)
+    is_online = BooleanField(default=None, allow_null=True)
     sensor_type = CharField(required=False)
 
     def validate_alarm_level(self, alarm_level: int) -> int:

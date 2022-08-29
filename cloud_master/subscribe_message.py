@@ -93,12 +93,11 @@ class DataLoader:
             "is_processed": False,
             "create_date": sensor_obj_dict["create_date"],
             "update_date": sensor_obj_dict["update_date"],
+            "customer_id": sensor_obj_dict["customer_id"],
+            "site_id": sensor_obj_dict["site_id"],
+            "equipment_id": sensor_obj_dict["equipment_id"],
+            "point_id": sensor_obj_dict["point_id"],
         }
-        sensor_info = cls.get_or_set_sensor_info_from_redis(sensor_id)
-        if not sensor_info:
-            print(f"can't get sensor_info in insert alarm data:{sensor_id=}")
-            return
-        alarm_info.update(sensor_info)
         # update is_latest filed to false
         AlarmInfo.objects.filter(is_latest=True, sensor_id=sensor_id).update(
             is_latest=False
@@ -121,6 +120,9 @@ class DataLoader:
             parsed_sensor_dict = cls.parse_origin_sensor_data(
                 sensor_type, gateway_id, sensor_id, sensor_data
             )
+            if not parsed_sensor_dict:
+                print("-----------------parsed_sensor_dict is none, discard this data")
+                return
             my_col = MONGO_CLIENT[sensor_type]
             # update old data before insert new sensor data
             my_col.update_many(my_query, new_values)
@@ -134,7 +136,7 @@ class DataLoader:
     @classmethod
     def parse_origin_sensor_data(
         cls, sensor_type: str, gateway_id: str, sensor_id: str, sensor_data: dict
-    ) -> dict:
+    ) -> Optional[dict]:
         parsed_dict = {
             "_id": ObjectId(),
             "sensor_type": sensor_type,
@@ -143,6 +145,11 @@ class DataLoader:
             "is_latest": True,
             "is_online": True,
         }
+        sensor_info = cls.get_or_set_sensor_info_from_redis(sensor_id)
+        if not sensor_info:
+            print(f"can't get sensor_info in insert alarm data:{sensor_id=}")
+            return
+        parsed_dict.update(sensor_info)
         params = sensor_data.get("params", {})
         # if sensor_type in [SensorType.ae.value, SensorType.tev.value, SensorType.temp.value, SensorType.uhf.vale]:
         if sensor_type != SensorType.mech:

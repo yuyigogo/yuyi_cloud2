@@ -96,7 +96,8 @@ class SiteSensorsView(SensorsBaseView):
         if not self.validate_site_or_equipment(site_id=site_id):
             logger.info(f"invalid {site_id=}")
             return BaseResponse(status_code=HTTP_404_NOT_FOUND)
-        site_sensor_infos, total = self._get_sensor_list_from_site_or_equipment(
+        logger.info(f"{request.user.username} request list sensors in {site_id=}")
+        total, site_sensor_infos = self._get_sensor_list_from_site_or_equipment(
             data, site_id=site_id
         )
         return BaseResponse(data={"sensor_list": site_sensor_infos, "total": total})
@@ -114,7 +115,7 @@ class EquipmentSensorsView(SensorsBaseView):
         if not self.validate_site_or_equipment(equipment_id=equipment_id):
             logger.info(f"invalid {equipment_id=}")
             return BaseResponse(status_code=HTTP_404_NOT_FOUND)
-        equipment_sensor_infos, total = self._get_sensor_list_from_site_or_equipment(
+        total, equipment_sensor_infos = self._get_sensor_list_from_site_or_equipment(
             data, equipment_id=equipment_id
         )
         return BaseResponse(
