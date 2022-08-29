@@ -93,13 +93,12 @@ class SensorListService(BaseService):
     ) -> dict:
         list_data = []
         for sensor_type, sensor_ids in sensor_type_id.items():
+            not_display_fields = None
             my_col = MONGO_CLIENT[sensor_type]
             raw_query = {"_id": {"$in": sensor_ids}}
             if sensor_type == SensorType.uhf.value:
                 not_display_fields = {"prps": 0}
-                sensors = my_col.find(raw_query, not_display_fields)
-            else:
-                sensors = my_col.find(raw_query)
+            sensors = my_col.find(raw_query, not_display_fields)
             list_data.extend(sensors)
         sensor_id_dict = {}
         for sensor in list_data:
