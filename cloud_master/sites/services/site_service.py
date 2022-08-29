@@ -1,11 +1,10 @@
-from typing import Optional, Union, List
+from typing import List, Optional, Union
 
 from bson import ObjectId
-from mongoengine import queryset
-
 from equipment_management.models.gateway import GateWay
 from file_management.models.electrical_equipment import ElectricalEquipment
 from file_management.models.measure_point import MeasurePoint
+from mongoengine import queryset
 from sites.models.site import Site
 from user_management.models.user import CloudUser
 
@@ -43,9 +42,6 @@ class SiteService(BaseService):
     @classmethod
     def delete_site(cls, site: Site, clear_resource: bool):
         site_id = site.pk
-        # todo when delete a customer/site, the user should not deleted, but remove its sites
-        # or set the customer to none
-        # CloudUser.objects.filter(sites__in=[site_id]).delete()
         GateWay.objects.filter(site_id=site_id).delete()
         equipments = ElectricalEquipment.objects.filter(site_id=site_id)
         equipment_ids = equipments.values_list("id")
@@ -53,6 +49,17 @@ class SiteService(BaseService):
         cls.delete_points(points, clear_resource=clear_resource)
         equipments.delete()
         site.delete()
+        users = CloudUser.objects.filter(sites__in=[site_id])
+        delete_users, remove_site_users = [], []
+        for user in users:
+            if len(user.sites) > 1:
+                remove_site_users.append(user.pk)
+            else:
+                delete_users.append(user.pk)
+        CloudUser.object(id__in=delete_users).delete()
+        CloudUser.objects(id__in=remove_site_users).update(
+            __raw__={"$pull": {"sites": {site_id}}}
+        )
 
     @classmethod
     def named_all_site_id(cls):

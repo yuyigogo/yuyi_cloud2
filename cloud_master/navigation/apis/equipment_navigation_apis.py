@@ -1,13 +1,7 @@
 import logging
-from typing import Optional
 
 from customer.models.customer import Customer
-from file_management.models.electrical_equipment import ElectricalEquipment
 from navigation.services.equipment_navigation_service import SiteNavigationService
-from navigation.services.sensor_list_service import SensorListService
-from navigation.validators.sensor_list_sereializers import SensorListSerializer
-from rest_framework.status import HTTP_404_NOT_FOUND
-from sites.models.site import Site
 
 from common.framework.response import BaseResponse
 from common.framework.view import BaseView

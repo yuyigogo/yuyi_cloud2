@@ -152,7 +152,6 @@ class SiteNavigationService(BaseService):
             "type": "gateway",
             "children": [],
         }
-        # todo add sensor infos to children
         return gateway_tree_info
 
     @classmethod
