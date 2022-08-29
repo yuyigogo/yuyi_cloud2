@@ -2,7 +2,11 @@ from django.urls import path, re_path
 from navigation.apis.equipment_navigation_apis import CustomerTreesView
 from navigation.apis.gateway_navigation_apis import GatewayTreesView
 from navigation.apis.points_trend_apis import PointsGraphView, PointsTrendView
-from navigation.apis.sensor_list_apis import EquipmentSensorsView, SiteSensorsView
+from navigation.apis.sensor_list_apis import (
+    EquipmentSensorsView,
+    SensorDetailsView,
+    SiteSensorsView,
+)
 
 urlpatterns = [
     re_path(
@@ -20,6 +24,11 @@ urlpatterns = [
     #     CustomerSensorsView.as_view(),
     #     name="sensor_info_in_customer",
     # ),
+    re_path(
+        r"^sensor/(?P<pk>[a-zA-Z0-9]+)/sensor_type/(?P<sensor_type>[a-zA-Z]+)/$",
+        SensorDetailsView.as_view(),
+        name="sensor_details",
+    ),
     path("customer-trees/", CustomerTreesView.as_view(), name="customer_trees_info"),
     path(
         "gateway-trees/", GatewayTreesView.as_view(), name="customer_gateway_trees_info"

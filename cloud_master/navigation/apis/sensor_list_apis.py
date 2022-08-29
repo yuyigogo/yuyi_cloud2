@@ -3,10 +3,15 @@ from typing import Optional
 
 from file_management.models.electrical_equipment import ElectricalEquipment
 from navigation.services.sensor_list_service import SensorListService
-from navigation.validators.sensor_list_sereializers import SensorListSerializer
+from navigation.validators.sensor_list_sereializers import (
+    SensorDetailsSerializer,
+    SensorListSerializer,
+)
 from rest_framework.status import HTTP_404_NOT_FOUND
 from sites.models.site import Site
 
+from common.const import RoleLevel
+from common.framework.permissions import PermissionFactory
 from common.framework.response import BaseResponse
 from common.framework.view import BaseView
 
@@ -108,3 +113,23 @@ class CustomerSensorsView(BaseView):
         # customer_sensors = SiteNavigationService.get_all_sensors_in_customer(customer)
         # return BaseResponse(data=customer_sensors)
         pass
+
+
+class SensorDetailsView(BaseView):
+    permission_classes = (
+        PermissionFactory(
+            RoleLevel.CLIENT_SUPER_ADMIN.value,
+            RoleLevel.CLOUD_SUPER_ADMIN.value,
+            RoleLevel.ADMIN.value,
+        ),
+    )
+
+    def get(self, request, pk, sensor_type):
+        _, context = self.get_validated_data(
+            SensorDetailsSerializer, pk=pk, sensor_type=sensor_type
+        )
+        logger.info(
+            f"{request.user.username} request sensor details for {pk=}, {sensor_type=}"
+        )
+        sensor_obj_dict = context["sensor_obj_dict"]
+        return BaseResponse(data=sensor_obj_dict)
