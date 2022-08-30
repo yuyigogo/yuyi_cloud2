@@ -1,4 +1,8 @@
-from alarm_management.apis.alarm_apis import EquipmentAlarmListView, SiteAlarmListView
+from alarm_management.apis.alarm_apis import (
+    AlarmActionView,
+    EquipmentAlarmListView,
+    SiteAlarmListView,
+)
 from django.urls import re_path
 
 urlpatterns = [
@@ -11,5 +15,10 @@ urlpatterns = [
         r"^sites/(?P<site_id>[a-zA-Z0-9]+)/alarm_info/$",
         SiteAlarmListView.as_view(),
         name="sensor_info_in_site",
+    ),
+    re_path(
+        r"^alarms/(?P<alarm_id>[a-zA-Z0-9]+)/$",
+        AlarmActionView.as_view(),
+        name="alarm_action",
     ),
 ]

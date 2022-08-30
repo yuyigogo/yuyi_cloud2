@@ -72,6 +72,7 @@ class AlarmListService(BaseService):
                     "update_time": bson_to_dict(alarm_info.create_date),
                     "alarm_level": alarm_info.alarm_level,
                     "alarm_describe": alarm_info.alarm_describe,
+                    "processed_remarks": alarm_info.processed_remarks,
                 }
             )
         equipment_id_name, point_id_name = cls.get_names_info(equipment_ids, point_ids)

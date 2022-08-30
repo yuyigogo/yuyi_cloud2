@@ -1,7 +1,10 @@
 import logging
 
 from alarm_management.services.alarm_list_service import AlarmListService
-from alarm_management.validators.alarm_list_sereializers import AlarmListSerializer
+from alarm_management.validators.alarm_list_sereializers import (
+    AlarmActionSerializer,
+    AlarmListSerializer,
+)
 
 from common.framework.response import BaseResponse
 from common.framework.view import BaseView
@@ -51,3 +54,19 @@ class EquipmentAlarmListView(BaseView):
             sensor_type=data.get("sensor_type"),
         )
         return BaseResponse(data={"alarm_list": data, "total": total})
+
+
+class AlarmActionView(BaseView):
+    def put(self, request, alarm_id):
+        data, _ = self.get_validated_data(AlarmActionSerializer, alarm_id=alarm_id)
+        logger.info(
+            f"{request.user.username} request to update {alarm_id=} with {data=}"
+        )
+        alarm_info = data["alarm_info"]
+        is_processed = data["is_processed"]
+        processed_remarks = data.get("processed_remarks", "")
+        alarm_info.update(
+            is_processed=is_processed, processed_remarks=processed_remarks
+        )
+        # todo auto-increment/decrement not processed number
+        return BaseResponse()

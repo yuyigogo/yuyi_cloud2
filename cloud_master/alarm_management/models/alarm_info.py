@@ -11,6 +11,7 @@ class AlarmInfo(CloudDocument):
     alarm_level = IntField(required=True)
     alarm_describe = StringField(max_length=MAX_MESSAGE_LENGTH)
     is_processed = BooleanField(default=False)
+    processed_remarks = StringField(max_length=MAX_MESSAGE_LENGTH)
     is_online = BooleanField(default=True)
     is_latest = BooleanField(default=True)
     sensor_data_id = ObjectIdField()
