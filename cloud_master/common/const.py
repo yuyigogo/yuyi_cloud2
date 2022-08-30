@@ -224,6 +224,10 @@ class AlarmLevel(int, BaseEnum):
     WARNING = 1
     ALARM = 2
 
+    @classmethod
+    def abnormal_alarm_level(cls):
+        return [cls.WARNING.value, cls.ALARM.value]
+
 
 class AlarmType(int, BaseEnum):
     """报警类型：1：传感器报警；2：测点报警"""

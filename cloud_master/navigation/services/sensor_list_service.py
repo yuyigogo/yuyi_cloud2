@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple
 
 from alarm_management.models.alarm_info import AlarmInfo
 from bson import ObjectId
@@ -46,7 +46,7 @@ class SensorListService(BaseService):
         alarm_infos = AlarmInfo.objects.filter(alarm_info_query)
         total = alarm_infos.count()
         alarm_infos_by_page = get_objects_pagination(
-            page, limit, alarm_infos.order_by("create_date")
+            page, limit, alarm_infos.order_by("-create_date")
         )
         data = cls.assemble_alarm_infos(alarm_infos_by_page)
         return total, data
@@ -108,7 +108,7 @@ class SensorListService(BaseService):
             point_id = sensor["point_id"]
             info = {
                 "sensor_data_id": str(sensor_obj_id),
-                "sensor_id": sensor["sensor_id"],
+                # "sensor_id": sensor["sensor_id"],
                 "sensor_type": sensor_type,
                 "equipment_id": equipment_id,
                 "equipment_name": equipment_id_name.get(ObjectId(equipment_id), ""),
