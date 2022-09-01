@@ -7,6 +7,7 @@ from file_management.validators.excel_file_serializers import ExcelImportSeriali
 
 
 class ImportFileView(BaseView):
+    # todo every user can import file, so need add validation;
     permission_classes = (
         PermissionFactory(
             RoleLevel.CLIENT_SUPER_ADMIN.value, RoleLevel.CLOUD_SUPER_ADMIN.value,

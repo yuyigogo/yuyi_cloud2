@@ -13,7 +13,7 @@ class SensorConfig(CloudDocument):
     sensor_type = StringField()
     client_number = StringField()
     model_key = StringField()
-    can_senor_online = BooleanField(default=False)  # 是否支持在线迷失
+    can_senor_online = BooleanField(default=False)  # 是否支持在线模式
     communication_mode = StringField()
     # rtc_set = DateTimeField(default=lambda: datetime.now(tz=pytz.utc))  # time set
     # gain_set = StringField()  # db, 增益选择
