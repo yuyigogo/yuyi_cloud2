@@ -1,5 +1,5 @@
 from cloud.models import CloudDocument
-from mongoengine import BooleanField, ObjectIdField, StringField
+from mongoengine import ObjectIdField, StringField, IntField
 
 
 class SensorConfig(CloudDocument):
@@ -13,7 +13,7 @@ class SensorConfig(CloudDocument):
     sensor_type = StringField()
     client_number = StringField()
     model_key = StringField()
-    can_senor_online = BooleanField(default=False)  # 是否支持在线模式
+    can_senor_online = IntField(default=0)  # 是否支持在线模式, 0:不支持， 1：支持
     communication_mode = StringField()
     # rtc_set = DateTimeField(default=lambda: datetime.now(tz=pytz.utc))  # time set
     # gain_set = StringField()  # db, 增益选择

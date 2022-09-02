@@ -2,16 +2,17 @@ import logging
 import re
 
 from cloud.settings import CLIENT_IDS
-from equipment_management.models.gateway import GateWay
-from mongoengine import DoesNotExist
 
-from common.const import MODEL_KEY_TO_SENSOR_TYPE
+# 获取网关下传感器列表的主题
+from equipment_management.models.sensor_config import SensorConfig
+from pymongo import UpdateOne
+
 from common.storage.redis import redis
 
 # this file is to add the corresponding subscribe and published topics
 # and each topic is paired
 
-# 获取网关下传感器列表的主题
+
 BASE_GATEWAY_SUBSCRIBE_TOPIC = "/serivice_reply/sub_get"
 BASE_GATEWAY_PUBLISH_TOPIC = "/serivice/sub_get"
 # 匹配网关下传感器列表
@@ -36,40 +37,53 @@ class OnMqttMessage(object):
 
     @classmethod
     def deal_with_sensors_in_gateway_msg(cls, client_id: str, msg_dict: dict):
-        # todo 2 model changed; new db model needed.
         """网关下传感器列表数据存储"""
         logger.info(f"deal_with_sensors_in_gateway_msg for {client_id=}")
         if not cls.is_gateway_enabled(client_id):
+            logger.info(f"{client_id=} is not active!")
             return
-        print("1" * 100)
-        try:
-            gateway = GateWay.objects.get(client_number=client_id)
-        except DoesNotExist:
-            logger.error(f"{client_id=} in redis, but not find in mongodb")
-            return
-        logger.info(f"*****************")
-        params = msg_dict.get("params", {})
-        sensors_ids = params.get("sensor", [])
-        model_keys = params.get("modelkey", [])
-        sensor_types = [MODEL_KEY_TO_SENSOR_TYPE[model_key] for model_key in model_keys]
-        sensor_info = {"sensor_ids": sensors_ids, "sensor_types": sensor_types}
-        # todo 3: how to store sensor_info in gateway model;
-        # todo 4: how to judge the difference between the old and new, so update or create
-        gateway.update(sensor_info=sensor_info)
+        params = msg_dict.get("params", [])
+        bulk_operations = [
+            UpdateOne(
+                {"sensor_number": param["sensor_id"]},
+                {
+                    "$set": {
+                        "model_key": param["modelkey"],
+                        "can_senor_online": param["sensor_online"],
+                        "communication_mode": param["sensor_comm_mode"],
+                    }
+                },
+            )
+            for param in params
+        ]
+        collection = SensorConfig._get_collection()
+        collection.bulk_write(bulk_operations, ordered=False)
 
-        current_sensors = set(zip(sensors_ids, sensor_types))
-        e_sensors_ids = gateway.sensor_info.get("sensor_ids", [])
-        e_sensor_types = gateway.sensor_info.get("sensor_types", [])
-        existing_sensors = set(zip(e_sensors_ids, e_sensor_types))
-        new_sensors = current_sensors - existing_sensors
-        # all_sensors = list(current_sensors | existing_sensors)
 
-        if len(new_sensors) > 0:
-            pass
-            # create sensor_config model
-            # SensorConfigService(client_id).bulk_insert_sensor_configs(new_sensors)
-
-    @classmethod
-    def deal_with_sensor_configs(cls, client_id: str, msg_dict: dict):
-        # todo 5: 下发传感器配置时先写redis
-        pass
+# msg_dict = {"params":[
+#     {
+#         "sensor_id": "584e500400200002",
+#         "modelkey": "0000000000000002",
+#         "sensor_online": 0,
+#         "sensor_comm_mode": "RS485"
+#     },
+#     {
+#         "sensor_id": "584e500400200005",
+#         "modelkey": "0000000000000005",
+#         "sensor_online": 1,
+#         "sensor_comm_mode": "LoRa"
+#     },
+#     {
+#         "sensor_id": "584e50040020000b",
+#         "modelkey": "0000000000000004",
+#         "sensor_online": 0,
+#         "sensor_comm_mode": "LoRaWan"
+#     },
+#     {
+#         "sensor_id": "584e50040020000e",
+#         "modelkey": "0000000000000006",
+#         "sensor_online": 1,
+#         "sensor_comm_mode": "433MHz"
+#     },
+# ]}
+# OnMqttMessage.deal_with_sensors_in_gateway_msg("", msg_dict)

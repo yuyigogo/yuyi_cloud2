@@ -168,11 +168,6 @@ class SensorType(str, BaseEnum):
     uhf = "UHF"
     mech = "MECH"  # 机械特性
 
-    @classmethod
-    def ae_and_tev(cls):
-        """二合一传感器，存储到db时分为ae和tev存"""
-        return f"{cls.ae.value}_{cls.tev.value}"
-
 
 class DeviceType(str, BaseEnum):
     """设备类型"""
@@ -197,9 +192,11 @@ class VoltageLevel(str, BaseEnum):
 
 
 MODEL_KEY_TO_SENSOR_TYPE = {
-    "0000000000000002": SensorType.ae_and_tev(),  # 默认成对出现
+    "0000000000000002": SensorType.ae.value,  # 默认成对出现
     "0000000000000003": SensorType.uhf.value,
     "0000000000000004": SensorType.temp.value,
+    "0000000000000005": SensorType.tev.value,
+    "0000000000000006": SensorType.mech.value,
 }
 
 
@@ -237,11 +234,18 @@ class AlarmType(int, BaseEnum):
 
 
 class SensorCommunicationMode(str, BaseEnum):
-    LORA = "LoRa"
-    LORAWAN = "LoRaWan"
-    MHZ433 = "433MHz"
-    NB = "NB"
-    RS485 = "RS485"
+    LORA = "无线国网LoRa"
+    LORAWAN = "无线LoRaWan"
+    MHZ433 = "无线433MHz"
+    NB = "无线NB"
+    RS485 = "有线RS485"
+    ETHERNET = "有线以太网"
+    WIFI_BT = "无线WIFI and 蓝牙"
+    CAN_ENUM = "可枚举"
+
+    @classmethod
+    def support_online_types(cls) -> list:
+        return [cls.RS485.value, cls.ETHERNET.value, cls.WIFI_BT.value]
 
 
 # store in redis db5---->normal key
