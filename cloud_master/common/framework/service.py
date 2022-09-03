@@ -52,6 +52,10 @@ class BaseService(object):
     def delete_sensor_data_from_gateway(cls, gateway: GateWay, clear_resource=False):
         client_id = gateway.client_number
         if clear_resource:
+            # delete alarm_info
+            delete_filters = {"client_number": client_id}
+            alarm_info_col = MONGO_CLIENT["alarm_info"]
+            alarm_info_col.delete_many(delete_filters)
             for sensor_type in SensorType.values():
                 try:
                     mongo_col = MONGO_CLIENT[sensor_type]

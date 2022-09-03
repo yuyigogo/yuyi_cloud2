@@ -28,6 +28,7 @@ class AlarmInfo(CloudDocument):
             "alarm_level",
             "sensor_type",
             "is_latest",
+            "client_number",
             # todo add join indexes
             {
                 "fields": (

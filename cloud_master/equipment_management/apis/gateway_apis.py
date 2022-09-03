@@ -93,7 +93,7 @@ class GatewayView(BaseView):
             gateway.update(**update_fields)
         if data["changed_client_id"]:
             redis.srem(CLIENT_IDS, old_client_id)
-            redis.sadd(CLIENT_IDS, client_number)
+        redis.sadd(CLIENT_IDS, client_number)
         return BaseResponse(data=update_fields)
 
     def delete(self, request, gateway_id):
