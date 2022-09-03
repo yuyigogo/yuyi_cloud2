@@ -56,30 +56,11 @@ class DataLoader:
             if sensor_info is None:
                 print(f"get sensor_info failed for {sensor_id=}")
             return sensor_info
-            # try:
-            #     point = MeasurePoint.objects.only("equipment_id").get(
-            #         sensor_number=sensor_id
-            #     )
-            #     equipment_id = str(point.equipment_id)
-            #     point_id = str(point.id)
-            #     equipment = ElectricalEquipment.objects.only("site_id").get(
-            #         id=equipment_id
-            #     )
-            #     site_id = str(equipment.site_id)
-            #     sensor_info = {
-            #         "point_id": point_id,
-            #         "equipment_id": equipment_id,
-            #         "site_id": site_id,
-            #     }
-            # except Exception as e:
-            #     print(f"get sensor: {sensor_id=} info error with exception: {e=}")
-            #     return
-            # # set sensor_info to redis
-            # redis.hmset(sensor_info_key, sensor_info)
 
     @classmethod
     def insert_and_update_alarm_info(cls, sensor_obj_dict: dict) -> Optional[dict]:
         sensor_id = sensor_obj_dict["sensor_id"]
+        upload_interval = sensor_obj_dict.get("upload_interval")
         alarm_info = {
             "sensor_id": sensor_id,
             "sensor_type": sensor_obj_dict["sensor_type"],
@@ -97,6 +78,7 @@ class DataLoader:
             "site_id": sensor_obj_dict["site_id"],
             "equipment_id": sensor_obj_dict["equipment_id"],
             "point_id": sensor_obj_dict["point_id"],
+            "upload_interval": upload_interval if upload_interval else "",
         }
         # update is_latest filed to false
         AlarmInfo.objects.filter(is_latest=True, sensor_id=sensor_id).update(
