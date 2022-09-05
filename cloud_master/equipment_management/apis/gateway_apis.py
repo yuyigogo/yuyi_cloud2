@@ -117,15 +117,15 @@ class GatewaySensorsView(BaseView):
         page = data.get("page", 1)
         limit = data.get("limit", 10)
         sensor_id = data.get("sensor_id")
-        sensor_name = data.get("sensor_name")
         sensor_type = data.get("sensor_type")
+        is_online = data.get("is_online")
         total, data = GatewayService.get_sensor_info_in_gateway(
             page,
             limit,
             gateway.client_number,
-            sensor_name=sensor_name,
             sensor_id=sensor_id,
             sensor_type=sensor_type,
+            is_online=is_online,
         )
         return BaseResponse(data={"total": total, "sensor_info": data})
 

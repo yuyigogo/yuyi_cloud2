@@ -132,9 +132,9 @@ class DeleteGatewaySerializer(BaseSerializer):
 class SensorConfigSerializer(BaseSerializer):
     page = IntegerField(required=False)
     limit = IntegerField(required=False)
-    sensor_name = CharField(required=False)
     sensor_id = CharField(required=False)
     sensor_type = CharField(required=False)
+    is_online = BooleanField(default=None, allow_null=True)
 
     def validate_sensor_type(self, sensor_type):
         if sensor_type not in SensorType.values():

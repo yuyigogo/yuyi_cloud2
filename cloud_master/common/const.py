@@ -192,11 +192,12 @@ class VoltageLevel(str, BaseEnum):
 
 
 MODEL_KEY_TO_SENSOR_TYPE = {
-    "0000000000000002": SensorType.ae.value,  # 默认成对出现
-    "0000000000000003": SensorType.uhf.value,
-    "0000000000000004": SensorType.temp.value,
-    "0000000000000005": SensorType.tev.value,
-    "0000000000000006": SensorType.mech.value,
+    "0000000000000001": SensorType.uhf.value,
+    "0000000000000002": "HFCT",
+    "0000000000000003": SensorType.tev.value,
+    "0000000000000004": SensorType.ae.value,
+    "0000000000000009": SensorType.tev.value,
+    "0000000000000008": SensorType.mech.value,
 }
 
 
@@ -234,14 +235,14 @@ class AlarmType(int, BaseEnum):
 
 
 class SensorCommunicationMode(str, BaseEnum):
-    LORA = "无线国网LoRa"
-    LORAWAN = "无线LoRaWan"
-    MHZ433 = "无线433MHz"
-    NB = "无线NB"
-    RS485 = "有线RS485"
-    ETHERNET = "有线以太网"
-    WIFI_BT = "无线WIFI and 蓝牙"
-    CAN_ENUM = "可枚举"
+    LORA = "国网LoRa"
+    LORAWAN = "LoRaWan"
+    MHZ433 = "433MHz"
+    NB = "NB-IoT"
+    RS485 = "RS485"
+    ETHERNET = "LAN"
+    WIFI = "WIFI"
+    BLUETOOTH = "Bluetooth"
 
     @classmethod
     def support_online_types(cls) -> list:
