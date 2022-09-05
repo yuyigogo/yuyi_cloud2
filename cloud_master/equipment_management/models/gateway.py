@@ -15,7 +15,6 @@ class GateWay(CloudDocument):
     customer = ObjectIdField(required=True)
     time_adjusting = DateTimeField(default=lambda: datetime.now(tz=pytz.utc))
     remarks = StringField(max_length=MAX_MESSAGE_LENGTH)
-    sensor_info = DictField()  # {"sensor_ids": [], "sensor_types": []}
 
     meta = {
         "indexes": ["name", "customer", "site_id", "client_number"],

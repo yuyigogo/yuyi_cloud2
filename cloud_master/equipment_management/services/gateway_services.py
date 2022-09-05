@@ -30,18 +30,36 @@ class GatewayService(BaseService):
         gateway.save()
         return gateway
 
-    def get_list_gateway_in_site(self):
+    def get_list_gateway_in_site(self) -> list:
         gateways = GateWay.objects.only("name", "client_number").filter(
             site_id=self.site_id
         )
-        return [
-            {
-                "gateway_id": str(gateway.id),
-                "name": gateway.name,
-                "client_number": gateway.client_number,
+        data, client_numbers = [], []
+        for gateway in gateways:
+            client_number = gateway.client_number
+            client_numbers.append(client_number)
+            data.append(
+                {
+                    "gateway_id": str(gateway.id),
+                    "name": gateway.name,
+                    "client_number": client_number,
+                }
+            )
+        latest_info_dict = self.get_latest_gateway_infos(client_numbers)
+        return [d.update(latest_info_dict.get(d["client_number"])) for d in data]
+
+    @classmethod
+    def get_latest_gateway_infos(cls, client_numbers: list) -> dict:
+        alarm_infos = AlarmInfo.objects.only(
+            "is_online", "create_date", "client_number"
+        ).filter(client_number__in=client_numbers, is_latest=True)
+        return {
+            alarm_info.client_number: {
+                "is_online": alarm_info.is_online,
+                "update_time": alarm_info.create_date,
             }
-            for gateway in gateways
-        ]
+            for alarm_info in alarm_infos
+        }
 
     @classmethod
     def get_sensor_info_in_gateway(
