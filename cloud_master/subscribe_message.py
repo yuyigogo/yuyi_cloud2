@@ -60,7 +60,6 @@ class DataLoader:
     @classmethod
     def insert_and_update_alarm_info(cls, sensor_obj_dict: dict) -> Optional[dict]:
         sensor_id = sensor_obj_dict["sensor_id"]
-        upload_interval = sensor_obj_dict.get("upload_interval")
         alarm_info = {
             "sensor_id": sensor_id,
             "sensor_type": sensor_obj_dict["sensor_type"],
@@ -78,7 +77,6 @@ class DataLoader:
             "site_id": sensor_obj_dict["site_id"],
             "equipment_id": sensor_obj_dict["equipment_id"],
             "point_id": sensor_obj_dict["point_id"],
-            "upload_interval": upload_interval if upload_interval else "",
         }
         # update is_latest filed to false
         AlarmInfo.objects.filter(is_latest=True, sensor_id=sensor_id).update(

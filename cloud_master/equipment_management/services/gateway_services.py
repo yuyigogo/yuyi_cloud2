@@ -1,12 +1,15 @@
+from collections import defaultdict
 from datetime import datetime
 from typing import Optional
 
 from alarm_management.models.alarm_info import AlarmInfo
 from cloud.models import bson_to_dict
+from cloud.settings import MONGO_CLIENT
 from equipment_management.models.gateway import GateWay
 from equipment_management.models.sensor_config import SensorConfig
 from mongoengine import Q
 
+from common.const import SensorType
 from common.framework.service import BaseService
 from common.utils import get_objects_pagination
 
@@ -65,25 +68,46 @@ class GatewayService(BaseService):
         ).filter(sensor_query)
         total = sensors.count()
         sensor_by_page = get_objects_pagination(page, limit, sensors)
-        sensor_ids = sensor_by_page.values_list("sensor_number")
-        # query sensor_data , not
+        data, sensor_type_sensor_ids = [], defaultdict(list)
+        for sensor_config in sensor_by_page:
+            sensor_type = sensor_type.sensor_type
+            sensor_id = sensor_config.sensor_number
+            data.append(
+                {
+                    "name": f"{sensor_type}传感器",
+                    "sensor_id": sensor_id,
+                    "sensor_type": sensor_type,
+                }
+            )
+            sensor_type_sensor_ids[sensor_type].append(sensor_id)
+        sensor_infos = cls._get_sensor_info_in_gateway(sensor_type_sensor_ids)
         data = [
-            {
-                "name": f"{sensor_type}传感器",
-                "sensor_id": sensor_config.sensor_number,
-                "sensor_type": sensor_config.sensor_type,
-            }
-            for sensor_config in sensor_by_page
+            info_dict.update(sensor_infos.get(info_dict["sensor_id"]))
+            for info_dict in data
         ]
-
         return total, data
 
     @classmethod
-    def _get_sensor_info_in_gateway(cls, sensor_ids: list) -> dict:
-        alarm_infos = AlarmInfo.objects.filter(is_latest=True, sensor_id__in=sensor_ids)
-        return {alarm_info.sensor_id: {
-            "sensor_data_id": str(alarm_info.pk),
-            "is_online": alarm_info.is_online,
-            "upload_interval": alarm_info.upload_interval,
-            "update_time": bson_to_dict(alarm_info.create_date),
-        } for alarm_info in alarm_infos}
+    def _get_sensor_info_in_gateway(cls, sensor_type_sensor_ids: dict) -> dict:
+        sensor_datas = []
+        for sensor_type, sensor_ids in sensor_type_sensor_ids.items():
+            not_display_fields = None
+            my_col = MONGO_CLIENT[sensor_type]
+            raw_query = {"_id": {"$in": sensor_ids}, "is_latest": True}
+            if sensor_type == SensorType.uhf.value:
+                not_display_fields = {"prps": 0}
+            sensors = my_col.find(raw_query, not_display_fields)
+            sensor_datas.extend(sensors)
+        sensor_infos = {
+            sensor["sensor_id"]: {
+                "sensor_data_id": str(sensor["_id"]),
+                "update_time": bson_to_dict(sensor["create_date"]),
+                "upload_interval": sensor.get("upload_interval", ""),
+                "is_online": sensor["is_online"],
+                "battery": sensor.get("battery", ""),
+                "rssi": sensor.get("rssi", ""),
+                "snr": sensor.get("snr", ""),
+            }
+            for sensor in sensor_datas
+        }
+        return sensor_infos

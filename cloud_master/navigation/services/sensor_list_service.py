@@ -95,7 +95,7 @@ class SensorListService(BaseService):
         for sensor_type, sensor_ids in sensor_type_id.items():
             not_display_fields = None
             my_col = MONGO_CLIENT[sensor_type]
-            raw_query = {"_id": {"$in": sensor_ids}}
+            raw_query = {"_id": {"$in": sensor_ids}, "is_latest": True}
             if sensor_type == SensorType.uhf.value:
                 not_display_fields = {"prps": 0}
             sensors = my_col.find(raw_query, not_display_fields)
@@ -117,6 +117,7 @@ class SensorListService(BaseService):
                 "update_time": bson_to_dict(sensor["create_date"]),
                 "alarm_level": sensor["alarm_level"],
                 "alarm_describe": sensor["alarm_describe"],
+                "upload_interval": sensor.get("upload_interval", ""),
                 # work status fields
                 "is_online": sensor["is_online"],
                 "battery": sensor.get("battery", ""),
