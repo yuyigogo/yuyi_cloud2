@@ -114,33 +114,27 @@ class SensorListService(BaseService):
                 "equipment_name": equipment_id_name.get(ObjectId(equipment_id), ""),
                 "point_id": point_id,
                 "point_name": point_id_name.get(ObjectId(point_id), ""),
-                "is_online": sensor["is_online"],
-                "upload_interval": sensor["upload_interval"],
                 "update_time": bson_to_dict(sensor["create_date"]),
                 "alarm_level": sensor["alarm_level"],
                 "alarm_describe": sensor["alarm_describe"],
+                # work status fields
+                "is_online": sensor["is_online"],
+                "battery": sensor.get("battery", ""),
+                "rssi": sensor.get("rssi", ""),
+                "snr": sensor.get("snr", ""),
             }
             if sensor_type == SensorType.ae:
                 info["character_value"] = sensor["maxvalue"]
-                info["battery"] = sensor["battery"]
-                info["rssi"] = sensor["rssi"]
-                info["snr"] = sensor["snr"]
             elif sensor_type == SensorType.tev:
                 info["character_value"] = sensor["amp"]
-                info["battery"] = sensor["battery"]
-                info["rssi"] = sensor["rssi"]
-                info["snr"] = sensor["snr"]
             elif sensor_type == SensorType.uhf:
                 info["character_value"] = sensor["ampmax"]
-                info["battery"] = sensor["battery"]
-                info["rssi"] = sensor["rssi"]
-                info["snr"] = sensor["snr"]
             elif sensor_type == SensorType.temp:
                 info["character_value"] = sensor["T"]
-                info["battery"] = sensor["battery"]
             else:
                 # mech
-                # todo
-                info["character_value"] = sensor["todo"]
+                info["character_value"] = sensor.get("Mech_DIS_I", {}).get(
+                    "current_value"
+                )
             sensor_id_dict[sensor_obj_id] = info
         return sensor_id_dict
