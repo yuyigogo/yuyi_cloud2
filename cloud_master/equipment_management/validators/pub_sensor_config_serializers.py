@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class PubSensorConfigSerializer(BaseSerializer):
-    upload_interval = IntegerField(required=True)
+    acq_period = IntegerField(required=True)
 
     def validate(self, data):
         client_number = self.context["client_number"]
@@ -23,18 +23,23 @@ class PubSensorConfigSerializer(BaseSerializer):
             )
         except DoesNotExist:
             raise APIException(f"invalid {client_number=} or {sensor_id=}")
-        data["sensor_type"] = sensor_config.sensor_type
+        sensor_type = sensor_config.sensor_type
+        if sensor_type == SensorType.mech:
+            raise APIException("mech sensor not support this action!")
+        data["sensor_type"] = sensor_type
         return data
 
 
 class PubMultiSensorConfigSerializer(BaseSerializer):
     sensor_id = CharField(required=True)
     sensor_type = CharField(required=True)
-    upload_interval = IntegerField(required=True)
+    acq_period = IntegerField(required=True)
 
     def validate_sensor_type(self, sensor_type):
         if sensor_type not in SensorType.values():
             raise APIException(f"invalid {sensor_type=}")
+        if sensor_type == SensorType.mech:
+            raise APIException("mech sensor not support this action!")
         return sensor_type
 
     def validate(self, data: dict) -> dict:

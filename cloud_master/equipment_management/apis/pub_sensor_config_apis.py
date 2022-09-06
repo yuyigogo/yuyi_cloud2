@@ -26,10 +26,10 @@ class SensorConfigView(BaseView):
         sensor_type = data["sensor_type"]
         my_col = MONGO_CLIENT[sensor_type]
         raw_query = {"sensor_id": sensor_id, "is_latest": True}
-        projection = {"upload_interval": 1}
+        projection = {"acq_period": 1}
         data = my_col.find_one(raw_query, projection)
-        upload_interval = data.get("upload_interval")
-        return BaseResponse(data={"upload_interval": upload_interval})
+        acq_period = data.get("acq_period")
+        return BaseResponse(data={"acq_period": acq_period})
 
     def put(self, request, client_number, sensor_id):
         data, _ = self.get_validated_data(
@@ -38,7 +38,7 @@ class SensorConfigView(BaseView):
         logger.info(
             f"{request.user.username} request update sensor upload_interval with {client_number=}, {sensor_id=} by mqtt publish client"
         )
-        payload = {"params": {"period": data["upload_interval"]}}
+        payload = {"params": {"period": data["acq_period"]}}
         try:
             cloud_mqtt_client.mqtt_publish(
                 f"/{client_number}subnode/{sensor_id}/{BASE_SENSOR_SAMPLE_PERIOD_PUBLISH_TOPIC}",
@@ -65,7 +65,7 @@ class SensorConfigsView(BaseView):
         sensor_id_client_number = SensorConfig.objects.filter(
             site_id=site_id, sensor_type=sensor_type
         ).values_list("sensor_number", "client_number")
-        payload = {"params": {"period": data["upload_interval"]}}
+        payload = {"params": {"period": data["acq_period"]}}
         for (sensor_id, client_number) in sensor_id_client_number:
             try:
                 cloud_mqtt_client.mqtt_publish(
