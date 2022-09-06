@@ -1,5 +1,5 @@
 from cloud.models import CloudDocument
-from mongoengine import ObjectIdField, StringField, IntField
+from mongoengine import IntField, ObjectIdField, StringField
 
 
 class SensorConfig(CloudDocument):
@@ -9,6 +9,7 @@ class SensorConfig(CloudDocument):
         gateway;
     3. delete this model when customer/site/point deleted
     """
+
     sensor_number = StringField(required=True)
     sensor_type = StringField()
     client_number = StringField()
@@ -24,7 +25,7 @@ class SensorConfig(CloudDocument):
     point_id = ObjectIdField()
 
     meta = {
-        "indexes": ["sensor_number", "client_number"],
+        "indexes": ["sensor_number", "client_number", "sensor_type", "site_id"],
         "index_background": True,
         "collection": "sensor_config",
     }
