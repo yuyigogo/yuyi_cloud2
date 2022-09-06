@@ -1,0 +1,3 @@
+this file is indexes which need to add in sensor model
+1. raw_query = {"sensor_id": sensor_id, "is_latest": True}
+       index: sensor_id, is_latest or (is_latest, sensor_id)

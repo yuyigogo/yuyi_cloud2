@@ -12,12 +12,19 @@ from common.storage.redis import redis
 # this file is to add the corresponding subscribe and published topics
 # and each topic is paired
 
-
+# 网关下传感器列表主题
 BASE_GATEWAY_SUBSCRIBE_TOPIC = "/serivice_reply/sub_get"
 BASE_GATEWAY_PUBLISH_TOPIC = "/serivice/sub_get"
 # 匹配网关下传感器列表
 SENSORS_IN_GATEWAY_PATTERN = re.compile(
     rf"/(?P<client_id>[a-zA-Z0-9]+){BASE_GATEWAY_SUBSCRIBE_TOPIC}"
+)
+
+# 采集周期设置主题
+BASE_SENSOR_SAMPLE_PERIOD_PUBLISH_TOPIC = "/common/service/sample_period_set"
+BASE_SENSOR_SAMPLE_PERIOD_SUBSCRIBE_TOPIC = "/common/service_reply/sample_period_set"
+SENSOR_PERIOD_PATTERN = re.compile(
+    rf"/(?P<gateway_id>[a-zA-Z0-9]+)/subnode/(?P<sensor_id>[a-zA-Z0-9]+){BASE_SENSOR_SAMPLE_PERIOD_SUBSCRIBE_TOPIC}"
 )
 
 logger = logging.getLogger(__name__)

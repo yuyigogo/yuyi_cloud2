@@ -82,19 +82,20 @@ class GatewayService(BaseService):
             sensor_ids = AlarmInfo.objects.filter(alarm_query).values_list("sensor_id")
             sensor_query &= Q(sensor_number__in=sensor_ids)
         sensors = SensorConfig.objects.only(
-            "sensor_number", "sensor_type", "communication_mode"
+            "sensor_number", "sensor_type", "communication_mode", "client_number"
         ).filter(sensor_query)
         total = sensors.count()
         sensor_by_page = get_objects_pagination(page, limit, sensors)
         data, sensor_type_sensor_ids = [], defaultdict(list)
         for sensor_config in sensor_by_page:
-            sensor_type = sensor_type.sensor_type
+            sensor_type = sensor_config.sensor_type
             sensor_id = sensor_config.sensor_number
             data.append(
                 {
                     "name": f"{sensor_type}传感器",
                     "sensor_id": sensor_id,
                     "sensor_type": sensor_type,
+                    "client_number": sensor_config.client_number,
                 }
             )
             sensor_type_sensor_ids[sensor_type].append(sensor_id)
@@ -111,7 +112,7 @@ class GatewayService(BaseService):
         for sensor_type, sensor_ids in sensor_type_sensor_ids.items():
             not_display_fields = None
             my_col = MONGO_CLIENT[sensor_type]
-            raw_query = {"_id": {"$in": sensor_ids}, "is_latest": True}
+            raw_query = {"sensor_id": {"$in": sensor_ids}, "is_latest": True}
             if sensor_type == SensorType.uhf.value:
                 not_display_fields = {"prps": 0}
             sensors = my_col.find(raw_query, not_display_fields)
