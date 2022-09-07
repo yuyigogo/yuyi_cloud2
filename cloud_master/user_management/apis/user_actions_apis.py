@@ -1,5 +1,7 @@
 import logging
 
+from django.contrib.auth import logout
+
 from common.framework.exception import APIException
 from customer.services.customer_service import CustomerService
 from mongoengine import DoesNotExist
@@ -156,4 +158,6 @@ class UserActionView(BaseView):
             update_dict["phone"] = phone
         if update_dict:
             user.update(**update_dict)
+            user.remove_sessions()
+            logout(request)
         return BaseResponse()
