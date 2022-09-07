@@ -78,3 +78,12 @@ class SensorConfigsView(BaseView):
                 )
                 pass
         return BaseResponse()
+
+
+class SensorWorkModeView(BaseView):
+    # todo 
+    def get(self, request, sensor_id):
+        pass
+
+    def put(self, request, sensor_id):
+        pass

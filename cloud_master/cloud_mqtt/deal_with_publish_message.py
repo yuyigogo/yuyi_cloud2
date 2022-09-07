@@ -27,6 +27,12 @@ SENSOR_PERIOD_PATTERN = re.compile(
     rf"/(?P<gateway_id>[a-zA-Z0-9]+)/subnode/(?P<sensor_id>[a-zA-Z0-9]+){BASE_SENSOR_SAMPLE_PERIOD_SUBSCRIBE_TOPIC}"
 )
 
+# 工作模式设置主题
+BASE_SENSOR_WORK_MODE_PUBLISH_TOPIC = "/common/service/work_mode_set"
+BASE_SENSOR_WORK_MODE_SUBSCRIBE_TOPIC = "/common/service_reply/work_mode_set"
+SENSOR_WORK_MODE_PATTERN = re.compile(
+    rf"/(?P<gateway_id>[a-zA-Z0-9]+)/subnode/(?P<sensor_id>[a-zA-Z0-9]+){BASE_SENSOR_WORK_MODE_SUBSCRIBE_TOPIC}"
+)
 logger = logging.getLogger(__name__)
 
 
