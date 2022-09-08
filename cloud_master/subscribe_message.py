@@ -27,8 +27,11 @@ class DataLoader:
     just load data into mongodb
     """
 
-    pattern = re.compile(
+    SENSOR_DATA_PATTERN = re.compile(
         r"/(?P<gateway_id>[a-zA-Z0-9]+)/subnode/(?P<sensor_id>[a-zA-Z0-9]+)/data_ctrl/property"
+    )
+    SENSOR_ALARM_PATTERN = re.compile(
+        r"/(?P<gateway_id>[a-zA-Z0-9]+)/subnode/(?P<sensor_id>[a-zA-Z0-9]+)/common/event"
     )
 
     def __init__(self, client_id, host, port):
@@ -39,9 +42,11 @@ class DataLoader:
 
     @staticmethod
     def on_connect(client, userdata, flags, rc):
-        print(f"{datetime.datetime.now()} Connected with result code " + str(rc))
+        print(
+            f"{datetime.datetime.now()} DataLoader connected with result code "
+            + str(rc)
+        )
         client.subscribe("#")  # 订阅消息
-        # client.subscribe("8E001302000001A5")  # 订阅消息
 
     @classmethod
     def get_or_set_sensor_info_from_redis(cls, sensor_id: str) -> Optional[dict]:
@@ -79,9 +84,9 @@ class DataLoader:
             "point_id": sensor_obj_dict["point_id"],
         }
         # update is_latest filed to false
-        AlarmInfo.objects.filter(is_latest=True, sensor_id=sensor_id).update(
-            is_latest=False
-        )
+        AlarmInfo.objects.filter(
+            is_latest=True, sensor_id=sensor_id, alarm_type=AlarmType.POINT_ALARM.value
+        ).update(is_latest=False)
         new_alarm_info = AlarmInfo(**alarm_info)
         new_alarm_info.save()
         return alarm_info
@@ -207,28 +212,104 @@ class DataLoader:
         cls.deal_with_ws_data(new_obj_dict, alarm_info)
 
     @classmethod
+    def deal_with_sensor_alarm(cls, gateway_id: str, sensor_id: str, origin_data: dict):
+        """
+        This method is to deal with sensor alarm(alarm type is SENSOR_ALARM).
+        when a point alarm has happened, the following thing need to do:
+            1. insert a new data in alarm_info;
+            2. update the corresponding record's is_online field;
+        """
+        sensor_type = origin_data.get("sensor_type")
+        if sensor_type not in SensorType.values():
+            print(f"************invalid {sensor_type=}")
+            return
+        parsed_dict = {
+            "_id": ObjectId(),
+            "sensor_type": sensor_type,
+            "client_number": gateway_id,
+            "sensor_id": sensor_id,
+            "is_latest": True,
+            "is_processed": False,
+            "alarm_type": AlarmType.SENSOR_ALARM.value,
+            # "alarm_level": sensor_obj_dict["alarm_level"],
+            # "alarm_describe": sensor_obj_dict["alarm_describe"],
+        }
+        sensor_info = cls.get_or_set_sensor_info_from_redis(sensor_id)
+        if not sensor_info:
+            print(f"can't get sensor_info in process sensor alarm :{sensor_id=}")
+            return
+        parsed_dict.update(sensor_info)
+        params = origin_data.get("params", {})
+        battery_alert = params.get("battery_alert")
+        online_alert = params.get("online_alert")
+        if battery_alert:
+            create_time = datetime_from_str(battery_alert["time"])
+            alarm_level = int(battery_alert.get("battery_alertl", 0))
+            parsed_dict["alarm_describe"] = "电池低电量报警"
+            parsed_dict["is_online"] = True
+        else:
+            create_time = datetime_from_str(online_alert["time"])
+            alarm_level = int(online_alert.get("online_alertl", 0))
+            parsed_dict["alarm_describe"] = "掉线报警"
+            parsed_dict["is_online"] = False
+        parsed_dict["create_date"] = create_time
+        parsed_dict["update_date"] = create_time
+        if alarm_level == 1:
+            parsed_dict["alarm_level"] = AlarmLevel.ALARM.value
+        else:
+            parsed_dict["alarm_level"] = AlarmLevel.NORMAL.value
+        if parsed_dict["is_online"] is False:
+            AlarmInfo.objects.filter(
+                is_latest=True,
+                sensor_id=sensor_id,
+                alarm_type=AlarmType.POINT_ALARM.value,
+            ).update(is_online=False)
+        new_alarm_info = AlarmInfo(**parsed_dict)
+        new_alarm_info.save()
+        # todo deal with ws
+        return new_alarm_info
+
+    @classmethod
     def deal_with_ws_data(cls, sensor_data: dict, alarm_data: dict):
         sensor_id = sensor_data["sensor_id"]
         WsSensorDataSend(sensor_id).ws_send(sensor_data)
-        pass
+
+    @classmethod
+    def can_precessing(cls, gateway_id: str, sensor_id: str) -> bool:
+        sensor_info_key = f"{SENSOR_INFO_PREFIX}{sensor_id}"
+        # 网关已启用且档案已配置才会入库
+        return redis.sismember("client_ids", gateway_id) and redis.exists(
+            sensor_info_key
+        )
 
     @staticmethod
     def on_message(client, userdata, msg):
-        # print(f"time: {datetime.datetime.now()} msg.topic:{msg.topic}")
-        ret = DataLoader.pattern.match(msg.topic)
-        if ret is not None:
-            gateway_id, sensor_id = ret.groups()[0], ret.groups()[1]
-            sensor_info_key = f"{SENSOR_INFO_PREFIX}{sensor_id}"
-            # 网关已启用且档案已配置才会入库
-            try:
-                if redis.sismember("client_ids", gateway_id) and redis.exists(
-                    sensor_info_key
-                ):
-                    print(f"matched for {gateway_id=}, {sensor_id=}")
+        topic = msg.topic
+        sensor_data_ret = DataLoader.SENSOR_DATA_PATTERN.match(msg.topic)
+        if sensor_data_ret is not None:
+            gateway_id, sensor_id = (
+                sensor_data_ret.groups()[0],
+                sensor_data_ret.groups()[1],
+            )
+            if DataLoader.can_precessing(gateway_id, sensor_id):
+                try:
+                    print(
+                        f"begin to process sensor_data_ret for {gateway_id=}, {sensor_id=}"
+                    )
                     msg_dict = json.loads(msg.payload.decode("utf-8"))
                     DataLoader.deal_with_sensor_data(gateway_id, sensor_id, msg_dict)
-            except Exception as e:
-                print(e)
+                except Exception as e:
+                    print(e)
+        elif (alarm_ret := DataLoader.SENSOR_ALARM_PATTERN.match(topic)) is not None:
+            gateway_id, sensor_id = alarm_ret.groups()[0], alarm_ret.groups()[1]
+            if DataLoader.can_precessing(gateway_id, sensor_id):
+                try:
+                    print(f"begin to process alarm_ret for {gateway_id=}, {sensor_id=}")
+                    msg_dict = json.loads(msg.payload.decode("utf-8"))
+                    DataLoader.deal_with_sensor_alarm(gateway_id, sensor_id, msg_dict)
+                except Exception as e:
+                    print(e)
+            pass
 
     @staticmethod
     def on_subscribe(client, userdata, mid, granted_qos):
@@ -237,9 +318,9 @@ class DataLoader:
     @staticmethod
     def on_disconnect(client, userdata, rc):
         if rc != 0:
-            print("Unexpected disconnection %s" % rc)
+            print("DataLoader Unexpected disconnection %s" % rc)
         else:
-            print("disconnection !!!")
+            print("DataLoader disconnection !!!")
 
     def run(self):
         self.client.username_pw_set(
