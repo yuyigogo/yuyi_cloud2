@@ -1,4 +1,6 @@
-from typing import Optional
+from typing import Optional, Union
+
+from bson import ObjectId
 
 from file_management.models.electrical_equipment import ElectricalEquipment
 from file_management.models.measure_point import MeasurePoint
@@ -23,6 +25,16 @@ class AssetCountService(BaseService):
             equipment_ids = equipments.values_list("id")
             asset_infos["equipment_num"] = equipments.count()
             point_num = MeasurePoint.objects(equipment_id__in=equipment_ids).count()
+        asset_infos["point_num"] = point_num
+        asset_infos["sensor_num"] = point_num
+        return asset_infos
+
+    @classmethod
+    def get_site_assets(cls, site_id: Union[str, ObjectId]) -> dict:
+        equipments = ElectricalEquipment.objects.filter(site_id=site_id)
+        equipment_ids = equipments.values_list("id")
+        asset_infos = {"equipment_num": equipments.count()}
+        point_num = MeasurePoint.objects(equipment_id__in=equipment_ids).count()
         asset_infos["point_num"] = point_num
         asset_infos["sensor_num"] = point_num
         return asset_infos

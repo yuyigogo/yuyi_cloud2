@@ -1,5 +1,8 @@
 from cloud_home.services.asset_count_service import AssetCountService
-from cloud_home.validators.asset_count_serializers import CustomerAssetSerializer
+from cloud_home.validators.asset_count_serializers import (
+    CustomerAssetSerializer,
+    SiteAssetSerializer,
+)
 
 from common.const import ALL
 from common.framework.response import BaseResponse
@@ -19,4 +22,11 @@ class CustomerAssetsView(BaseView):
         else:
             # get asset in the customer
             assent_infos = AssetCountService.get_customer_assets()
+        return BaseResponse(data=assent_infos)
+
+
+class SiteAssetsView(BaseView):
+    def get(self, request, site_id):
+        self.get_validated_data(SiteAssetSerializer)
+        assent_infos = AssetCountService.get_site_assets(site_id)
         return BaseResponse(data=assent_infos)
