@@ -29,4 +29,6 @@ urlpatterns += [
     path("rest/v1/", include("file_management.urls")),
     path("rest/v1/", include("navigation.urls")),
     path("rest/v1/", include("cloud_ws.urls")),
+    path("rest/v1/", include("alarm_management.urls")),
+    path("rest/v1/", include("cloud_home.urls")),
 ]
