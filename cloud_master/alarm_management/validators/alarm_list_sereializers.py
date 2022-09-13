@@ -53,7 +53,7 @@ class AlarmListSerializer(PageLimitSerializer):
 
 
 class AlarmActionSerializer(BaseSerializer):
-    is_processed = BooleanField(required=True, default=True)
+    is_processed = BooleanField(default=True)
     processed_remarks = CharField(required=False, max_length=MAX_MESSAGE_LENGTH)
 
     def validate(self, data: dict) -> dict:
