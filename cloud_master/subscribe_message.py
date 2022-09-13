@@ -12,6 +12,7 @@ from paho.mqtt import client as mqtt_client
 
 from common.const import (
     SENSOR_INFO_PREFIX,
+    SITE_UNPROCESSED_NUM,
     AlarmFlag,
     AlarmLevel,
     AlarmType,
@@ -65,6 +66,7 @@ class DataLoader:
     @classmethod
     def insert_and_update_alarm_info(cls, sensor_obj_dict: dict) -> Optional[dict]:
         sensor_id = sensor_obj_dict["sensor_id"]
+        site_id = sensor_obj_dict["site_id"]
         alarm_info = {
             "sensor_id": sensor_id,
             "sensor_type": sensor_obj_dict["sensor_type"],
@@ -79,7 +81,7 @@ class DataLoader:
             "create_date": sensor_obj_dict["create_date"],
             "update_date": sensor_obj_dict["update_date"],
             "customer_id": sensor_obj_dict["customer_id"],
-            "site_id": sensor_obj_dict["site_id"],
+            "site_id": site_id,
             "equipment_id": sensor_obj_dict["equipment_id"],
             "point_id": sensor_obj_dict["point_id"],
         }
@@ -89,6 +91,8 @@ class DataLoader:
         ).update(is_latest=False)
         new_alarm_info = AlarmInfo(**alarm_info)
         new_alarm_info.save()
+        # set unprocessed_unm for site
+        redis.incrby(f"{SITE_UNPROCESSED_NUM}{str(site_id)}")
         return alarm_info
 
     @classmethod
@@ -231,8 +235,6 @@ class DataLoader:
             "is_latest": True,
             "is_processed": False,
             "alarm_type": AlarmType.SENSOR_ALARM.value,
-            # "alarm_level": sensor_obj_dict["alarm_level"],
-            # "alarm_describe": sensor_obj_dict["alarm_describe"],
         }
         sensor_info = cls.get_or_set_sensor_info_from_redis(sensor_id)
         if not sensor_info:
@@ -266,6 +268,8 @@ class DataLoader:
             ).update(is_online=False)
         new_alarm_info = AlarmInfo(**parsed_dict)
         new_alarm_info.save()
+        # set unprocessed_unm for site
+        redis.incrby(f"{SITE_UNPROCESSED_NUM}{parsed_dict['site_id']}")
         # todo deal with ws
         return new_alarm_info
 

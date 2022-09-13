@@ -5,8 +5,9 @@ from customer.models.customer import Customer
 from equipment_management.models.sensor_config import SensorConfig
 from sites.models.site import Site
 
-from common.const import ALL
+from common.const import ALL, SITE_UNPROCESSED_NUM
 from common.framework.service import BaseService
+from common.storage.redis import redis
 
 
 class MapService(BaseService):
@@ -37,7 +38,9 @@ class MapService(BaseService):
                     "label": site.name,
                     "id": str(site.pk),
                     "sensor_num": sensor_num_infos.get(site.pk, 0),
-                    "unprocessed_num": 0,
+                    "unprocessed_num": redis.get(
+                        f"{SITE_UNPROCESSED_NUM}{str(site.pk)}"
+                    ),
                 }
                 for site in sites
             ]
@@ -59,13 +62,19 @@ class MapService(BaseService):
             site_info = defaultdict(list)
             for site in sites:
                 site_id = site.pk
+                # sit_unprocessed_key = f"{SITE_UNPROCESSED_NUM}{str(site_id)}"
+                # unprocessed_num = redis.get(sit_unprocessed_key)
+                # if not unprocessed_num:
+                #     unprocessed_num = 0
                 site_info[site.customer].append(
                     {
                         "type": "site",
                         "label": site.name,
                         "id": str(site_id),
                         "sensor_num": sensor_num_infos.get(site_id, 0),
-                        "unprocessed_num": 0,
+                        "unprocessed_num": redis.get(
+                            f"{SITE_UNPROCESSED_NUM}{str(site_id)}"
+                        ),
                     }
                 )
             for customer_id, customer_info_dict in customer_infos.items():

@@ -251,5 +251,6 @@ class SensorCommunicationMode(str, BaseEnum):
 
 # store in redis db5---->normal key
 # store sensor_info,it's hset like:
-# {"sensor_id": {"site_id": "xxxxx", "equipment_id": xxxx", "measure_point_id": "xxxxxx"}}
+# {"sensor_id": {"site_id": "xxx", "equipment_id": xxx", "measure_point_id": "xxx"}}
 SENSOR_INFO_PREFIX = "cloud_sensor_info:sensor_id:"
+SITE_UNPROCESSED_NUM = "site_unprocessed_num:"    # "site_unprocessed_num:xxx" 12
