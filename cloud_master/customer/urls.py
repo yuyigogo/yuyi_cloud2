@@ -1,4 +1,3 @@
-from cloud_home.apis.map_apis import MapTressView
 from customer.apis.customer_apis import CustomersView, CustomerView
 from django.urls import path, re_path
 
@@ -9,5 +8,4 @@ urlpatterns = [
         CustomerView.as_view(),
         name="customer_actions",
     ),
-    path("map/customer-tress/", MapTressView.as_view(), name="map_tress"),
 ]

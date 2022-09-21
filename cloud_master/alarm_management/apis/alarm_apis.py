@@ -6,8 +6,10 @@ from alarm_management.validators.alarm_list_sereializers import (
     AlarmListSerializer,
 )
 
+from common.const import SITE_UNPROCESSED_NUM
 from common.framework.response import BaseResponse
 from common.framework.view import BaseView
+from common.storage.redis import redis
 
 logger = logging.getLogger(__name__)
 
@@ -65,8 +67,15 @@ class AlarmActionView(BaseView):
         alarm_info = data["alarm_info"]
         is_processed = data["is_processed"]
         processed_remarks = data.get("processed_remarks", "")
+        need_update_in_redis = alarm_info.is_processed != is_processed
         alarm_info.update(
             is_processed=is_processed, processed_remarks=processed_remarks
         )
-        # todo auto-increment/decrement not processed number
+        # add auto-increment/decrement not processed number
+        if need_update_in_redis:
+            site_unprocessed_key = f"{SITE_UNPROCESSED_NUM}{str(alarm_info.site_id)}"
+            if is_processed is True:
+                redis.decrby(site_unprocessed_key)
+            else:
+                redis.incrby(site_unprocessed_key)
         return BaseResponse()
