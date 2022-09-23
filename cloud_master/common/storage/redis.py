@@ -1,3 +1,10 @@
+"""
+redis's db:
+    db1: store only for websocket;
+    db2: celery, crontab;
+    db5: store normal values
+"""
+
 from cloud.settings import REDIS_HOST, REDIS_PORT
 from redis import ConnectionPool, Redis
 

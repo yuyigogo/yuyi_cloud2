@@ -31,3 +31,6 @@ xlrd==1.2.0
 channels==3.0.4
 channels-redis==3.4.0
 uwsgi==2.0.19.1
+celery==5.1.0
+celery-redbeat==2.0.0
+celery-once==3.0.1

@@ -276,3 +276,14 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+# settings for celery, db 2 for celery
+CELERY_BROKER_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/2"
+CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}/2"
+# tasks not in django app dir should include
+CELERY_INCLUDE = "common.tasks"
+CELERY_REDBEAT_REDIS_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/2"
+CELERYBEAT_SCHEDULER = "redbeat.RedBeatScheduler"
+CELERYD_MAX_TASKS_PER_CHILD = 500
+CELERY_TASK_IGNORE_RESULT = True
+CELERY_TASK_STORE_ERRORS_EVEN_IF_IGNORED = True
