@@ -266,6 +266,11 @@ class DataLoader:
                 sensor_id=sensor_id,
                 alarm_type=AlarmType.POINT_ALARM.value,
             ).update(is_online=False)
+            # set corresponding sensor_type db's is_online to false
+            my_col = MONGO_CLIENT[sensor_type]
+            my_query = {"is_latest": True, "sensor_id": sensor_id}
+            new_values = {"$set": {"is_online": False}}
+            my_col.update_one(my_query, new_values)
         new_alarm_info = AlarmInfo(**parsed_dict)
         new_alarm_info.save()
         # set unprocessed_unm for site
