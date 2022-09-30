@@ -44,7 +44,7 @@ class SStatusStatistic(CloudDocument):
 
 class CAbnormalRatio(CloudDocument):
     customer_id = ObjectIdField(required=True)
-    c_ratio = StringField()
+    ratio = StringField()
 
     meta = {
         "indexes": ["customer_id"],
@@ -55,7 +55,7 @@ class CAbnormalRatio(CloudDocument):
 
 class SAbnormalRatio(CloudDocument):
     site_id = ObjectIdField(required=True)
-    s_ratio = StringField()
+    ratio = StringField()
 
     meta = {
         "indexes": ["site_id"],

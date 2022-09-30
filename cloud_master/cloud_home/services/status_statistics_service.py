@@ -7,6 +7,7 @@ from cloud.settings import MONGO_CLIENT
 from customer.models.customer import Customer
 from file_management.models.electrical_equipment import ElectricalEquipment
 from file_management.models.measure_point import MeasurePoint
+from mongoengine import Q
 from sites.models.site import Site
 
 from common.const import ALL, AlarmLevel, AlarmType, SensorType
@@ -212,3 +213,40 @@ class StatusStatisticService(BaseService):
                 d["alarm_num"] = s_count
             point_distribution_dict[sensor_type].update(d)
         return list(point_distribution_dict.values())
+
+    def get_customer_or_site_equipment_abnormal_ratio(self) -> float:
+        if self.site_id:
+            site_ids = [self.site_id]
+        else:
+            if not self.is_named_all:
+                site_ids = Site.objects.filter(customer=self.customer_id).values_list(
+                    "id"
+                )
+            else:
+                site_ids = Site.objects.filter(
+                    customer__ne=self.named_all_customer_id
+                ).values_list("id")
+        equipment_ids = ElectricalEquipment.objects.filter(
+            site_id__in=site_ids
+        ).values_list("id")
+        total = len(equipment_ids)
+        if total == 0:
+            return float(0)
+        abnormal_num = 0
+        alarm_infos = AlarmInfo.objects.only("equipment_id", "alarm_level").filter(
+            equipment_id__in=equipment_ids,
+            alarm_type=AlarmType.POINT_ALARM.value,
+            is_latest=True,
+        )
+        equipment_id2_alarm_level = defaultdict(set)
+        for alarm_info in alarm_infos:
+            equipment_id2_alarm_level[alarm_info.equipment_id].add(
+                alarm_info.alarm_level
+            )
+        for equipment_id, alarm_levels in equipment_id2_alarm_level.items():
+            if (
+                AlarmLevel.ALARM.value in alarm_levels
+                or AlarmLevel.WARNING.value in alarm_levels
+            ):
+                abnormal_num += 1
+        return round(float(abnormal_num / total))

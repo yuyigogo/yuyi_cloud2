@@ -1,7 +1,12 @@
 from typing import Optional
 
 from bson import ObjectId
-from cloud_home.models.status_statistics import CStatusStatistic, SStatusStatistic
+from cloud_home.models.status_statistics import (
+    CAbnormalRatio,
+    CStatusStatistic,
+    SAbnormalRatio,
+    SStatusStatistic,
+)
 from cloud_home.services.status_statistics_service import StatusStatisticService
 from customer.models.customer import Customer
 from pymongo import UpdateOne
@@ -99,3 +104,44 @@ def async_site_status_statistic(site_ids: Optional[list] = None):
         )
     collection = SStatusStatistic._get_collection()
     collection.bulk_write(bulk_operations, ordered=False)
+
+
+@cloud_task
+def async_customer_equipment_abnormal_ratio(customer_ids: Optional[list] = None):
+    if customer_ids is None:
+        # get all customer_ids
+        customer_ids = Customer.objects().values_list("id")
+        customer_ids = list(map(str, customer_ids))
+    bulk_operations = []
+    for customer_id in customer_ids:
+        service = StatusStatisticService(customer_id=customer_id)
+        ratio = service.get_customer_or_site_equipment_abnormal_ratio()
+        bulk_operations.append({"customer_id": customer_id, "ratio": ratio})
+    collection = CAbnormalRatio._get_collection()
+    collection.insert_many(bulk_operations, ordered=False)
+
+
+@cloud_task
+def async_site_equipment_abnormal_ratio(site_ids: Optional[list] = None):
+    if site_ids is None:
+        # get all site_ids
+        site_ids = Site.objects(name__ne=ALL).values_list("id")
+        site_ids = list(map(str, site_ids))
+    bulk_operations = []
+    for site_id in site_ids:
+        service = StatusStatisticService(site_id=site_id)
+        ratio = service.get_customer_or_site_equipment_abnormal_ratio()
+        bulk_operations.append({"site_id": site_id, "ratio": ratio})
+    if site_ids is None:
+        site = Site.objects.only("customer").get(name=ALL)
+        named_all_site_id = site.pk
+        c_abnormal_ratio = (
+            CAbnormalRatio.objects.filter(customer_id=site.customer)
+            .order_by("-create_date")
+            .first()
+        )
+        bulk_operations.append(
+            {"site_id": named_all_site_id, "ratio": c_abnormal_ratio.ratio}
+        )
+    collection = SAbnormalRatio._get_collection()
+    collection.insert_many(bulk_operations, ordered=False)
