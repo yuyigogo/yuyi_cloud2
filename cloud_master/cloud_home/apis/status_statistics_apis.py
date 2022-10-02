@@ -1,5 +1,4 @@
-from cloud_home.services.asset_count_service import AssetCountService
-from cloud_home.validators.asset_count_serializers import (
+from cloud_home.validators.status_statistics_serializers import (
     CustomerAssetSerializer,
     SiteAssetSerializer,
 )
@@ -9,7 +8,7 @@ from common.framework.response import BaseResponse
 from common.framework.view import BaseView
 
 
-class CustomerAssetsView(BaseView):
+class CustomerStatusView(BaseView):
     def get(self, request, customer_id):
         """get customer assets"""
         data, _ = self.get_validated_data(
@@ -25,8 +24,7 @@ class CustomerAssetsView(BaseView):
         return BaseResponse(data=assent_infos)
 
 
-class SiteAssetsView(BaseView):
+class SiteStatusView(BaseView):
     def get(self, request, site_id):
         self.get_validated_data(SiteAssetSerializer)
-        assent_infos = AssetCountService.get_site_assets(site_id)
         return BaseResponse(data=assent_infos)

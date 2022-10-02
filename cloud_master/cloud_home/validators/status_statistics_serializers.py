@@ -8,6 +8,7 @@ from sites.models.site import Site
 
 
 class CustomerAssetSerializer(BaseSerializer):
+    is_refresh = B
     def validate(self, data):
         customer_id = self.context["customer_id"]
         try:

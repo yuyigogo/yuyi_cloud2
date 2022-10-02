@@ -1,3 +1,17 @@
 this file is indexes which need to add in sensor model
 1. raw_query = {"sensor_id": sensor_id, "is_latest": True}
        index: sensor_id, is_latest or (is_latest, sensor_id)
+
+
+AE/TEV/UHF/TEMP/MECH index
+MONGO_CLIENT[sensor_type]
+{"is_latest": True, "sensor_id": sensor_id}
+delete_filters = {"sensor_id": {"$in": deleted_sensor_numbers}}
+
+
+AlarmInfo
+alarm_infos = AlarmInfo.objects.only("equipment_id", "alarm_level").filter(
+            equipment_id__in=equipment_ids,
+            alarm_type=AlarmType.POINT_ALARM.value,
+            is_latest=True,
+        )
