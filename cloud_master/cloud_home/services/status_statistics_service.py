@@ -1,17 +1,21 @@
+import logging
 from collections import defaultdict
 from typing import Optional
 
 from alarm_management.models.alarm_info import AlarmInfo
 from bson import ObjectId
 from cloud.settings import MONGO_CLIENT
+from cloud_home.models.status_statistics import CStatusStatistic, SStatusStatistic
 from customer.models.customer import Customer
 from file_management.models.electrical_equipment import ElectricalEquipment
 from file_management.models.measure_point import MeasurePoint
-from mongoengine import Q
+from mongoengine import DoesNotExist
 from sites.models.site import Site
 
 from common.const import ALL, AlarmLevel, AlarmType, SensorType
 from common.framework.service import BaseService
+
+logger = logging.getLogger(__name__)
 
 
 class StatusStatisticService(BaseService):
@@ -250,3 +254,73 @@ class StatusStatisticService(BaseService):
             ):
                 abnormal_num += 1
         return round(float(abnormal_num / total))
+
+
+class StatusStatisticApiService(StatusStatisticService):
+    def __init__(
+        self,
+        is_refresh: bool,
+        customer_id: Optional[str] = None,
+        site_id: Optional[str] = None,
+    ):
+        self.is_refresh = is_refresh
+        super().__init__(customer_id, site_id)
+
+    def get_customer_or_site_status_infos(self) -> dict:
+        if self.is_refresh is False:
+            infos = self.get_customer_or_site_status_infos_from_cache()
+        else:
+            infos = self._get_customer_or_site_status_infos()
+        return infos
+
+    def get_customer_or_site_status_infos_from_cache(self) -> Optional[dict]:
+        try:
+            if self.customer_id:
+                status_statistic = CStatusStatistic.objects.get(
+                    customer_id=self.customer_id
+                )
+            else:
+                status_statistic = SStatusStatistic.objects.get(site_id=self.site_id)
+        except DoesNotExist:
+            logger.warning(f"can't get {self.customer_id}'s customer_status_infos")
+            return
+        return {
+            "asset_info": status_statistic.asset_info,
+            "equipment_status_info": status_statistic.equipment_status_info,
+            "sensor_online_ratio": status_statistic.sensor_online_ratio,
+            "point_distribution_info": status_statistic.point_distribution_info,
+        }
+
+    def _get_customer_or_site_status_infos(self) -> dict:
+        """
+        get one customer/site's status infos, it should not be the named all customer or site
+        """
+        if self.customer_id:
+            asset_info = self.get_customer_asset_info()
+            equipment_status_info = self.get_customer_equipment_status_statistics()
+            sensor_online_ratio = self.get_customer_or_site_sensor_online_ratio()
+            point_distribution_info = (
+                self.get_customer_or_site_point_distribution_info()
+            )
+        else:
+            asset_info = self.get_site_asset_info()
+            equipment_status_info = self.get_site_equipment_status_statistics_in_site()
+            sensor_online_ratio = self.get_customer_or_site_sensor_online_ratio()
+            point_distribution_info = (
+                self.get_customer_or_site_point_distribution_info()
+            )
+        infos = {
+            "asset_info": asset_info,
+            "equipment_status_info": equipment_status_info,
+            "sensor_online_ratio": sensor_online_ratio,
+            "point_distribution_info": point_distribution_info,
+        }
+        if self.customer_id:
+            # update the customer's c_status_statistic
+            CStatusStatistic.objects.filter(customer_id=self.customer_id).update(
+                **infos
+            )
+        else:
+            # update the site's c_status_statistic
+            SStatusStatistic.objects.filter(site_id=self.site_id).update(**infos)
+        return infos
