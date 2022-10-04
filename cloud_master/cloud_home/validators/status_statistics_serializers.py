@@ -17,7 +17,7 @@ class CustomerStatusSerializer(BaseSerializer):
             customer = Customer.objects.get(pk=customer_id)
         except DoesNotExist:
             raise APIException(f"invalid {customer_id=}")
-        if customer.name == ALL:
+        if data["is_refresh"] and customer.name == ALL:
             raise APIException("can't pass named all's customer id")
         return data
 

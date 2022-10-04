@@ -10,7 +10,7 @@ from common.framework.view import BaseView
 
 class CustomerStatusView(BaseView):
     def get(self, request, customer_id):
-        """get customer assets"""
+        """get customer status infos"""
         data, _ = self.get_validated_data(
             CustomerStatusSerializer, customer_id=customer_id
         )
