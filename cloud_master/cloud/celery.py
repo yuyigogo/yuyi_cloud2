@@ -54,6 +54,30 @@ app.conf.beat_schedule = {
     # "args": (16, 27),
     # "options": {"queue": "beat"},
     # },
+    "async_customer_status_statistic": {
+        "task": "cloud_home.tasks.async_customer_status_statistic",
+        "schedule": crontab(minute=0, hour=1),
+        "args": None,
+        "options": {"queue": "beat"},
+    },
+    "async_site_status_statistic": {
+        "task": "cloud_home.tasks.async_site_status_statistic",
+        "schedule": crontab(minute=0, hour=1),
+        "args": None,
+        "options": {"queue": "beat"},
+    },
+    "async_customer_equipment_abnormal_ratio": {
+        "task": "cloud_home.tasks.async_customer_equipment_abnormal_ratio",
+        "schedule": crontab(hour=0, minute=1),
+        "args": None,
+        "options": {"queue": "beat"},
+    },
+    "async_site_equipment_abnormal_ratio": {
+        "task": "cloud_home.tasks.async_site_equipment_abnormal_ratio",
+        "schedule": crontab(hour=0, minute=3),
+        "args": None,
+        "options": {"queue": "beat"},
+    },
 }
 
 # celery-once config
