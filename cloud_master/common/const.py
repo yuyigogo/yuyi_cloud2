@@ -254,3 +254,13 @@ class SensorCommunicationMode(str, BaseEnum):
 # {"sensor_id": {"site_id": "xxx", "equipment_id": xxx", "measure_point_id": "xxx"}}
 SENSOR_INFO_PREFIX = "cloud_sensor_info:sensor_id:"
 SITE_UNPROCESSED_NUM = "site_unprocessed_num:"    # "site_unprocessed_num:xxx" 12
+
+# day/week/month abnormal count,
+# it's hset like: {customer_day_abnormal_info:customer_id: {"alarm_num": 20, "processed_num": 2}}
+customer_day_abnormal_info = "customer_day_abnormal_info:"
+customer_week_abnormal_info = "customer_week_abnormal_info:"
+customer_month_abnormal_info = "customer_month_abnormal_info:"
+
+site_day_abnormal_info = "site_day_abnormal_info:"
+site_week_abnormal_info = "site_week_abnormal_info:"
+site_month_abnormal_info = "site_month_abnormal_info:"
