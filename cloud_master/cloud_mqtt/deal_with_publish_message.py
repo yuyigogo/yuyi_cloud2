@@ -7,7 +7,7 @@ from cloud.settings import CLIENT_IDS
 from equipment_management.models.sensor_config import SensorConfig
 from pymongo import UpdateOne
 
-from common.storage.redis import redis
+from common.storage.redis import normal_redis
 
 # this file is to add the corresponding subscribe and published topics
 # and each topic is paired
@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 class OnMqttMessage(object):
     @classmethod
     def is_gateway_enabled(cls, client_id: str) -> bool:
-        return redis.sismember(CLIENT_IDS, client_id)
+        return normal_redis.sismember(CLIENT_IDS, client_id)
 
     @classmethod
     def deal_with_msg(cls, topic: str, msg_dict: dict):

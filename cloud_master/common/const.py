@@ -253,7 +253,7 @@ class SensorCommunicationMode(str, BaseEnum):
 # store sensor_info,it's hset like:
 # {"sensor_id": {"site_id": "xxx", "equipment_id": xxx", "measure_point_id": "xxx"}}
 SENSOR_INFO_PREFIX = "cloud_sensor_info:sensor_id:"
-SITE_UNPROCESSED_NUM = "site_unprocessed_num:"    # "site_unprocessed_num:xxx" 12
+SITE_UNPROCESSED_NUM = "site_unprocessed_num:"  # "site_unprocessed_num:xxx" 12
 
 # day/week/month abnormal count,
 # it's hset like: {customer_day_abnormal_info:customer_id: {"alarm_num": 20, "processed_num": 2}}
@@ -264,3 +264,12 @@ customer_month_abnormal_info = "customer_month_abnormal_info:"
 site_day_abnormal_info = "site_day_abnormal_info:"
 site_week_abnormal_info = "site_week_abnormal_info:"
 site_month_abnormal_info = "site_month_abnormal_info:"
+
+CLOUD_SUBSCRIBE_MSG_LIST = "cloud:subscribe:msg:list"
+
+
+class MsgQueueType(str, BaseEnum):
+    """need to deal with different type of matched msg which subscribed from mqtt in redis list"""
+
+    DATA_LOADER = "data_loader"  # 采集数据上传
+    SENSOR_ALARM = "sensor_alarm"  # 传感器报警

@@ -10,7 +10,7 @@ from cloud_home.services.abnormal_count_service import AbnormalCacheService
 from common.const import SITE_UNPROCESSED_NUM
 from common.framework.response import BaseResponse
 from common.framework.view import BaseView
-from common.storage.redis import redis
+from common.storage.redis import normal_redis
 
 logger = logging.getLogger(__name__)
 
@@ -78,9 +78,9 @@ class AlarmActionView(BaseView):
             site_id = str(alarm_info.site_id)
             site_unprocessed_key = f"{SITE_UNPROCESSED_NUM}{site_id}"
             if is_processed is True:
-                redis.decrby(site_unprocessed_key)
+                normal_redis.decrby(site_unprocessed_key)
             else:
-                redis.incrby(site_unprocessed_key)
+                normal_redis.incrby(site_unprocessed_key)
             amount = 1 if is_processed else -1
             service = AbnormalCacheService(customer_id, site_id)
             service.auto_increment_customer_abnormal_infos(

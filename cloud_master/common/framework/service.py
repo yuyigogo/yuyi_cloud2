@@ -8,7 +8,7 @@ from equipment_management.models.gateway import GateWay
 from equipment_management.models.sensor_config import SensorConfig
 
 from common.const import SENSOR_INFO_PREFIX, SensorType
-from common.storage.redis import redis
+from common.storage.redis import normal_redis
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +69,7 @@ class BaseService(object):
 
     @classmethod
     def remove_client_id_from_redis(cls, client_id: str):
-        redis.srem(CLIENT_IDS, client_id)
+        normal_redis.srem(CLIENT_IDS, client_id)
 
     @classmethod
     def get_latest_sensor_info(cls, sensor_number: str, sensor_type: str) -> dict:
@@ -129,7 +129,7 @@ class SensorConfigService(BaseService):
             "point_id": point_id,
         }
         logger.info(f"set sensor_info to redis, key:{self.sensor_info_key}, {value=}")
-        redis.hmset(self.sensor_info_key, value)
+        normal_redis.hmset(self.sensor_info_key, value)
 
     def update_and_set_sensor_info(
         self,
@@ -149,7 +149,7 @@ class SensorConfigService(BaseService):
         )
         old_sensor_info_key = f"{SENSOR_INFO_PREFIX}{old_sensor_id}"
         logger.info(f"delete {old_sensor_info_key} from redis")
-        redis.delete(old_sensor_info_key)
+        normal_redis.delete(old_sensor_info_key)
         self.set_sensor_info_to_redis(customer_id, site_id, equipment_id, point_id)
 
     @classmethod
@@ -162,7 +162,7 @@ class SensorConfigService(BaseService):
             f"{SENSOR_INFO_PREFIX}{sensor_id}" for sensor_id in sensor_ids
         ]
         for d_key in delete_sensor_info_keys:
-            redis.delete(d_key)
+            normal_redis.delete(d_key)
 
     @lru_cache
     def get_or_set_sensor_info_from_sensor_config(self) -> Optional[dict]:

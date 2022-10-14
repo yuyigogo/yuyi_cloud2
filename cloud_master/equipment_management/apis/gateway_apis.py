@@ -24,7 +24,7 @@ from common.const import RoleLevel
 from common.framework.permissions import PermissionFactory
 from common.framework.response import BaseResponse
 from common.framework.view import BaseView
-from common.storage.redis import redis
+from common.storage.redis import normal_redis
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +55,7 @@ class GatewaysView(BaseView):
         logger.info(f"{user.username} create a gateway with data: {data}")
         gateway = GatewayService(data["site_id"]).create_gateway(data)
         # add this client_number to redis
-        redis.sadd(CLIENT_IDS, gateway.client_number)
+        normal_redis.sadd(CLIENT_IDS, gateway.client_number)
         return BaseResponse(data=gateway.to_dict(), status_code=HTTP_201_CREATED)
 
 
@@ -92,8 +92,8 @@ class GatewayView(BaseView):
         if update_fields:
             gateway.update(**update_fields)
         if data["changed_client_id"]:
-            redis.srem(CLIENT_IDS, old_client_id)
-        redis.sadd(CLIENT_IDS, client_number)
+            normal_redis.srem(CLIENT_IDS, old_client_id)
+        normal_redis.sadd(CLIENT_IDS, client_number)
         return BaseResponse(data=update_fields)
 
     def delete(self, request, gateway_id):

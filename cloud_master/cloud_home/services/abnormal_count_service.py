@@ -14,7 +14,7 @@ from common.const import (
     site_week_abnormal_info,
 )
 from common.framework.service import BaseService
-from common.storage.redis import redis
+from common.storage.redis import normal_redis
 
 
 class AbnormalCacheService(BaseService):
@@ -72,9 +72,9 @@ class AbnormalCacheService(BaseService):
         """
         updated_key = self.ALARM_NUM if is_alarm_num else self.PROCESSED_NUM
         # customer day info
-        if redis.exists(self.customer_day_abnormal_info_key):
-            redis.hincrby(self.customer_day_abnormal_info_key, updated_key, amount)
-            redis.hincrby(
+        if normal_redis.exists(self.customer_day_abnormal_info_key):
+            normal_redis.hincrby(self.customer_day_abnormal_info_key, updated_key, amount)
+            normal_redis.hincrby(
                 self.named_all_customer_day_abnormal_info_key, updated_key, amount
             )
         else:
@@ -87,19 +87,19 @@ class AbnormalCacheService(BaseService):
             )
             expire_time = zero_today + datetime.timedelta(seconds=86400)
             # set value
-            redis.hset(
+            normal_redis.hset(
                 self.customer_day_abnormal_info_key, key=updated_key, value=amount
             )
-            redis.hset(
+            normal_redis.hset(
                 self.named_all_customer_day_abnormal_info_key,
                 key=updated_key,
                 value=amount,
             )
             # set expire time
-            redis.expireat(self.customer_day_abnormal_info_key, expire_time)
-            redis.expireat(self.named_all_customer_day_abnormal_info_key, expire_time)
+            normal_redis.expireat(self.customer_day_abnormal_info_key, expire_time)
+            normal_redis.expireat(self.named_all_customer_day_abnormal_info_key, expire_time)
         # customer week info
-        if redis.exists(self.customer_week_abnormal_info_key):
+        if normal_redis.exists(self.customer_week_abnormal_info_key):
             redis.hincrby(self.customer_week_abnormal_info_key, updated_key, amount)
             redis.hincrby(
                 self.named_all_customer_week_abnormal_info_key, updated_key, amount

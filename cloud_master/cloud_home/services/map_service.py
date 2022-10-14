@@ -7,7 +7,7 @@ from sites.models.site import Site
 
 from common.const import ALL, SITE_UNPROCESSED_NUM
 from common.framework.service import BaseService
-from common.storage.redis import redis
+from common.storage.redis import normal_redis
 
 
 class MapService(BaseService):
@@ -38,7 +38,7 @@ class MapService(BaseService):
                     "label": site.name,
                     "id": str(site.pk),
                     "sensor_num": sensor_num_infos.get(site.pk, 0),
-                    "unprocessed_num": redis.get(
+                    "unprocessed_num": normal_redis.get(
                         f"{SITE_UNPROCESSED_NUM}{str(site.pk)}"
                     ),
                 }
@@ -63,7 +63,7 @@ class MapService(BaseService):
             for site in sites:
                 site_id = site.pk
                 # sit_unprocessed_key = f"{SITE_UNPROCESSED_NUM}{str(site_id)}"
-                # unprocessed_num = redis.get(sit_unprocessed_key)
+                # unprocessed_num = normal_redis.get(sit_unprocessed_key)
                 # if not unprocessed_num:
                 #     unprocessed_num = 0
                 site_info[site.customer].append(

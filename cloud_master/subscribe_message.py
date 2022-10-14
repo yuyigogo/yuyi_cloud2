@@ -20,7 +20,7 @@ from common.const import (
     SensorType,
 )
 from common.framework.service import SensorConfigService
-from common.storage.redis import redis
+from common.storage.redis import normal_redis
 from common.utils import datetime_from_str
 
 
@@ -53,7 +53,7 @@ class DataLoader:
     @classmethod
     def get_sensor_info(cls, sensor_id: str) -> Optional[dict]:
         sensor_info_key = f"{SENSOR_INFO_PREFIX}{sensor_id}"
-        data_from_redis = redis.hgetall(sensor_info_key)
+        data_from_redis = normal_redis.hgetall(sensor_info_key)
         if data_from_redis:
             return data_from_redis
         else:
@@ -93,7 +93,7 @@ class DataLoader:
         new_alarm_info = AlarmInfo(**alarm_info)
         new_alarm_info.save()
         # set unprocessed_unm for site
-        redis.incrby(f"{SITE_UNPROCESSED_NUM}{str(site_id)}")
+        normal_redis.incrby(f"{SITE_UNPROCESSED_NUM}{str(site_id)}")
         return alarm_info
 
     @classmethod
@@ -282,7 +282,7 @@ class DataLoader:
         new_alarm_info = AlarmInfo(**parsed_dict)
         new_alarm_info.save()
         # set unprocessed_unm for site
-        redis.incrby(f"{SITE_UNPROCESSED_NUM}{parsed_dict['site_id']}")
+        normal_redis.incrby(f"{SITE_UNPROCESSED_NUM}{parsed_dict['site_id']}")
         # todo deal with ws
         return new_alarm_info
 
@@ -295,7 +295,7 @@ class DataLoader:
     def can_precessing(cls, gateway_id: str, sensor_id: str) -> bool:
         sensor_info_key = f"{SENSOR_INFO_PREFIX}{sensor_id}"
         # 网关已启用且档案已配置才会入库
-        return redis.sismember("client_ids", gateway_id) and redis.exists(
+        return normal_redis.sismember("client_ids", gateway_id) and normal_redis.exists(
             sensor_info_key
         )
 
