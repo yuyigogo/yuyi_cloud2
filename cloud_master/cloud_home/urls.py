@@ -1,3 +1,7 @@
+from cloud_home.apis.abnormal_count_apis import (
+    CustomerAbnormalCountView,
+    SiteAbnormalCountView,
+)
 from cloud_home.apis.abnormal_ratio_apis import (
     CustomerAbnormalRatioView,
     SiteAbnormalRatioView,
@@ -29,5 +33,15 @@ urlpatterns = [
         r"^sites/(?P<site_id>[a-zA-Z0-9]+)/abnormal-ratio/$",
         SiteAbnormalRatioView.as_view(),
         name="site_abnormal_ratio",
+    ),
+    re_path(
+        r"^customers/(?P<customer_id>[a-zA-Z0-9]+)/count-abnormal/$",
+        CustomerAbnormalCountView.as_view(),
+        name="customer_abnormal_count",
+    ),
+    re_path(
+        r"^sites/(?P<site_id>[a-zA-Z0-9]+)/count-abnormal/$",
+        SiteAbnormalCountView.as_view(),
+        name="site_abnormal_count",
     ),
 ]
