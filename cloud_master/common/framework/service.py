@@ -165,7 +165,7 @@ class SensorConfigService(BaseService):
             redis.delete(d_key)
 
     @lru_cache
-    def get_sensor_info_from_sensor_config(self) -> Optional[dict]:
+    def get_or_set_sensor_info_from_sensor_config(self) -> Optional[dict]:
         try:
             sensor_config = SensorConfig.objects.only(
                 "customer_id", "site_id", "equipment_id", "point_id"
@@ -179,8 +179,8 @@ class SensorConfigService(BaseService):
         point_id = sensor_config.point_id
         self.set_sensor_info_to_redis(customer_id, site_id, equipment_id, point_id)
         return {
-            "customer_id": customer_id,
-            "site_id": site_id,
-            "equipment_id": equipment_id,
-            "point_id": point_id,
+            "customer_id": str(customer_id),
+            "site_id": str(site_id),
+            "equipment_id": str(equipment_id),
+            "point_id": str(point_id),
         }

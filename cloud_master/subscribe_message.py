@@ -7,6 +7,7 @@ from typing import Optional
 from alarm_management.models.alarm_info import AlarmInfo
 from bson import ObjectId
 from cloud.settings import MONGO_CLIENT, MQTT_CLIENT_CONFIG
+from cloud_home.services.abnormal_count_service import AbnormalCacheService
 from cloud_ws.ws_group_send import WsSensorDataSend
 from paho.mqtt import client as mqtt_client
 
@@ -50,7 +51,7 @@ class DataLoader:
         client.subscribe("#")  # 订阅消息
 
     @classmethod
-    def get_or_set_sensor_info_from_redis(cls, sensor_id: str) -> Optional[dict]:
+    def get_sensor_info(cls, sensor_id: str) -> Optional[dict]:
         sensor_info_key = f"{SENSOR_INFO_PREFIX}{sensor_id}"
         data_from_redis = redis.hgetall(sensor_info_key)
         if data_from_redis:
@@ -58,7 +59,7 @@ class DataLoader:
         else:
             sensor_info = SensorConfigService(
                 sensor_id
-            ).get_sensor_info_from_sensor_config()
+            ).get_or_set_sensor_info_from_sensor_config()
             if sensor_info is None:
                 print(f"get sensor_info failed for {sensor_id=}")
             return sensor_info
@@ -134,7 +135,7 @@ class DataLoader:
             "is_latest": True,
             "is_online": True,
         }
-        sensor_info = cls.get_or_set_sensor_info_from_redis(sensor_id)
+        sensor_info = cls.get_sensor_info(sensor_id)
         if not sensor_info:
             print(f"can't get sensor_info in insert alarm data:{sensor_id=}")
             return
@@ -212,6 +213,13 @@ class DataLoader:
         if not new_obj_dict:
             return
         alarm_info = cls.insert_and_update_alarm_info(new_obj_dict)
+        if alarm_info["alarm_level"] in AlarmLevel.abnormal_alarm_level():
+            # increment customer/site day/week/month's alarm num
+            service = AbnormalCacheService(
+                customer_id=alarm_info["customer_id"], site_id=alarm_info["site_id"]
+            )
+            service.auto_increment_customer_abnormal_infos()
+            service.auto_increment_site_abnormal_infos()
         # ws: 1. push alarm data; 2. sensor_list data
         cls.deal_with_ws_data(new_obj_dict, alarm_info)
 
@@ -236,7 +244,7 @@ class DataLoader:
             "is_processed": False,
             "alarm_type": AlarmType.SENSOR_ALARM.value,
         }
-        sensor_info = cls.get_or_set_sensor_info_from_redis(sensor_id)
+        sensor_info = cls.get_sensor_info(sensor_id)
         if not sensor_info:
             print(f"can't get sensor_info in process sensor alarm :{sensor_id=}")
             return
@@ -309,6 +317,7 @@ class DataLoader:
                     DataLoader.deal_with_sensor_data(gateway_id, sensor_id, msg_dict)
                 except Exception as e:
                     print(e)
+        # deal with sensor alarm: off line/ low battery......
         elif (alarm_ret := DataLoader.SENSOR_ALARM_PATTERN.match(topic)) is not None:
             gateway_id, sensor_id = alarm_ret.groups()[0], alarm_ret.groups()[1]
             if DataLoader.can_precessing(gateway_id, sensor_id):

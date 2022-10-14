@@ -5,6 +5,7 @@ from alarm_management.validators.alarm_list_sereializers import (
     AlarmActionSerializer,
     AlarmListSerializer,
 )
+from cloud_home.services.abnormal_count_service import AbnormalCacheService
 
 from common.const import SITE_UNPROCESSED_NUM
 from common.framework.response import BaseResponse
@@ -73,9 +74,19 @@ class AlarmActionView(BaseView):
         )
         # add auto-increment/decrement not processed number
         if need_update_in_redis:
-            site_unprocessed_key = f"{SITE_UNPROCESSED_NUM}{str(alarm_info.site_id)}"
+            customer_id = str(alarm_info.customer_id)
+            site_id = str(alarm_info.site_id)
+            site_unprocessed_key = f"{SITE_UNPROCESSED_NUM}{site_id}"
             if is_processed is True:
                 redis.decrby(site_unprocessed_key)
             else:
                 redis.incrby(site_unprocessed_key)
+            amount = 1 if is_processed else -1
+            service = AbnormalCacheService(customer_id, site_id)
+            service.auto_increment_customer_abnormal_infos(
+                is_alarm_num=False, amount=amount
+            )
+            service.auto_increment_site_abnormal_infos(
+                is_alarm_num=False, amount=amount
+            )
         return BaseResponse()
