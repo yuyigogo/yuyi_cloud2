@@ -26,6 +26,16 @@ class CloudUser(User, DocumentMixin):
     role_level = IntField(required=True)
     is_active = BooleanField(default=True)
 
+    meta = {
+        "indexes": [
+            "customer",
+            "sites",
+            "username",
+            "email",
+        ],
+        "index_background": True,
+    }
+
     def remove_sessions(self):
         user_sessions = UserSession.objects(user_id=self.id)
         for user_session in user_sessions:

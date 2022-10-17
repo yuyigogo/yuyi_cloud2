@@ -6,6 +6,7 @@ This script is to pop msg from redis queue, and do following things:
 """
 import json
 import logging
+import os
 import time
 import traceback
 from typing import Optional
@@ -56,7 +57,7 @@ class SyncPopMsg(object):
         if msg_queue_type == MsgQueueType.DATA_LOADER:
             cls.deal_with_sensor_data(gateway_id, sensor_id, msg_dict)
         else:
-            cls.deal_with_sensor_alarm()
+            cls.deal_with_sensor_alarm(gateway_id, sensor_id, msg_dict)
 
     @classmethod
     def deal_with_sensor_data(cls, gateway_id: str, sensor_id: str, sensor_data: dict):
@@ -321,3 +322,8 @@ class SyncPopMsg(object):
     def deal_with_ws_data(cls, sensor_data: dict, alarm_data: dict):
         sensor_id = sensor_data["sensor_id"]
         # WsSensorDataSend(sensor_id).ws_send(sensor_data)
+
+
+if __name__ == "__main__":
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "cloud.settings")
+    SyncPopMsg.run()
