@@ -46,7 +46,8 @@ class GatewayService(BaseService):
                 }
             )
         latest_info_dict = self.get_latest_gateway_infos(client_numbers)
-        return [d.update(latest_info_dict.get(d["client_number"])) for d in data]
+        [d.update(latest_info_dict.get(d["client_number"])) for d in data]
+        return data
 
     @classmethod
     def get_latest_gateway_infos(cls, client_numbers: list) -> dict:

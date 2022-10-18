@@ -58,7 +58,12 @@ class CreateGatewaySerializer(BaseSerializer):
         return client_number
 
     def validate(self, data: dict) -> dict:
-        if GateWay.objects.filter(name=data["name"]).count() > 0:
+        if (
+            GateWay.objects.filter(
+                customer=data["customer"], site_id=data["site_id"], name=data["name"]
+            ).count()
+            > 0
+        ):
             raise APIException(
                 "主机名称已存在!",
                 code=StatusCode.GATEWAY_NAME_DUPLICATE.value,
@@ -71,7 +76,7 @@ class UpdateGatewaySerializer(BaseSerializer):
     customer = CharField(required=False)
     site_id = CharField(required=False)
     client_number = CharField(required=False)
-    time_adjusting = IntegerField(required=False)
+    time_adjusting = IntegerField(required=False, allow_null=True)
     remarks = CharField(
         required=False, max_length=MAX_MESSAGE_LENGTH, allow_blank=True, allow_null=True
     )
@@ -99,12 +104,19 @@ class UpdateGatewaySerializer(BaseSerializer):
         data["gateway"] = gateway
         name = data.get("name")
         client_number = data.get("client_number")
-        if name and name != gateway.name:
-            if GateWay.objects(name=name).count() > 0:
-                raise APIException(
-                    "主机名称已存在!",
-                    code=StatusCode.GATEWAY_NAME_DUPLICATE.value,
-                )
+        if (
+            GateWay.objects.filter(
+                customer=data["customer"],
+                site_id=data["site_id"],
+                name=data["name"],
+                id__ne=gateway_id,
+            ).count()
+            > 0
+        ):
+            raise APIException(
+                "主机名称已存在!",
+                code=StatusCode.GATEWAY_NAME_DUPLICATE.value,
+            )
         data["changed_client_id"] = False
         if client_number and client_number != gateway.client_number:
             if GateWay.objects(client_number=client_number).count() > 0:
