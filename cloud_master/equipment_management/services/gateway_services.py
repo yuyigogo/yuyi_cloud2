@@ -46,7 +46,8 @@ class GatewayService(BaseService):
                 }
             )
         latest_info_dict = self.get_latest_gateway_infos(client_numbers)
-        [d.update(latest_info_dict.get(d["client_number"])) for d in data]
+        if latest_info_dict:
+            [d.update(latest_info_dict.get(d["client_number"])) for d in data]
         return data
 
     @classmethod
