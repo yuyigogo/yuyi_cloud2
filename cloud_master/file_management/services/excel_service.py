@@ -20,7 +20,7 @@ class ExcelService(object):
     @classmethod
     def file_import(cls, excel_file=None, excel_file_name=None, sheet_name=None):
         """
-        import data set record from excel
+        import customer/site/equipment/point/sensor_config from excel
         :param excel_file: excel file object or excel file contents
         :param excel_file_name: excel file name
         :param sheet_name: excel sheet name

@@ -4,7 +4,11 @@ from equipment_management.apis.gateway_apis import (
     GatewayView,
     SiteGatewaysView,
 )
-from equipment_management.apis.pub_sensor_config_apis import SensorConfigView, SensorConfigsView
+from equipment_management.apis.gateway_excel_apis import GatewayImportView
+from equipment_management.apis.pub_sensor_config_apis import (
+    SensorConfigsView,
+    SensorConfigView,
+)
 
 urlpatterns = [
     re_path(
@@ -31,5 +35,10 @@ urlpatterns = [
         r"^sensor/upload-intervals/$",
         SensorConfigsView.as_view(),
         name="modify_multi_sensor_upload-intervals",
+    ),
+    re_path(
+        r"^gateway_file_import/$",
+        GatewayImportView.as_view(),
+        name="import_gateway_file",
     ),
 ]

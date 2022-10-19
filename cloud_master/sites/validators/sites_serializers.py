@@ -53,10 +53,11 @@ class CreateSiteSerializer(BaseSerializer):
         customer_id = self.context["customer_id"]
         if (
             name == ALL
-            or Site.objects.filter(name=name).count() > 0
+            or Site.objects.filter(customer=customer_id, name=name).count() > 0
         ):
             raise APIException(
-                "站点名称已存在!", code=StatusCode.SITE_NAME_DUPLICATE.value,
+                "站点名称已存在!",
+                code=StatusCode.SITE_NAME_DUPLICATE.value,
             )
         return data
 
@@ -96,9 +97,10 @@ class UpdateSiteSerializer(BaseSerializer):
         self.context["site"] = site
         name = data.get("name")
         if name and name != site.name:
-            if Site.objects.filter(name=name).count() > 0:
+            if Site.objects.filter(customer=site.customer, name=name).count() > 0:
                 raise APIException(
-                    "站点名称已存在!", code=StatusCode.SITE_NAME_DUPLICATE.value,
+                    "站点名称已存在!",
+                    code=StatusCode.SITE_NAME_DUPLICATE.value,
                 )
         if user.is_cloud_or_client_super_admin():
             return data
