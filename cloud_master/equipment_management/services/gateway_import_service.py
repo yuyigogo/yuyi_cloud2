@@ -7,7 +7,7 @@ from bson import ObjectId
 from cloud.settings import CLIENT_IDS
 from customer.models.customer import Customer
 from equipment_management.models.gateway import GateWay
-from mongoengine import DateTimeField, DoesNotExist, MultipleObjectsReturned
+from mongoengine import DoesNotExist, MultipleObjectsReturned
 from sites.models.site import Site
 
 from common.framework.exception import APIException
@@ -84,6 +84,7 @@ class GatewayExcelService(BaseService):
             import_succeed_num += 1
             bulk_inserts.append(
                 {
+                    "_id": ObjectId(),
                     "name": gateway_name,
                     "client_number": client_number,
                     "customer": ObjectId(customer_id),
@@ -101,21 +102,21 @@ class GatewayExcelService(BaseService):
         return import_succeed_num
 
     @classmethod
-    @lru_cache
+    @lru_cache(maxsize=50)
     def customer_id(cls, customer_name: str) -> Optional[str]:
         try:
             return str(Customer.objects.get(name=customer_name).pk)
         except (DoesNotExist, MultipleObjectsReturned) as e:
-            logger.exception(f"can't get customer_id by {customer_name=}")
+            logger.warning(f"can't get customer_id by {customer_name=}")
             return
 
     @classmethod
-    @lru_cache
+    @lru_cache(maxsize=50)
     def site_id(cls, customer_id: str, site_name: str) -> Optional[str]:
         try:
             return str(Site.objects.get(customer=customer_id, name=site_name).pk)
         except (DoesNotExist, MultipleObjectsReturned) as e:
-            logger.exception(f"can't get site_id by {customer_id=}, {site_name=}")
+            logger.warning(f"can't get site_id by {customer_id=}, {site_name=}")
             return
 
     @classmethod
@@ -125,3 +126,12 @@ class GatewayExcelService(BaseService):
     @classmethod
     def is_valid_client_number(cls, client_number: str) -> bool:
         return GateWay.objects.filter(client_number=client_number).count() == 0
+
+
+# @context_cache
+# def get_customer_id(customer_name: str) -> Optional[str]:
+#     try:
+#         return str(Customer.objects.get(name=customer_name).pk)
+#     except (DoesNotExist, MultipleObjectsReturned) as e:
+#         logger.warning(f"can't get customer_id by {customer_name=}")
+#         return

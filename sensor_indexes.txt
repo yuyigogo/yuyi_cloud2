@@ -5,8 +5,13 @@ this file is indexes which need to add in sensor model
 
 AE/TEV/UHF/TEMP/MECH index
 MONGO_CLIENT[sensor_type]
-{"is_latest": True, "sensor_id": sensor_id}
-delete_filters = {"sensor_id": {"$in": deleted_sensor_numbers}}
+1 {"is_latest": True, "sensor_id": sensor_id}
+2  delete_filters = {"sensor_id": {"$in": deleted_sensor_numbers}}
+    delete_filters = {"sensor_id": {"$in": deleted_sensor_numbers}}
+        for sensor_type in SensorType.values():
+            try:
+                mongo_col = MONGO_CLIENT[sensor_type]
+                mongo_col.delete_many(delete_filters)
 
 
 AlarmInfo
@@ -15,3 +20,8 @@ alarm_infos = AlarmInfo.objects.only("equipment_id", "alarm_level").filter(
             alarm_type=AlarmType.POINT_ALARM.value,
             is_latest=True,
         )
+
+delete_filters = {"sensor_id": {"$in": deleted_sensor_numbers}}
+        alarm_info_col = MONGO_CLIENT["alarm_info"]
+        try:
+            alarm_info_col.delete_many(delete_filters)
