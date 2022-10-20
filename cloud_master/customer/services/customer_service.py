@@ -28,7 +28,7 @@ class CustomerService(BaseService):
         # when delete customer, will delete the resources in this customer
         customer_id = customer.pk
         gateways = GateWay.objects.filter(customer=customer_id)
-        client_numbers = gateways.values_list("client_number")
+        client_numbers = list(gateways.values_list("client_number"))
         sites = Site.objects.filter(customer=customer_id)
         site_ids = sites.values_list("id")
         equipments = ElectricalEquipment.objects.filter(site_id__in=site_ids)
@@ -42,8 +42,8 @@ class CustomerService(BaseService):
         customer.delete()
         CloudUser.objects.filter(customer=customer_id).delete()
         # clear client_id from redis
-        for client_id in client_numbers:
-            cls.remove_client_id_from_redis(client_id)
+        if client_numbers:
+            cls.remove_client_ids_from_redis(client_numbers)
 
     @classmethod
     def named_all_customer_id(cls):

@@ -43,7 +43,7 @@ class SiteService(BaseService):
     def delete_site(cls, site: Site, clear_resource: bool):
         site_id = site.pk
         gateways = GateWay.objects.filter(site_id=site_id)
-        client_numbers = gateways.values_list("client_number")
+        client_numbers = list(gateways.values_list("client_number"))
         equipments = ElectricalEquipment.objects.filter(site_id=site_id)
         equipment_ids = equipments.values_list("id")
         points = MeasurePoint.objects.filter(equipment_id__in=equipment_ids)
@@ -63,8 +63,8 @@ class SiteService(BaseService):
             __raw__={"$pull": {"sites": {site_id}}}
         )
         # clear client_id from redis
-        for client_id in client_numbers:
-            cls.remove_client_id_from_redis(client_id)
+        if client_numbers:
+            cls.remove_client_ids_from_redis(client_numbers)
 
     @classmethod
     def named_all_site_id(cls):

@@ -26,13 +26,13 @@ class GatewayExcelService(BaseService):
 
     def gateway_file_import(
         self, excel_file=None, excel_file_name=None, sheet_name=None
-    ):
+    ) -> int:
         """
         import gateway data from excel
         :param excel_file: excel file object or excel file contents
         :param excel_file_name: excel file name
         :param sheet_name: excel sheet name
-        :return: None
+        :return: int: import_succeed_num
         """
         workbook = Workbook.open(excel_file_name=excel_file_name, excel_file=excel_file)
         try:
@@ -40,7 +40,7 @@ class GatewayExcelService(BaseService):
         except Exception as e:
             logger.exception(f"read excel error with {e=}")
             raise APIException("解析Exel文档错误!")
-        self.save_gateway_import_data(workbook_data)
+        return self.save_gateway_import_data(workbook_data)
 
     @classmethod
     def read_workbook_data(cls, workbook, sheet_name=None):
@@ -51,9 +51,9 @@ class GatewayExcelService(BaseService):
             if any(value.strip() != "" for value in result):
                 yield result
 
-    def save_gateway_import_data(self, data_list: list):
+    def save_gateway_import_data(self, data_list: list) -> int:
         insert_client_numbers = set()
-        bulk_inserts = []
+        bulk_inserts, import_succeed_num = [], 0
         for data in data_list:
             customer_name = data[0]
             site_name = data[1]
@@ -81,6 +81,7 @@ class GatewayExcelService(BaseService):
                 logger.warning(f"invalid {gateway_name=} or {client_number=}")
                 continue
             insert_client_numbers.add(client_number)
+            import_succeed_num += 1
             bulk_inserts.append(
                 {
                     "name": gateway_name,
@@ -97,6 +98,7 @@ class GatewayExcelService(BaseService):
             collection.insert_many(bulk_inserts, ordered=False)
             v1, *values = insert_client_numbers
             normal_redis.sadd(CLIENT_IDS, v1, *values)
+        return import_succeed_num
 
     @classmethod
     @lru_cache

@@ -32,5 +32,5 @@ class GatewayImportView(BaseView):
         logger.info(f"{request.user} request import gateway from excel!")
         validate_customer_id = data["validate_customer_id"]
         service = GatewayExcelService(validate_customer_id=validate_customer_id)
-        service.gateway_file_import(data["file"])
-        return BaseResponse()
+        import_succeed_num = service.gateway_file_import(data["file"])
+        return BaseResponse(data={"import_succeed_num": import_succeed_num})

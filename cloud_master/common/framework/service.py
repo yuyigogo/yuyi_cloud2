@@ -20,7 +20,7 @@ class BaseService(object):
 
     @classmethod
     def delete_points(cls, points, clear_resource=False):
-        deleted_sensor_numbers = points.values_list("sensor_number")
+        deleted_sensor_numbers = list(points.values_list("sensor_number"))
         SensorConfigService.delete_sensor_config_resource(deleted_sensor_numbers)
         points.delete()
         if clear_resource:
@@ -70,6 +70,11 @@ class BaseService(object):
     @classmethod
     def remove_client_id_from_redis(cls, client_id: str):
         normal_redis.srem(CLIENT_IDS, client_id)
+
+    @classmethod
+    def remove_client_ids_from_redis(cls, client_ids: list):
+        c1, *values = client_ids
+        normal_redis.srem(CLIENT_IDS, c1, *values)
 
     @classmethod
     def get_latest_sensor_info(cls, sensor_number: str, sensor_type: str) -> dict:
