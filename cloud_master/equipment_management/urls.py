@@ -4,7 +4,10 @@ from equipment_management.apis.gateway_apis import (
     GatewayView,
     SiteGatewaysView,
 )
-from equipment_management.apis.gateway_excel_apis import GatewayImportView
+from equipment_management.apis.gateway_excel_apis import (
+    GatewayExportView,
+    GatewayImportView,
+)
 from equipment_management.apis.pub_sensor_config_apis import (
     SensorConfigsView,
     SensorConfigView,
@@ -40,5 +43,10 @@ urlpatterns = [
         r"^gateway_file_import/$",
         GatewayImportView.as_view(),
         name="import_gateway_file",
+    ),
+    re_path(
+        r"^gateway_file_export/$",
+        GatewayExportView.as_view(),
+        name="export_gateway_file",
     ),
 ]
