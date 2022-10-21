@@ -72,7 +72,7 @@ class MapService(BaseService):
                         "label": site.name,
                         "id": str(site_id),
                         "sensor_num": sensor_num_infos.get(site_id, 0),
-                        "unprocessed_num": redis.get(
+                        "unprocessed_num": normal_redis.get(
                             f"{SITE_UNPROCESSED_NUM}{str(site_id)}"
                         ),
                     }

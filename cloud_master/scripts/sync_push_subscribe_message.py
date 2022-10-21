@@ -7,11 +7,11 @@ import json
 import os
 import re
 
-from cloud.settings import MQTT_CLIENT_CONFIG
+from cloud.settings import MQTT_CLIENT_CONFIG, CLIENT_IDS
 from paho.mqtt import client as mqtt_client
 
-from common.const import CLOUD_SUBSCRIBE_MSG_LIST, MsgQueueType
-from common.storage.redis import msg_queue_redis
+from common.const import CLOUD_SUBSCRIBE_MSG_LIST, MsgQueueType, SENSOR_INFO_PREFIX
+from common.storage.redis import msg_queue_redis, normal_redis
 
 
 class SyncSubscribeMsg:
@@ -50,6 +50,8 @@ class SyncSubscribeMsg:
         re_ret = sensor_data_ret or alarm_ret
         if re_ret is not None:
             gateway_id, sensor_id = re_ret.groups()[0], re_ret.groups()[1]
+            if not SyncSubscribeMsg.can_precessing(gateway_id, sensor_id):
+                return
             if sensor_data_ret is not None:
                 msg_queue_type = MsgQueueType.DATA_LOADER.value
             elif alarm_ret is not None:
@@ -57,6 +59,7 @@ class SyncSubscribeMsg:
             else:
                 print("undefined msg_queue_type!")
                 return
+            print("************* matched data has been configured, push it to redis! ***********************")
             queue_data = {
                 "msg_queue_type": msg_queue_type,
                 "gateway_id": gateway_id,
@@ -76,6 +79,14 @@ class SyncSubscribeMsg:
         else:
             print("DataLoader disconnection !!!")
 
+    @classmethod
+    def can_precessing(cls, gateway_id: str, sensor_id: str) -> bool:
+        sensor_info_key = f"{SENSOR_INFO_PREFIX}{sensor_id}"
+        # 网关已启用且档案已配置才会入库
+        return normal_redis.sismember(CLIENT_IDS, gateway_id) and normal_redis.exists(
+            sensor_info_key
+        )
+
     def run(self):
         self.client.username_pw_set(
             MQTT_CLIENT_CONFIG["user"], MQTT_CLIENT_CONFIG["pw"]
@@ -88,13 +99,12 @@ class SyncSubscribeMsg:
         self.client.loop_forever()
 
 
-subscribe_client_id = MQTT_CLIENT_CONFIG.get("subscribe_client_id", "")
-host = MQTT_CLIENT_CONFIG.get("host", "")
-port = MQTT_CLIENT_CONFIG.get("port", "")
-sync_subscribe_msg = SyncSubscribeMsg(subscribe_client_id, host, port)
-
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "cloud.settings")
+    subscribe_client_id = MQTT_CLIENT_CONFIG.get("subscribe_client_id", "")
+    host = MQTT_CLIENT_CONFIG.get("host", "")
+    port = MQTT_CLIENT_CONFIG.get("port", "")
+    sync_subscribe_msg = SyncSubscribeMsg(subscribe_client_id, host, port)
     try:
         sync_subscribe_msg.run()
     except Exception as e:

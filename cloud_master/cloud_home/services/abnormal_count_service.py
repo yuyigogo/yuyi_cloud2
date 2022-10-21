@@ -100,8 +100,8 @@ class AbnormalCacheService(BaseService):
             normal_redis.expireat(self.named_all_customer_day_abnormal_info_key, expire_time)
         # customer week info
         if normal_redis.exists(self.customer_week_abnormal_info_key):
-            redis.hincrby(self.customer_week_abnormal_info_key, updated_key, amount)
-            redis.hincrby(
+            normal_redis.hincrby(self.customer_week_abnormal_info_key, updated_key, amount)
+            normal_redis.hincrby(
                 self.named_all_customer_week_abnormal_info_key, updated_key, amount
             )
         else:
@@ -115,23 +115,23 @@ class AbnormalCacheService(BaseService):
             interval_days = 7 - now.isoweekday() + 1
             expire_time = zero_today + datetime.timedelta(days=interval_days)
             # set value
-            redis.hset(
+            normal_redis.hset(
                 self.customer_week_abnormal_info_key, key=updated_key, value=amount
             )
-            redis.hset(
+            normal_redis.hset(
                 self.named_all_customer_week_abnormal_info_key,
                 key=updated_key,
                 value=amount,
             )
             # set expire time
-            redis.expireat(self.customer_week_abnormal_info_key, expire_time)
-            redis.expireat(self.named_all_customer_week_abnormal_info_key, expire_time)
+            normal_redis.expireat(self.customer_week_abnormal_info_key, expire_time)
+            normal_redis.expireat(self.named_all_customer_week_abnormal_info_key, expire_time)
             # customer month info
-            if redis.exists(self.customer_month_abnormal_info_key):
-                redis.hincrby(
+            if normal_redis.exists(self.customer_month_abnormal_info_key):
+                normal_redis.hincrby(
                     self.customer_month_abnormal_info_key, updated_key, amount
                 )
-                redis.hincrby(
+                normal_redis.hincrby(
                     self.named_all_customer_month_abnormal_info_key, updated_key, amount
                 )
             else:
@@ -146,25 +146,25 @@ class AbnormalCacheService(BaseService):
                 interval_days = total_days - now.day + 1
                 expire_time = zero_today + datetime.timedelta(days=interval_days)
                 # set value
-                redis.hset(
+                normal_redis.hset(
                     self.customer_month_abnormal_info_key, key=updated_key, value=amount
                 )
-                redis.hset(
+                normal_redis.hset(
                     self.named_all_customer_month_abnormal_info_key,
                     key=updated_key,
                     value=amount,
                 )
                 # set expire time
-                redis.expireat(self.customer_month_abnormal_info_key, expire_time)
-                redis.expireat(
+                normal_redis.expireat(self.customer_month_abnormal_info_key, expire_time)
+                normal_redis.expireat(
                     self.named_all_customer_month_abnormal_info_key, expire_time
                 )
 
     def auto_increment_site_abnormal_infos(self, is_alarm_num=True, amount=1):
         updated_key = self.ALARM_NUM if is_alarm_num else self.PROCESSED_NUM
         # site day info
-        if redis.exists(self.site_day_abnormal_info_key):
-            redis.hincrby(self.site_day_abnormal_info_key, updated_key, amount)
+        if normal_redis.exists(self.site_day_abnormal_info_key):
+            normal_redis.hincrby(self.site_day_abnormal_info_key, updated_key, amount)
         else:
             now = datetime.datetime.now()
             zero_today = now - datetime.timedelta(
@@ -175,12 +175,12 @@ class AbnormalCacheService(BaseService):
             )
             expire_time = zero_today + datetime.timedelta(seconds=86400)
             # set value
-            redis.hset(self.site_day_abnormal_info_key, key=updated_key, value=amount)
+            normal_redis.hset(self.site_day_abnormal_info_key, key=updated_key, value=amount)
             # set expire time
-            redis.expireat(self.site_day_abnormal_info_key, expire_time)
+            normal_redis.expireat(self.site_day_abnormal_info_key, expire_time)
         # site week info
-        if redis.exists(self.site_week_abnormal_info_key):
-            redis.hincrby(self.site_week_abnormal_info_key, updated_key, amount)
+        if normal_redis.exists(self.site_week_abnormal_info_key):
+            normal_redis.hincrby(self.site_week_abnormal_info_key, updated_key, amount)
         else:
             now = datetime.datetime.now()
             zero_today = now - datetime.timedelta(
@@ -192,12 +192,12 @@ class AbnormalCacheService(BaseService):
             interval_days = 7 - now.isoweekday() + 1
             expire_time = zero_today + datetime.timedelta(days=interval_days)
             # set value
-            redis.hset(self.site_week_abnormal_info_key, key=updated_key, value=amount)
+            normal_redis.hset(self.site_week_abnormal_info_key, key=updated_key, value=amount)
             # set expire time
-            redis.expireat(self.site_week_abnormal_info_key, expire_time)
+            normal_redis.expireat(self.site_week_abnormal_info_key, expire_time)
             # site month info
-            if redis.exists(self.site_month_abnormal_info_key):
-                redis.hincrby(self.site_month_abnormal_info_key, updated_key, amount)
+            if normal_redis.exists(self.site_month_abnormal_info_key):
+                normal_redis.hincrby(self.site_month_abnormal_info_key, updated_key, amount)
             else:
                 now = datetime.datetime.now()
                 zero_today = now - datetime.timedelta(
@@ -210,8 +210,8 @@ class AbnormalCacheService(BaseService):
                 interval_days = total_days - now.day + 1
                 expire_time = zero_today + datetime.timedelta(days=interval_days)
                 # set value
-                redis.hset(
+                normal_redis.hset(
                     self.site_month_abnormal_info_key, key=updated_key, value=amount
                 )
                 # set expire time
-                redis.expireat(self.site_month_abnormal_info_key, expire_time)
+                normal_redis.expireat(self.site_month_abnormal_info_key, expire_time)

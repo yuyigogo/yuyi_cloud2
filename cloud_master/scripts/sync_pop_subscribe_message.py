@@ -13,7 +13,7 @@ from typing import Optional
 
 from alarm_management.models.alarm_info import AlarmInfo
 from bson import ObjectId
-from cloud.settings import MONGO_CLIENT
+from cloud.settings import MONGO_CLIENT, CLIENT_IDS
 from cloud_home.services.abnormal_count_service import AbnormalCacheService
 
 from common.const import (
@@ -37,7 +37,6 @@ class SyncPopMsg(object):
     @classmethod
     def run(cls):
         while True:
-            logger.info("-------------start to run sync_pop_msg task------------")
             while msg_queue_redis.llen(CLOUD_SUBSCRIBE_MSG_LIST):
                 try:
                     handle_data = msg_queue_redis.rpop(CLOUD_SUBSCRIBE_MSG_LIST)
@@ -66,11 +65,6 @@ class SyncPopMsg(object):
         2. store alarm data to db;
         3. push data from ws;
         """
-        if not cls.can_precessing(gateway_id, sensor_id):
-            logger.warning(
-                f"this msg can't be processed with {gateway_id=}, {sensor_id=}"
-            )
-            return
         logger.info(f"begin to process sensor_data_ret for {gateway_id=}, {sensor_id=}")
         sensor_type = sensor_data.get("sensor_type")
         if sensor_type not in SensorType.values():
@@ -100,11 +94,6 @@ class SyncPopMsg(object):
             1. insert a new data in alarm_info;
             2. update the corresponding record's is_online field;
         """
-        if not cls.can_precessing(gateway_id, sensor_id):
-            logger.warning(
-                f"this msg can't be processed with {gateway_id=}, {sensor_id=}"
-            )
-            return
         sensor_type = origin_data.get("sensor_type")
         if sensor_type not in SensorType.values():
             logger.warning(f"************invalid {sensor_type=}")
@@ -161,14 +150,6 @@ class SyncPopMsg(object):
         normal_redis.incrby(f"{SITE_UNPROCESSED_NUM}{parsed_dict['site_id']}")
         # todo deal with ws
         return new_alarm_info
-
-    @classmethod
-    def can_precessing(cls, gateway_id: str, sensor_id: str) -> bool:
-        sensor_info_key = f"{SENSOR_INFO_PREFIX}{sensor_id}"
-        # 网关已启用且档案已配置才会入库
-        return normal_redis.sismember("client_ids", gateway_id) and normal_redis.exists(
-            sensor_info_key
-        )
 
     @classmethod
     def get_sensor_info(cls, sensor_id: str) -> Optional[dict]:
@@ -326,4 +307,5 @@ class SyncPopMsg(object):
 
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "cloud.settings")
+    logger.info("************************* start to run sync_pop_subscribe_message ********************")
     SyncPopMsg.run()
